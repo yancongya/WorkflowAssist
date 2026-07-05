@@ -1,0 +1,29 @@
+{
+  "name": "头像框",
+  "description": "头像框工作流 - 先创建输出层再创建预览层",
+  "steps": [
+    {
+      "name": "输出",
+      "width": 240,
+      "height": 240,
+      "frameRate": 12,
+      "duration": 3,
+      "suffix": "_输出",
+      "scaleMode": "fit_width"
+    },
+    {
+      "name": "预览",
+      "width": 500,
+      "height": 500,
+      "frameRate": 24,
+      "duration": 6,
+      "suffix": "_预览",
+      "scaleMode": "custom",
+      "scalePercent": 150,
+      "stagger": {
+        "enabled": true,
+        "count": 2
+      }
+    }
+  ]
+}
