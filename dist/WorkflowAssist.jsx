@@ -165,7 +165,7 @@ function nestWithScale(sourceComp, targetComp, scaleMode, scalePercent) {
 // ===== END 04-ae-utils.jsx =====
 
 // ===== BEGIN 05-workflow-engine.jsx =====
-function executeWorkflow(sourceComp, baseName, presetFile) {
+function executeWorkflow(sourceComp, baseName, presetFile, activeStates) {
     if (!sourceComp) {
         alert("请先选择一个活动合成！");
         return false;
@@ -185,68 +185,146 @@ function executeWorkflow(sourceComp, baseName, presetFile) {
     app.beginUndoGroup("工作流助手 - " + baseName);
 
     try {
-        // 将当前合成重命名为基础名称
         var originalName = decodeUrlString(sourceComp.name);
         sourceComp.name = baseName;
         logMessage("当前合成已重命名: " + originalName + " → " + baseName, LOG_LEVEL.NORMAL, "ENGINE");
 
-        // 检查所有目标合成是否已存在
         var steps = presetData.steps;
-        for (var i = 0; i < steps.length; i++) {
-            var checkName = baseName + steps[i].suffix;
-            if (getCompByName(checkName)) {
-                alert("合成已存在: " + checkName + "\n请先删除或重命名现有合成后再执行。");
-                sourceComp.name = originalName;
-                app.endUndoGroup();
-                return false;
-            }
-        }
+        var lastComp = runSteps(sourceComp, baseName, steps, activeStates);
 
-        // 按顺序执行工作流步骤
-        var currentComp = sourceComp;
-        var lastComp = null;
-        for (var j = 0; j < steps.length; j++) {
-            var s = steps[j];
-            var outputName = baseName + s.suffix;
-
-            logMessage("执行步骤 " + (j + 1) + ": " + outputName, LOG_LEVEL.NORMAL, "ENGINE");
-
-            var newComp = createComp(outputName, s.width, s.height, s.frameRate, s.duration);
-            nestWithScale(currentComp, newComp, s.scaleMode, s.scalePercent);
-
-            // 处理错层（stagger）— 偏移量自动取上一步合成的时长
-            if (s.stagger && s.stagger.enabled) {
-                var staggerOffset = currentComp.duration;
-                var firstLayer = newComp.layer(1);
-                for (var k = 1; k < s.stagger.count; k++) {
-                    var dup = firstLayer.duplicate();
-                    dup.startTime = k * staggerOffset;
-                    logMessage("  错层 " + (k + 1) + ": startTime=" + dup.startTime + "s (偏移=" + staggerOffset + "s)", LOG_LEVEL.NORMAL, "ENGINE");
-                }
-            }
-
-            currentComp = newComp;
-            lastComp = newComp;
-        }
-
-        // 打开最新创建的合成
         if (lastComp) {
-            app.project.activeItem = lastComp;
+            lastComp.openInViewer();
         }
 
         app.endUndoGroup();
 
-        var resultMsg = "工作流执行完成！\n共创建 " + steps.length + " 个合成:\n";
+        var count = 0;
+        var resultMsg = "工作流执行完成！\n共创建 ";
         for (var m = 0; m < steps.length; m++) {
-            resultMsg += (m + 1) + ". " + baseName + steps[m].suffix;
-            resultMsg += " (" + steps[m].width + "×" + steps[m].height + ")\n";
+            if (activeStates && !activeStates[m]) continue;
+            count++;
+            resultMsg += "\n" + count + ". " + baseName + steps[m].suffix;
+            resultMsg += " (" + steps[m].width + "×" + steps[m].height + ")";
         }
+        resultMsg = "工作流执行完成！\n共创建 " + count + " 个合成:\n" + resultMsg.replace("工作流执行完成！\n共创建 ", "");
         alert(resultMsg);
         return true;
 
     } catch (e) {
         app.endUndoGroup();
         alert("工作流执行出错: " + e.message);
+        return false;
+    }
+}
+
+function runSteps(sourceComp, baseName, steps, activeStates) {
+    var currentComp = sourceComp;
+    var lastComp = null;
+
+    for (var j = 0; j < steps.length; j++) {
+        if (activeStates && !activeStates[j]) {
+            logMessage("跳过步骤 " + (j + 1) + ": " + steps[j].name, LOG_LEVEL.NORMAL, "ENGINE");
+            continue;
+        }
+
+        var s = steps[j];
+        var outputName = baseName + s.suffix;
+
+        if (getCompByName(outputName)) {
+            alert("合成已存在: " + outputName + "\n请先删除或重命名现有合成后再执行。");
+            return null;
+        }
+
+        logMessage("执行步骤 " + (j + 1) + ": " + outputName, LOG_LEVEL.NORMAL, "ENGINE");
+
+        var newComp = createComp(outputName, s.width, s.height, s.frameRate, s.duration);
+        nestWithScale(currentComp, newComp, s.scaleMode, s.scalePercent);
+
+        if (s.stagger && s.stagger.enabled) {
+            var staggerOffset = currentComp.duration;
+            var firstLayer = newComp.layer(1);
+            for (var k = 1; k < s.stagger.count; k++) {
+                var dup = firstLayer.duplicate();
+                dup.startTime = k * staggerOffset;
+                logMessage("  错层 " + (k + 1) + ": startTime=" + dup.startTime + "s (偏移=" + staggerOffset + "s)", LOG_LEVEL.NORMAL, "ENGINE");
+            }
+        }
+
+        currentComp = newComp;
+        lastComp = newComp;
+    }
+
+    return lastComp;
+}
+
+function executeSingleStep(sourceComp, baseName, presetFile, stepIndex) {
+    if (!sourceComp) {
+        alert("请先选择一个活动合成！");
+        return false;
+    }
+
+    if (!baseName) {
+        alert("基础名称不能为空！");
+        return false;
+    }
+
+    var presetData = loadPreset(presetFile);
+    if (!presetData || !presetData.steps || stepIndex >= presetData.steps.length) {
+        alert("预设数据无效！");
+        return false;
+    }
+
+    app.beginUndoGroup("工作流助手 - 单步 " + baseName);
+
+    try {
+        var originalName = decodeUrlString(sourceComp.name);
+        sourceComp.name = baseName;
+        logMessage("当前合成已重命名: " + originalName + " → " + baseName, LOG_LEVEL.NORMAL, "ENGINE");
+
+        // 找到此步骤的源合成
+        var stepSource = sourceComp;
+        if (stepIndex > 0) {
+            var prevName = baseName + presetData.steps[stepIndex - 1].suffix;
+            stepSource = getCompByName(prevName);
+            if (!stepSource) {
+                alert("前置合成不存在: " + prevName + "\n请先执行前面的步骤。");
+                sourceComp.name = originalName;
+                app.endUndoGroup();
+                return false;
+            }
+        }
+
+        var s = presetData.steps[stepIndex];
+        var outputName = baseName + s.suffix;
+
+        if (getCompByName(outputName)) {
+            alert("合成已存在: " + outputName + "\n请先删除或重命名现有合成后再执行。");
+            sourceComp.name = originalName;
+            app.endUndoGroup();
+            return false;
+        }
+
+        var newComp = createComp(outputName, s.width, s.height, s.frameRate, s.duration);
+        nestWithScale(stepSource, newComp, s.scaleMode, s.scalePercent);
+
+        if (s.stagger && s.stagger.enabled) {
+            var staggerOffset = stepSource.duration;
+            var firstLayer = newComp.layer(1);
+            for (var k = 1; k < s.stagger.count; k++) {
+                var dup = firstLayer.duplicate();
+                dup.startTime = k * staggerOffset;
+            }
+        }
+
+        newComp.openInViewer();
+        app.endUndoGroup();
+
+        alert("单步执行完成: " + outputName + "\n(" + s.width + "×" + s.height + ", " + s.frameRate + "fps, " + s.duration + "s)");
+        return true;
+
+    } catch (e) {
+        app.endUndoGroup();
+        alert("单步执行出错: " + e.message);
         return false;
     }
 }
@@ -286,6 +364,12 @@ function createMainUI(parentPanel) {
         try {
             ctrl.graphics.foregroundColor = ctrl.graphics.newPen(ctrl.graphics.PenType.SOLID_COLOR, color, 1);
         } catch(e) {}
+    }
+
+    function clearContainer(container) {
+        while (container.children.length > 0) {
+            container.remove(container.children[0]);
+        }
     }
 
     // ================== 当前合成行（含图标按钮） ==================
@@ -413,19 +497,28 @@ function createMainUI(parentPanel) {
     presetDropdown.alignment = ["fill", "center"];
     presetDropdown.minimumSize.width = 120;
 
-    // 步骤预览区域
+    // 步骤按钮区域
     var stepPreviewPanel = organizeGroup.add("panel");
     stepPreviewPanel.orientation = "column";
-    stepPreviewPanel.alignChildren = ["fill", "fill"];
+    stepPreviewPanel.alignChildren = ["fill", "top"];
     stepPreviewPanel.alignment = ["fill", "fill"];
-    stepPreviewPanel.spacing = 2;
+    stepPreviewPanel.spacing = 3;
     stepPreviewPanel.margins = 4;
-    stepPreviewPanel.text = "工作流步骤预览";
+    stepPreviewPanel.text = "工作流步骤";
 
-    var stepDisplay = stepPreviewPanel.add("edittext", undefined, "请选择一个预设", {multiline: true, readonly: true, scrollable: true});
-    stepDisplay.alignment = ["fill", "fill"];
-    stepDisplay.minimumSize.height = 100;
-    stepDisplay.margins = [4, 4, 4, 4];
+    var stepContainer = stepPreviewPanel.add("group");
+    stepContainer.orientation = "column";
+    stepContainer.alignChildren = ["fill", "top"];
+    stepContainer.alignment = ["fill", "top"];
+    stepContainer.spacing = 2;
+    stepContainer.margins = [0, 0, 0, 0];
+
+    var stepTipLine = stepPreviewPanel.add("statictext", undefined, "点击切换 | Ctrl+点击单步执行");
+    stepTipLine.alignment = ["center", "bottom"];
+    stepTipLine.margins = [0, 2, 0, 0];
+
+    var stepButtons = [];
+    var stepActiveStates = [];
 
     // --- 输出面板（占位） ---
     var outputGroup = contentPanel.add("group");
@@ -479,7 +572,7 @@ function createMainUI(parentPanel) {
             presetDropdown.selection = presetDropdown.items[0];
             updateStepPreview();
         } else {
-            stepDisplay.text = "未找到预设文件\n请在 " + configFolder.fsName + " 目录下添加 .json 预设文件";
+            stepPreviewPanel.text = "工作流步骤 - 未找到预设文件";
         }
     }
 
@@ -490,58 +583,98 @@ function createMainUI(parentPanel) {
         return cachedPresetFiles[idx].file;
     }
 
-    // ================== 更新步骤预览 ==================
+    // ================== 更新步骤按钮 ==================
     function updateStepPreview() {
         var baseName = nameInput.text || "{基础名称}";
         var presetFile = getSelectedPresetFile();
         if (!presetFile) {
-            stepDisplay.text = "请选择一个预设";
+            clearContainer(stepContainer);
             return;
         }
 
         var presetData = loadPreset(presetFile);
         if (!presetData || !presetData.steps) {
-            stepDisplay.text = "预设数据无效";
+            clearContainer(stepContainer);
             return;
         }
 
-        var lines = [];
+        clearContainer(stepContainer);
+        stepButtons = [];
+        stepActiveStates = [];
+
         for (var i = 0; i < presetData.steps.length; i++) {
+            stepActiveStates[i] = true;
             var s = presetData.steps[i];
-            var line = "Step " + (i + 1) + ": ";
-            line += s.width + "×" + s.height + "  ";
-            line += s.frameRate + "fps  ";
-            line += s.duration + "s  ";
-            line += "→ " + baseName + s.suffix;
-            lines.push(line);
 
-            var layerDesc = "  └ 图层: ";
-            if (s.scaleMode === "fit_width") {
-                layerDesc += "自适应宽度缩放";
-            } else if (s.scaleMode === "custom") {
-                layerDesc += s.scalePercent + "% 缩放";
-            }
-            lines.push(layerDesc);
+            var btn = stepContainer.add("button", undefined, "");
+            btn.alignment = ["fill", "top"];
+            btn.preferredSize.height = 24;
 
-            if (s.stagger && s.stagger.enabled) {
-                var prevDuration = "?";
-                if (i > 0) {
-                    prevDuration = presetData.steps[i - 1].duration;
-                }
-                var staggerLine = "  └ 错层: " + s.stagger.count + "层, 偏移=" + prevDuration + "s (上一步时长)";
-                lines.push(staggerLine);
-            }
-
-            if (i < presetData.steps.length - 1) {
-                lines.push("");
-            }
+            buildStepButton(btn, i, s, baseName, true, presetFile);
+            stepButtons.push(btn);
         }
 
-        stepDisplay.text = lines.join("\n");
+        stepContainer.layout.layout(true);
     }
 
-    presetDropdown.onChange = function() { updateStepPreview(); };
-    nameInput.onChange = function() { updateStepPreview(); };
+    function buildStepHelpTip(index, s, baseName) {
+        var tip = "Step " + (index + 1) + ": " + s.name + "\n";
+        tip += "合成: " + baseName + s.suffix + "\n";
+        tip += "尺寸: " + s.width + "\u00D7" + s.height + "\n";
+        tip += "帧率: " + s.frameRate + "fps\n";
+        tip += "时长: " + s.duration + "s\n";
+        tip += "图层: ";
+        if (s.scaleMode === "fit_width") {
+            tip += "自适应宽度缩放";
+        } else if (s.scaleMode === "custom") {
+            tip += s.scalePercent + "% 缩放";
+        }
+        if (s.stagger && s.stagger.enabled) {
+            tip += "\n错层: " + s.stagger.count + "层, 偏移=";
+            if (index > 0) {
+                tip += s.duration + "s";
+            } else {
+                tip += "?s";
+            }
+        }
+        tip += "\n\n单击: 切换启用/禁用 | Ctrl+单击: 立即执行此步骤";
+        return tip;
+    }
+
+    function buildStepButton(btn, index, s, baseName, isActive, presetFile) {
+        var prefix = isActive ? "\u2713 " : "\u25CB ";
+        btn.text = prefix + "Step " + (index + 1) + ": " + s.name;
+        btn.helpTip = buildStepHelpTip(index, s, baseName);
+        btn._stepIndex = index;
+        btn._stepName = s.name;
+
+        btn.onClick = function() {
+            var ctrlKey = ScriptUI.environment.keyboardState.ctrlKey;
+            var idx = this._stepIndex;
+
+            if (ctrlKey) {
+                var sourceComp = getActiveComp();
+                if (!sourceComp) {
+                    alert("请先在 After Effects 中选择一个活动合成！");
+                    return;
+                }
+                var base = nameInput.text;
+                if (!base) {
+                    alert("请输入基础名称！");
+                    return;
+                }
+                var pFile = getSelectedPresetFile();
+                if (!pFile) return;
+
+                executeSingleStep(sourceComp, base, pFile, idx);
+            } else {
+                stepActiveStates[idx] = !stepActiveStates[idx];
+                var active = stepActiveStates[idx];
+                var p2 = active ? "\u2713 " : "\u25CB ";
+                this.text = p2 + "Step " + (idx + 1) + ": " + this._stepName;
+            }
+        };
+    }
 
     // ================== 执行工作流 ==================
     btnExecute.onClick = function() {
@@ -563,7 +696,7 @@ function createMainUI(parentPanel) {
             return;
         }
 
-        executeWorkflow(sourceComp, baseName, presetFile);
+        executeWorkflow(sourceComp, baseName, presetFile, stepActiveStates);
     };
 
     // ================== 初始化 ==================
