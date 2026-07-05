@@ -164,6 +164,161 @@ function nestWithScale(sourceComp, targetComp, scaleMode, scalePercent) {
 
 // ===== END 04-ae-utils.jsx =====
 
+// ===== BEGIN 05a-render-engine.jsx =====
+function ensureSequenceTemplate() {
+    var templateNames = ["序列帧", "PNG Sequence", "PNG 序列"];
+    for (var t = 0; t < templateNames.length; t++) {
+        try {
+            var tempComp = app.project.items.addComp("__template_check__", 10, 10, 1, 1, 30);
+            var rqItem = app.project.renderQueue.items.add(tempComp);
+            var om = rqItem.outputModule(1);
+            om.applyTemplate(templateNames[t]);
+            rqItem.remove();
+            try { tempComp.remove(); } catch(e) {}
+            logMessage("模板已存在: " + templateNames[t], LOG_LEVEL.VERBOSE, "RENDER");
+            return;
+        } catch(e) {}
+    }
+
+    logMessage("序列帧模板不存在，正在创建...", LOG_LEVEL.NORMAL, "RENDER");
+    var tempComp = app.project.items.addComp("__template_create__", 10, 10, 1, 1, 30);
+    var rqItem = app.project.renderQueue.items.add(tempComp);
+    var om = rqItem.outputModule(1);
+
+    try {
+        om.setSetting("Format", "8");
+    } catch(e) {
+        logMessage("setSetting Format 失败: " + e.toString(), LOG_LEVEL.WARNING, "RENDER");
+    }
+
+    om.file = new File(Folder.temp.fsName + "/__template_temp_[#####].png");
+
+    try {
+        om.saveToTemplate("序列帧");
+        logMessage("模板已创建: 序列帧", LOG_LEVEL.NORMAL, "RENDER");
+    } catch(e) {
+        logMessage("模板创建失败: " + e.toString(), LOG_LEVEL.WARNING, "RENDER");
+    }
+
+    rqItem.remove();
+    try { tempComp.remove(); } catch(e) {}
+}
+
+function applySequenceTemplate(om) {
+    var names = ["序列帧", "PNG 序列", "PNG Sequence", "PNG", "PNG Sequence with Alpha"];
+    for (var n = 0; n < names.length; n++) {
+        try {
+            om.applyTemplate(names[n]);
+            var fmt = om.getSetting("Format");
+            if (fmt === "8") {
+                return true;
+            }
+        } catch(e) {}
+    }
+    return false;
+}
+
+function renderCompToSequence(comp, projectDir, settings) {
+    logMessage("开始渲染: " + comp.name, LOG_LEVEL.NORMAL, "RENDER");
+
+    try {
+        var outDir = new Folder(projectDir + "/" + comp.name);
+        if (!outDir.exists) outDir.create();
+
+        var rqItem = app.project.renderQueue.items.add(comp);
+        var om = rqItem.outputModule(1);
+
+        while (rqItem.outputModules.length > 1) {
+            rqItem.outputModule(rqItem.outputModules.length).remove();
+        }
+
+        ensureSequenceTemplate();
+        var ok = applySequenceTemplate(om);
+        if (!ok) {
+            logMessage("无法应用序列帧模板，使用默认设置", LOG_LEVEL.WARNING, "RENDER");
+        }
+
+        var outFile = new File(outDir.fsName + "/" + comp.name + "_[#####].png");
+        om.file = outFile;
+
+        try {
+            var fmt = om.getSetting("Format");
+            if (fmt !== "8") {
+                logMessage("设置文件后Format已变: " + fmt + "，重新应用模板", LOG_LEVEL.WARNING, "RENDER");
+                applySequenceTemplate(om);
+            }
+        } catch(e) {
+            logMessage("验证Format失败: " + e.toString(), LOG_LEVEL.WARNING, "RENDER");
+        }
+
+        app.project.renderQueue.render();
+
+        if (settings.importBack) {
+            importSequenceToComp(comp, outDir);
+        }
+
+        rqItem.remove();
+
+        logMessage("渲染完成: " + comp.name, LOG_LEVEL.NORMAL, "RENDER");
+        return true;
+
+    } catch (e) {
+        logMessage("渲染出错: " + e.message, LOG_LEVEL.ERROR, "RENDER");
+        alert("渲染出错: " + e.message);
+        return false;
+    }
+}
+
+function findFirstFileInFolder(folder) {
+    if (!folder || !folder.exists) return null;
+
+    var patterns = ["*.png", "*.tga", "*.tif", "*.tiff", "*.jpg", "*.jpeg", "*.exr", "*.bmp", "*.mp4", "*.mov", "*.avi"];
+    for (var p = 0; p < patterns.length; p++) {
+        var files = folder.getFiles(patterns[p]);
+        if (files.length > 0) return files[0];
+    }
+    return null;
+}
+
+function importSequenceToComp(comp, outDir) {
+    var firstFile = findFirstFileInFolder(outDir);
+    if (!firstFile) {
+        logMessage("未找到渲染文件: " + outDir.fsName, LOG_LEVEL.ERROR, "RENDER");
+        alert("未找到渲染文件:\n" + outDir.fsName);
+        return null;
+    }
+
+    var importOpt = new ImportOptions(firstFile);
+    importOpt.sequence = true;
+    importOpt.forceAlphabetical = true;
+
+    var footage = app.project.importFile(importOpt);
+    footage.name = comp.name + "_序列";
+
+    var targetFrameRate = comp.frameRate;
+    var actualRate = footage.frameRate;
+    logMessage("导入序列帧率: 实际=" + actualRate + "fps, 目标=" + targetFrameRate + "fps", LOG_LEVEL.NORMAL, "RENDER");
+
+    if (Math.abs(actualRate - targetFrameRate) > 0.01) {
+        try {
+            footage.mainSource.conformFrameRate = targetFrameRate;
+            logMessage("帧率已设为: " + targetFrameRate + "fps", LOG_LEVEL.NORMAL, "RENDER");
+        } catch(e) {
+            logMessage("设置帧率失败: " + e.toString(), LOG_LEVEL.WARNING, "RENDER");
+        }
+    }
+
+    var layer = comp.layers.add(footage);
+    layer.solo = true;
+    layer.name = comp.name + "_渲染";
+    layer.moveToBeginning();
+
+    logMessage("渲染结果已导入: " + comp.name + " (" + targetFrameRate + "fps)", LOG_LEVEL.NORMAL, "RENDER");
+    return footage;
+}
+
+// ===== END 05a-render-engine.jsx =====
+
 // ===== BEGIN 05-workflow-engine.jsx =====
 function executeWorkflow(sourceComp, baseName, presetFile, activeStates) {
     if (!sourceComp) {
@@ -398,12 +553,26 @@ function createMainUI(parentPanel) {
     var btnGetComp = makeIconButton(currentCompRow, "◎", "取合成名 → 填入输入框");
     var btnGetProject = makeIconButton(currentCompRow, "▣", "取项目名 → 填入输入框");
 
+    function stripKnownSuffixes(name) {
+        var presetFile = getSelectedPresetFile();
+        if (!presetFile) return name;
+        var presetData = loadPreset(presetFile);
+        if (!presetData || !presetData.steps) return name;
+        for (var si = 0; si < presetData.steps.length; si++) {
+            var sfx = presetData.steps[si].suffix;
+            if (name.length > sfx.length && name.lastIndexOf(sfx) === name.length - sfx.length) {
+                return name.substring(0, name.length - sfx.length);
+            }
+        }
+        return name;
+    }
+
     function detectCurrentComp() {
         var name = getActiveCompName();
         if (name) {
             curCompText.text = name;
             if (!nameInput.text || nameInput.text === "") {
-                nameInput.text = name;
+                nameInput.text = stripKnownSuffixes(name);
             }
         } else {
             curCompText.text = "（无活动合成）";
@@ -413,6 +582,7 @@ function createMainUI(parentPanel) {
     btnRefresh.onClick = function() {
         detectCurrentComp();
         updateStepPreview();
+        refreshOutputUI();
     };
 
     btnGetComp.onClick = function() {
@@ -452,6 +622,10 @@ function createMainUI(parentPanel) {
     nameInput.alignment = ["fill", "center"];
     nameInput.minimumSize.width = 140;
     nameInput.helpTip = "输入基础名称，源合成将被重命名为此名称";
+    nameInput.onChange = function() {
+        updateStepPreview();
+        refreshOutputUI();
+    };
 
     // ================== Tab 按钮行（居中） ==================
     var tabGroup = win.add("group");
@@ -520,19 +694,156 @@ function createMainUI(parentPanel) {
     var stepButtons = [];
     var stepActiveStates = [];
 
-    // --- 输出面板（占位） ---
+    // --- 输出面板 ---
     var outputGroup = contentPanel.add("group");
     outputGroup.orientation = "column";
-    outputGroup.alignChildren = ["fill", "top"];
+    outputGroup.alignChildren = ["fill", "fill"];
     outputGroup.alignment = ["fill", "fill"];
     outputGroup.spacing = 4;
     outputGroup.margins = [0, 0, 0, 0];
     outputGroup.visible = false;
 
-    var outputPlaceholder = outputGroup.add("statictext", undefined, "输出功能开发中...");
-    outputPlaceholder.alignment = ["center", "center"];
-    outputPlaceholder.preferredSize.height = 80;
-    setTextColor(outputPlaceholder, [0.5, 0.5, 0.5, 1]);
+    var outputStepPanel = outputGroup.add("panel");
+    outputStepPanel.orientation = "column";
+    outputStepPanel.alignChildren = ["fill", "top"];
+    outputStepPanel.alignment = ["fill", "fill"];
+    outputStepPanel.spacing = 3;
+    outputStepPanel.margins = 4;
+    outputStepPanel.text = "输出步骤";
+
+    var outputStepContainer = outputStepPanel.add("group");
+    outputStepContainer.orientation = "column";
+    outputStepContainer.alignChildren = ["fill", "top"];
+    outputStepContainer.alignment = ["fill", "top"];
+    outputStepContainer.spacing = 2;
+    outputStepContainer.margins = [0, 0, 0, 0];
+
+    var outputExecuteBtn = outputGroup.add("button", undefined, "▶ 执行输出");
+    outputExecuteBtn.alignment = ["center", "center"];
+    outputExecuteBtn.preferredSize.width = 140;
+    outputExecuteBtn.helpTip = "依次渲染并导入序列帧";
+
+    var renderRows = [];
+    var renderActiveStates = [];
+    var importActiveStates = [];
+    var renderStatusTexts = [];
+
+    function refreshOutputUI() {
+        clearContainer(outputStepContainer);
+        renderRows = [];
+        renderActiveStates = [];
+        importActiveStates = [];
+        renderStatusTexts = [];
+
+        var baseName = nameInput.text || "{基础名称}";
+        var presetFile = getSelectedPresetFile();
+        if (!presetFile) return;
+
+        var presetData = loadPreset(presetFile);
+        if (!presetData || !presetData.steps) return;
+
+        for (var i = 0; i < presetData.steps.length; i++) {
+            var s = presetData.steps[i];
+            var rc = s.render || {enabled: true, importBack: true};
+
+            var row = outputStepContainer.add("group");
+            row.orientation = "row";
+            row.alignChildren = ["left", "center"];
+            row.alignment = ["fill", "top"];
+            row.spacing = 4;
+            row.margins = [0, 0, 0, 0];
+
+            var chkRender = row.add("checkbox", undefined, "渲染");
+            chkRender.value = rc.enabled;
+            chkRender.preferredSize.width = 50;
+
+            var label = row.add("statictext", undefined, "Step " + (i + 1) + ": " + s.name);
+            label.preferredSize.width = 100;
+
+            var chkImport = row.add("checkbox", undefined, "导入");
+            chkImport.value = rc.importBack;
+            chkImport.preferredSize.width = 65;
+
+            var status = row.add("statictext", undefined, "待渲染");
+            status.alignment = ["right", "center"];
+            status.preferredSize.width = 80;
+            status.margins = [0, 0, 4, 0];
+            setTextColor(status, [0.5, 0.5, 0.5, 1]);
+
+            chkRender.onClick = function() {
+                chkImport.enabled = this.value;
+            };
+
+            renderRows.push(row);
+            renderActiveStates.push(chkRender);
+            importActiveStates.push(chkImport);
+            renderStatusTexts.push(status);
+        }
+        outputStepContainer.layout.layout(true);
+    }
+
+    outputExecuteBtn.onClick = function() {
+        var baseName = stripKnownSuffixes(nameInput.text);
+        if (!baseName) {
+            alert("请输入基础名称！");
+            return;
+        }
+
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+
+        var presetFile = getSelectedPresetFile();
+        if (!presetFile) {
+            alert("请先选择一个预设！");
+            return;
+        }
+
+        var projectDir = app.project.file.parent.fsName;
+
+        var presetData = loadPreset(presetFile);
+        if (!presetData || !presetData.steps) {
+            alert("预设数据无效！");
+            return;
+        }
+
+        for (var i = 0; i < presetData.steps.length; i++) {
+            if (!renderActiveStates[i] || !renderActiveStates[i].value) continue;
+
+            var s = presetData.steps[i];
+            var compName = baseName + s.suffix;
+            var comp = getCompByName(compName);
+
+            if (!comp) {
+                alert("未找到合成: " + compName + "\n请先执行工作流创建合成。");
+                renderStatusTexts[i].text = "未找到";
+                setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
+                continue;
+            }
+
+            renderStatusTexts[i].text = "渲染中...";
+            setTextColor(renderStatusTexts[i], [0.2, 0.4, 0.8, 1]);
+            outputStepContainer.layout.layout(true);
+
+            var settings = {
+                importBack: importActiveStates[i] && importActiveStates[i].value
+            };
+
+            var success = renderCompToSequence(comp, projectDir, settings);
+
+            if (success) {
+                renderStatusTexts[i].text = "完成";
+                setTextColor(renderStatusTexts[i], [0.2, 0.6, 0.2, 1]);
+            } else {
+                renderStatusTexts[i].text = "出错";
+                setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
+            }
+            outputStepContainer.layout.layout(true);
+        }
+
+        alert("输出处理完成！");
+    };
 
     function showOrganizeTab() {
         organizeGroup.visible = true;
@@ -542,6 +853,7 @@ function createMainUI(parentPanel) {
     function showOutputTab() {
         organizeGroup.visible = false;
         outputGroup.visible = true;
+        refreshOutputUI();
     }
 
     tabOrganize.onClick = function() { showOrganizeTab(); };
@@ -571,6 +883,7 @@ function createMainUI(parentPanel) {
             }
             presetDropdown.selection = presetDropdown.items[0];
             updateStepPreview();
+            refreshOutputUI();
         } else {
             stepPreviewPanel.text = "工作流步骤 - 未找到预设文件";
         }
