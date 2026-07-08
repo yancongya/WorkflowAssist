@@ -51,3 +51,12 @@ if (-not (Test-Path -LiteralPath $configDir)) {
   New-Item -ItemType Directory -Force -Path $configDir | Out-Null
   Write-Host "Created config directory: $configDir"
 }
+
+$configSource = Join-Path $root "config"
+if (Test-Path -LiteralPath $configSource) {
+  Get-ChildItem -LiteralPath $configSource -Filter "*.json" | ForEach-Object {
+    $dest = Join-Path $configDir $_.Name
+    Copy-Item -Path $_.FullName -Destination $dest -Force
+    Write-Host "  Copied preset: $($_.Name)"
+  }
+}

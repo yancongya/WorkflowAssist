@@ -138,6 +138,25 @@ function createMainUI(parentPanel) {
         refreshOutputUI();
     };
 
+    // ================== 预设选择行（通用，始终可见） ==================
+    var presetRow = win.add("group");
+    presetRow.orientation = "row";
+    presetRow.alignment = ["fill", "top"];
+    presetRow.alignChildren = ["fill", "center"];
+    presetRow.spacing = 4;
+    presetRow.margins = [0, 0, 0, 2];
+
+    var presetLabel = presetRow.add("statictext", undefined, "预设:");
+    presetLabel.alignment = ["left", "center"];
+
+    var presetDropdown = presetRow.add("dropdownlist", undefined, []);
+    presetDropdown.alignment = ["fill", "center"];
+    presetDropdown.minimumSize.width = 120;
+    presetDropdown.onChange = function() {
+        updateStepPreview();
+        refreshOutputUI();
+    };
+
     // ================== Tab 按钮行（居中） ==================
     var tabGroup = win.add("group");
     tabGroup.orientation = "row";
@@ -152,35 +171,22 @@ function createMainUI(parentPanel) {
     var tabOutput = tabGroup.add("button", undefined, "输出");
     tabOutput.preferredSize.width = 80;
 
+    var tabPackage = tabGroup.add("button", undefined, "打包");
+    tabPackage.preferredSize.width = 80;
+
     // ================== 内容容器 ==================
-    var contentPanel = win.add("panel");
-    contentPanel.orientation = "column";
-    contentPanel.alignChildren = ["fill", "fill"];
-    contentPanel.alignment = ["fill", "fill"];
-    contentPanel.spacing = 4;
-    contentPanel.margins = 6;
+    var tabContent = win.add("panel");
+    tabContent.orientation = "stack";
+    tabContent.alignment = ["fill", "fill"];
+    tabContent.minimumSize.height = 160;
 
     // --- 整理面板 ---
-    var organizeGroup = contentPanel.add("group");
+    var organizeGroup = tabContent.add("group");
     organizeGroup.orientation = "column";
     organizeGroup.alignChildren = ["fill", "top"];
     organizeGroup.alignment = ["fill", "fill"];
     organizeGroup.spacing = 4;
-    organizeGroup.margins = [0, 0, 0, 0];
-
-    var presetRow = organizeGroup.add("group");
-    presetRow.orientation = "row";
-    presetRow.alignment = ["fill", "top"];
-    presetRow.alignChildren = ["fill", "center"];
-    presetRow.spacing = 4;
-    presetRow.margins = [0, 0, 0, 2];
-
-    var presetLabel = presetRow.add("statictext", undefined, "预设:");
-    presetLabel.alignment = ["left", "center"];
-
-    var presetDropdown = presetRow.add("dropdownlist", undefined, []);
-    presetDropdown.alignment = ["fill", "center"];
-    presetDropdown.minimumSize.width = 120;
+    organizeGroup.margins = 6;
 
     // 步骤按钮区域
     var stepPreviewPanel = organizeGroup.add("panel");
@@ -206,12 +212,12 @@ function createMainUI(parentPanel) {
     var stepActiveStates = [];
 
     // --- 输出面板 ---
-    var outputGroup = contentPanel.add("group");
+    var outputGroup = tabContent.add("group");
     outputGroup.orientation = "column";
     outputGroup.alignChildren = ["fill", "fill"];
     outputGroup.alignment = ["fill", "fill"];
     outputGroup.spacing = 4;
-    outputGroup.margins = [0, 0, 0, 0];
+    outputGroup.margins = 6;
     outputGroup.visible = false;
 
     var outputStepPanel = outputGroup.add("panel");
@@ -229,10 +235,47 @@ function createMainUI(parentPanel) {
     outputStepContainer.spacing = 2;
     outputStepContainer.margins = [0, 0, 0, 0];
 
-    var outputExecuteBtn = outputGroup.add("button", undefined, "▶ 执行输出");
-    outputExecuteBtn.alignment = ["center", "center"];
-    outputExecuteBtn.preferredSize.width = 140;
-    outputExecuteBtn.helpTip = "依次渲染并导入序列帧";
+    // --- 打包面板 ---
+    var packageGroup = tabContent.add("group");
+    packageGroup.orientation = "column";
+    packageGroup.alignChildren = ["fill", "top"];
+    packageGroup.alignment = ["fill", "fill"];
+    packageGroup.spacing = 6;
+    packageGroup.margins = 6;
+    packageGroup.visible = false;
+
+    var packagePanel = packageGroup.add("panel");
+    packagePanel.orientation = "column";
+    packagePanel.alignChildren = ["fill", "top"];
+    packagePanel.alignment = ["fill", "top"];
+    packagePanel.spacing = 4;
+    packagePanel.margins = 6;
+    packagePanel.text = "项目工具";
+
+    var btnConsolidate = packagePanel.add("button", undefined, "整理项目  — 合并重复素材");
+    btnConsolidate.alignment = ["fill", "top"];
+    btnConsolidate.preferredSize.height = 26;
+    btnConsolidate.helpTip = "合并项目中所有重复的素材文件";
+
+    var btnReduce = packagePanel.add("button", undefined, "减少项目  — 删除未使用素材");
+    btnReduce.alignment = ["fill", "top"];
+    btnReduce.preferredSize.height = 26;
+    btnReduce.helpTip = "删除项目中未使用的素材和合成";
+
+    btnConsolidate.onClick = function() {
+        if (!app.project) { alert("请先打开一个项目！"); return; }
+        try {
+            app.project.consolidateFootage();
+            alert("整理项目完成！");
+        } catch(e) {
+            alert("整理项目出错: " + e.toString());
+        }
+    };
+
+    btnReduce.onClick = function() {
+        if (!app.project) { alert("请先打开一个项目！"); return; }
+        alert("请在 AE 菜单手动操作:\n\n文件 → 依赖关系 → 减少项目");
+    };
 
     var renderRows = [];
     var renderActiveStates = [];
@@ -293,82 +336,43 @@ function createMainUI(parentPanel) {
         outputStepContainer.layout.layout(true);
     }
 
-    outputExecuteBtn.onClick = function() {
-        var baseName = stripKnownSuffixes(nameInput.text);
-        if (!baseName) {
-            alert("请输入基础名称！");
-            return;
-        }
-
-        if (!app.project.file) {
-            alert("请先保存项目文件！");
-            return;
-        }
-
-        var presetFile = getSelectedPresetFile();
-        if (!presetFile) {
-            alert("请先选择一个预设！");
-            return;
-        }
-
-        var projectDir = app.project.file.parent.fsName;
-
-        var presetData = loadPreset(presetFile);
-        if (!presetData || !presetData.steps) {
-            alert("预设数据无效！");
-            return;
-        }
-
-        for (var i = 0; i < presetData.steps.length; i++) {
-            if (!renderActiveStates[i] || !renderActiveStates[i].value) continue;
-
-            var s = presetData.steps[i];
-            var compName = baseName + s.suffix;
-            var comp = getCompByName(compName);
-
-            if (!comp) {
-                alert("未找到合成: " + compName + "\n请先执行工作流创建合成。");
-                renderStatusTexts[i].text = "未找到";
-                setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
-                continue;
-            }
-
-            renderStatusTexts[i].text = "渲染中...";
-            setTextColor(renderStatusTexts[i], [0.2, 0.4, 0.8, 1]);
-            outputStepContainer.layout.layout(true);
-
-            var settings = {
-                importBack: importActiveStates[i] && importActiveStates[i].value
-            };
-
-            var success = renderCompToSequence(comp, projectDir, settings);
-
-            if (success) {
-                renderStatusTexts[i].text = "完成";
-                setTextColor(renderStatusTexts[i], [0.2, 0.6, 0.2, 1]);
-            } else {
-                renderStatusTexts[i].text = "出错";
-                setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
-            }
-            outputStepContainer.layout.layout(true);
-        }
-
-        alert("输出处理完成！");
-    };
+    var currentTab = "organize";
 
     function showOrganizeTab() {
+        currentTab = "organize";
         organizeGroup.visible = true;
         outputGroup.visible = false;
+        packageGroup.visible = false;
+        btnExecute.text = "▶ 执行工作流";
+        btnExecute.helpTip = "重命名当前合成并按预设步骤创建嵌套合成";
+        bottomGroup.visible = true;
+        tabContent.layout.layout(true);
     }
 
     function showOutputTab() {
+        currentTab = "output";
         organizeGroup.visible = false;
         outputGroup.visible = true;
+        packageGroup.visible = false;
+        btnExecute.text = "▶ 执行输出";
+        btnExecute.helpTip = "依次渲染并导入序列帧";
+        bottomGroup.visible = true;
         refreshOutputUI();
+        tabContent.layout.layout(true);
+    }
+
+    function showPackageTab() {
+        currentTab = "package";
+        organizeGroup.visible = false;
+        outputGroup.visible = false;
+        packageGroup.visible = true;
+        bottomGroup.visible = false;
+        tabContent.layout.layout(true);
     }
 
     tabOrganize.onClick = function() { showOrganizeTab(); };
     tabOutput.onClick = function() { showOutputTab(); };
+    tabPackage.onClick = function() { showPackageTab(); };
 
     // ================== 底部执行按钮（居中） ==================
     var bottomGroup = win.add("group");
@@ -443,10 +447,16 @@ function createMainUI(parentPanel) {
 
     function buildStepHelpTip(index, s, baseName) {
         var tip = "Step " + (index + 1) + ": " + s.name + "\n";
-        tip += "合成: " + baseName + s.suffix + "\n";
+        var outLabel = s.rename ? String(s.rename).replace("{baseName}", baseName) : baseName + (s.suffix || "");
+        tip += "合成: " + outLabel + "\n";
         tip += "尺寸: " + s.width + "\u00D7" + s.height + "\n";
         tip += "帧率: " + s.frameRate + "fps\n";
-        tip += "时长: " + s.duration + "s\n";
+        tip += "时长: ";
+        if (typeof s.duration === "string" && s.duration === "custom") {
+            tip += "自定义（运行前弹窗输入）\n";
+        } else {
+            tip += s.duration + "s\n";
+        }
         tip += "图层: ";
         if (s.scaleMode === "fit_width") {
             tip += "自适应宽度缩放";
@@ -500,27 +510,88 @@ function createMainUI(parentPanel) {
         };
     }
 
-    // ================== 执行工作流 ==================
+    // ================== 执行 ==================
     btnExecute.onClick = function() {
-        var sourceComp = getActiveComp();
-        if (!sourceComp) {
-            alert("请先在 After Effects 中选择一个活动合成！");
+        if (currentTab === "package") {
             return;
-        }
+        } else if (currentTab === "output") {
+            var baseName = stripKnownSuffixes(nameInput.text);
+            if (!baseName) {
+                alert("请输入基础名称！");
+                return;
+            }
 
-        var baseName = nameInput.text;
-        if (!baseName) {
-            alert("请输入基础名称！");
-            return;
-        }
+            if (!app.project.file) {
+                alert("请先保存项目文件！");
+                return;
+            }
 
-        var presetFile = getSelectedPresetFile();
-        if (!presetFile) {
-            alert("请先选择一个预设！");
-            return;
-        }
+            var presetFile = getSelectedPresetFile();
+            if (!presetFile) {
+                alert("请先选择一个预设！");
+                return;
+            }
 
-        executeWorkflow(sourceComp, baseName, presetFile, stepActiveStates);
+            var projectDir = app.project.file.parent.fsName;
+            var presetData = loadPreset(presetFile);
+            if (!presetData || !presetData.steps) {
+                alert("预设数据无效！");
+                return;
+            }
+
+            for (var i = 0; i < presetData.steps.length; i++) {
+                if (!renderActiveStates[i] || !renderActiveStates[i].value) continue;
+
+                var s = presetData.steps[i];
+                var compName = baseName + s.suffix;
+                var comp = getCompByName(compName);
+
+                if (!comp) {
+                    alert("未找到合成: " + compName + "\n请先执行工作流创建合成。");
+                    renderStatusTexts[i].text = "未找到";
+                    setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
+                    continue;
+                }
+
+                renderStatusTexts[i].text = "渲染中...";
+                setTextColor(renderStatusTexts[i], [0.2, 0.4, 0.8, 1]);
+                outputStepContainer.layout.layout(true);
+
+                var settings = { importBack: importActiveStates[i] && importActiveStates[i].value };
+                var success = renderCompToSequence(comp, projectDir, settings);
+
+                if (success) {
+                    renderStatusTexts[i].text = "完成";
+                    setTextColor(renderStatusTexts[i], [0.2, 0.6, 0.2, 1]);
+                } else {
+                    renderStatusTexts[i].text = "出错";
+                    setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
+                }
+                outputStepContainer.layout.layout(true);
+            }
+
+            alert("输出处理完成！");
+        } else {
+            var sourceComp = getActiveComp();
+            if (!sourceComp) {
+                alert("请先在 After Effects 中选择一个活动合成！");
+                return;
+            }
+
+            var baseName = nameInput.text;
+            if (!baseName) {
+                alert("请输入基础名称！");
+                return;
+            }
+
+            var presetFile = getSelectedPresetFile();
+            if (!presetFile) {
+                alert("请先选择一个预设！");
+                return;
+            }
+
+            executeWorkflow(sourceComp, baseName, presetFile, stepActiveStates);
+        }
     };
 
     // ================== 初始化 ==================
