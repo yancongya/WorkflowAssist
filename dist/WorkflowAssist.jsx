@@ -81,6 +81,10 @@ function scanPresetFiles() {
     return presets;
 }
 
+function getPresetResourcePath(filename) {
+    return configFolder.fsName + "/" + filename;
+}
+
 function loadPreset(file) {
     if (!file.exists) return null;
     try {
@@ -695,9 +699,6 @@ function createMainUI(parentPanel) {
     var tabOutput = tabGroup.add("button", undefined, "输出");
     tabOutput.preferredSize.width = 80;
 
-    var tabPackage = tabGroup.add("button", undefined, "打包");
-    tabPackage.preferredSize.width = 80;
-
     // ================== 内容容器 ==================
     var tabContent = win.add("panel");
     tabContent.orientation = "stack";
@@ -758,48 +759,6 @@ function createMainUI(parentPanel) {
     outputStepContainer.alignment = ["fill", "top"];
     outputStepContainer.spacing = 2;
     outputStepContainer.margins = [0, 0, 0, 0];
-
-    // --- 打包面板 ---
-    var packageGroup = tabContent.add("group");
-    packageGroup.orientation = "column";
-    packageGroup.alignChildren = ["fill", "top"];
-    packageGroup.alignment = ["fill", "fill"];
-    packageGroup.spacing = 6;
-    packageGroup.margins = 6;
-    packageGroup.visible = false;
-
-    var packagePanel = packageGroup.add("panel");
-    packagePanel.orientation = "column";
-    packagePanel.alignChildren = ["fill", "top"];
-    packagePanel.alignment = ["fill", "top"];
-    packagePanel.spacing = 4;
-    packagePanel.margins = 6;
-    packagePanel.text = "项目工具";
-
-    var btnConsolidate = packagePanel.add("button", undefined, "整理项目  — 合并重复素材");
-    btnConsolidate.alignment = ["fill", "top"];
-    btnConsolidate.preferredSize.height = 26;
-    btnConsolidate.helpTip = "合并项目中所有重复的素材文件";
-
-    var btnReduce = packagePanel.add("button", undefined, "减少项目  — 删除未使用素材");
-    btnReduce.alignment = ["fill", "top"];
-    btnReduce.preferredSize.height = 26;
-    btnReduce.helpTip = "删除项目中未使用的素材和合成";
-
-    btnConsolidate.onClick = function() {
-        if (!app.project) { alert("请先打开一个项目！"); return; }
-        try {
-            app.project.consolidateFootage();
-            alert("整理项目完成！");
-        } catch(e) {
-            alert("整理项目出错: " + e.toString());
-        }
-    };
-
-    btnReduce.onClick = function() {
-        if (!app.project) { alert("请先打开一个项目！"); return; }
-        alert("请在 AE 菜单手动操作:\n\n文件 → 依赖关系 → 减少项目");
-    };
 
     var renderRows = [];
     var renderActiveStates = [];
@@ -866,7 +825,6 @@ function createMainUI(parentPanel) {
         currentTab = "organize";
         organizeGroup.visible = true;
         outputGroup.visible = false;
-        packageGroup.visible = false;
         btnExecute.text = "▶ 执行工作流";
         btnExecute.helpTip = "重命名当前合成并按预设步骤创建嵌套合成";
         bottomGroup.visible = true;
@@ -877,7 +835,6 @@ function createMainUI(parentPanel) {
         currentTab = "output";
         organizeGroup.visible = false;
         outputGroup.visible = true;
-        packageGroup.visible = false;
         btnExecute.text = "▶ 执行输出";
         btnExecute.helpTip = "依次渲染并导入序列帧";
         bottomGroup.visible = true;
@@ -885,18 +842,310 @@ function createMainUI(parentPanel) {
         tabContent.layout.layout(true);
     }
 
-    function showPackageTab() {
-        currentTab = "package";
-        organizeGroup.visible = false;
-        outputGroup.visible = false;
-        packageGroup.visible = true;
-        bottomGroup.visible = false;
-        tabContent.layout.layout(true);
-    }
-
     tabOrganize.onClick = function() { showOrganizeTab(); };
     tabOutput.onClick = function() { showOutputTab(); };
-    tabPackage.onClick = function() { showPackageTab(); };
+
+    // ================== 功能按钮面板 ==================
+    var funcPanel = win.add("panel");
+    funcPanel.orientation = "column";
+    funcPanel.alignment = ["fill", "top"];
+    funcPanel.alignChildren = ["fill", "top"];
+    funcPanel.spacing = 4;
+    funcPanel.margins = 6;
+    funcPanel.text = "功能";
+
+    var funcRow = funcPanel.add("group");
+    funcRow.orientation = "row";
+    funcRow.alignment = ["fill", "top"];
+    funcRow.alignChildren = ["fill", "center"];
+    funcRow.spacing = 6;
+    funcRow.margins = [0, 0, 0, 0];
+
+    var funcButtons = [];
+    function addFuncButton(label, tip) {
+        var btn = funcRow.add("button", undefined, label);
+        btn.helpTip = tip || "";
+        btn.preferredSize.height = 26;
+        funcButtons.push(btn);
+        return btn;
+    }
+
+    function relayoutFuncButtons() {
+        if (funcButtons.length === 0) return;
+        var totalWidth = funcPanel.preferredSize.width - 12;
+        var spacing = funcRow.spacing * (funcButtons.length - 1);
+        var btnWidth = Math.max(60, (totalWidth - spacing) / funcButtons.length);
+        for (var fi = 0; fi < funcButtons.length; fi++) {
+            funcButtons[fi].preferredSize.width = btnWidth;
+        }
+        funcRow.layout.layout(true);
+    }
+
+    var btnAutoAddMask = addFuncButton("自动添加蒙版", "创建椭圆蒙版图层（带下拉/模糊/渐显渐隐）");
+    btnAutoAddMask.onClick = function() { createMaskLayer(); };
+
+    var btnAutoMask = addFuncButton("自动蒙版", "为所有图层设置/取消轨道遮罩");
+    btnAutoMask.onClick = function() { toggleTrackMatte(); };
+
+    var btnImportBg = addFuncButton("导入背景", "从预设目录导入 bg.png 作为背景图层");
+    btnImportBg.onClick = function() { importBgImage(); };
+
+    // ================== 内置功能函数 ==================
+
+    function createMaskLayer() {
+        var comp = app.project.activeItem;
+        if (!comp || !(comp instanceof CompItem)) {
+            alert("请先选择一个合成！");
+            return;
+        }
+
+        app.beginUndoGroup("Create Simple Mask with Dropdown");
+
+        try {
+            var shapeLayer = comp.layers.addShape();
+            shapeLayer.name = "蒙版";
+            var opacityProp = shapeLayer.property("Transform").property("Opacity");
+
+            var contents = shapeLayer.property("Contents");
+            var ellipseGroup = contents.addProperty("ADBE Vector Group");
+            var ellipseShape = ellipseGroup.property("Contents").addProperty("ADBE Vector Shape - Ellipse");
+            var sizeProperty = ellipseShape.property("ADBE Vector Ellipse Size");
+            if (sizeProperty && sizeProperty.canSetExpression) {
+                sizeProperty.expression = [
+                    'var w = thisComp.width * effect("宽度倍数")(1);',
+                    'var h;',
+                    'var v = effect("下拉菜单控件")(1);',
+                    'if (v == 1) {',
+                    '  h = thisComp.height / 2;',
+                    '} else if (v == 2) {',
+                    '  h = thisComp.height * 2 / 3;',
+                    '} else if (v == 3) {',
+                    '  h = thisComp.height * 3 / 4;',
+                    '} else if (v == 4) {',
+                    '  h = thisComp.height;',
+                    '} else {',
+                    '  h = thisComp.height / 2;',
+                    '}',
+                    'h += effect("动态调整")(1);',
+                    '[w, h]'
+                ].join("\n");
+            }
+
+            var fill = ellipseGroup.property("Contents").addProperty("ADBE Vector Graphic - Fill");
+            if (fill) fill.property("Color").setValue([0, 0, 0, 1]);
+
+            var dropdownEffect = shapeLayer.property("Effects").addProperty("ADBE Dropdown Control");
+            if (dropdownEffect) {
+                var menuProperty = dropdownEffect.property(1);
+                if (menuProperty && typeof menuProperty.setPropertyParameters === "function") {
+                    menuProperty.setPropertyParameters(["半屏", "三分二", "四分三", "全屏"]);
+                }
+            }
+
+            var sliderEffect = shapeLayer.property("Effects").addProperty("ADBE Slider Control");
+            if (sliderEffect) {
+                sliderEffect.name = "动态调整";
+                var sliderProp = sliderEffect.property(1);
+                if (sliderProp) sliderProp.setValue(0);
+            }
+
+            var widthScale = shapeLayer.property("Effects").addProperty("ADBE Slider Control");
+            if (widthScale) {
+                widthScale.name = "宽度倍数";
+                var widthScaleProp = widthScale.property(1);
+                if (widthScaleProp) widthScaleProp.setValue(3);
+            }
+
+            var blurSlider = shapeLayer.property("Effects").addProperty("ADBE Slider Control");
+            var blurSliderProp = null;
+            if (blurSlider) {
+                blurSlider.name = "模糊控制";
+                blurSliderProp = blurSlider.property(1);
+                if (blurSliderProp) blurSliderProp.setValue(50);
+            }
+
+            var enableFadeCheckbox = shapeLayer.property("Effects").addProperty("ADBE Checkbox Control");
+            if (enableFadeCheckbox) {
+                enableFadeCheckbox.name = "启用渐变";
+                var enableFadeProp = enableFadeCheckbox.property(1);
+                if (enableFadeProp) enableFadeProp.setValue(1);
+            }
+
+            var boxBlurEffect = shapeLayer.property("Effects").addProperty("ADBE Box Blur2");
+
+            var frameRate = comp.frameRate;
+            var compDuration = comp.duration;
+
+            shapeLayer.marker.setValueAtTime(0, new MarkerValue("开始渐显"));
+            shapeLayer.marker.setValueAtTime(12 / frameRate, new MarkerValue("渐显完成"));
+            shapeLayer.marker.setValueAtTime(compDuration - (8 / frameRate), new MarkerValue("开始渐隐"));
+            shapeLayer.marker.setValueAtTime(compDuration - (1 / frameRate), new MarkerValue("渐隐完成"));
+
+            if (opacityProp && opacityProp.canSetExpression) {
+                opacityProp.expression = [
+                    'var enableFade = effect("启用渐变")(1);',
+                    '',
+                    'if (enableFade == 0) {',
+                    '    100;',
+                    '} else {',
+                    '    var marker1 = null;',
+                    '    var marker2 = null;',
+                    '    var marker3 = null;',
+                    '    var marker4 = null;',
+                    '',
+                    '    for (var i = 1; i <= thisLayer.marker.numKeys; i++) {',
+                    '        var c = thisLayer.marker.key(i).comment;',
+                    '        var t = thisLayer.marker.key(i).time;',
+                    '        if (c == "开始渐显") marker1 = t;',
+                    '        else if (c == "渐显完成") marker2 = t;',
+                    '        else if (c == "开始渐隐") marker3 = t;',
+                    '        else if (c == "渐隐完成") marker4 = t;',
+                    '    }',
+                    '',
+                    '    if (marker1 == null || marker2 == null || marker3 == null || marker4 == null) {',
+                    '        0;',
+                    '    } else if (time < marker1) {',
+                    '        0;',
+                    '    } else if (time < marker2) {',
+                    '        linear(time, marker1, marker2, 0, 100);',
+                    '    } else if (time < marker3) {',
+                    '        100;',
+                    '    } else if (time < marker4) {',
+                    '        linear(time, marker3, marker4, 100, 0);',
+                    '    } else {',
+                    '        0;',
+                    '    }',
+                    '}'
+                ].join("\n");
+            }
+
+            if (boxBlurEffect && blurSliderProp) {
+                app.scheduleTask(
+                    'var lyr = app.project.activeItem.layer("蒙版");'
+                    + 'var fx = lyr.effect("快速方框模糊")||lyr.effect("Box Blur")||lyr.effect("Fast Box Blur");'
+                    + 'var ctrl = lyr.effect("模糊控制");'
+                    + 'if(fx&&ctrl){'
+                    + 'try{fx.property(1).expression = \'effect("模糊控制")(1);\';}catch(e){}'
+                    + '}',
+                    100,
+                    false
+                );
+            }
+        } catch(e) {
+            alert("创建蒙版出错: " + e.toString());
+        }
+
+        app.endUndoGroup();
+    }
+
+    function toggleTrackMatte() {
+        var activeComp = app.project.activeItem;
+        if (!(activeComp instanceof CompItem)) {
+            alert("请选择一个合成");
+            return;
+        }
+
+        var maskLayer = null;
+        for (var i = 1; i <= activeComp.numLayers; i++) {
+            if (activeComp.layer(i).name === "蒙版") {
+                maskLayer = activeComp.layer(i);
+                break;
+            }
+        }
+
+        if (!maskLayer) {
+            alert("未找到名为\"蒙版\"的图层");
+            return;
+        }
+
+        var isMaskSelected = false;
+        for (var i = 0; i < activeComp.selectedLayers.length; i++) {
+            if (activeComp.selectedLayers[i] === maskLayer) {
+                isMaskSelected = true;
+                break;
+            }
+        }
+
+        var originalLockState = maskLayer.locked;
+        if (originalLockState) maskLayer.locked = false;
+
+        app.beginUndoGroup(isMaskSelected ? "取消轨道遮罩" : "设置轨道遮罩");
+
+        try {
+            for (var i = 1; i <= activeComp.numLayers; i++) {
+                var currentLayer = activeComp.layer(i);
+                if (currentLayer !== maskLayer && currentLayer instanceof AVLayer) {
+                    if (isMaskSelected) {
+                        currentLayer.trackMatteType = TrackMatteType.NO_TRACK_MATTE;
+                    } else {
+                        maskLayer.moveBefore(currentLayer);
+                        currentLayer.trackMatteType = TrackMatteType.ALPHA;
+                    }
+                }
+            }
+
+            if (!isMaskSelected) {
+                maskLayer.moveToBeginning();
+            }
+        } catch(e) {
+            alert("设置轨道遮罩出错: " + e.toString());
+        }
+
+        app.endUndoGroup();
+
+        if (originalLockState) maskLayer.locked = true;
+    }
+
+    function importBgImage() {
+        var currentComp = app.project.activeItem;
+        if (!(currentComp instanceof CompItem)) {
+            alert("请先选择一个合成！");
+            return;
+        }
+
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+
+        var projectDir = app.project.file.parent.fsName;
+        var targetFile = new File(projectDir + "/bg.png");
+
+        if (!targetFile.exists) {
+            var sourceFile = new File(getPresetResourcePath("bg.png"));
+            if (!sourceFile.exists) {
+                alert("找不到 bg.png 文件！\n请将 bg.png 放置在预设目录:\n" + configFolder.fsName);
+                return;
+            }
+            sourceFile.copy(targetFile.fsName);
+            if (!targetFile.exists) {
+                alert("复制 bg.png 到项目目录失败！");
+                return;
+            }
+        }
+
+        app.beginUndoGroup("Import bg.png");
+        try {
+            var importOptions = new ImportOptions(targetFile);
+            var importedFile = app.project.importFile(importOptions);
+
+            var bgLayer = currentComp.layers.add(importedFile);
+
+            var compWidth = currentComp.width;
+            var compHeight = currentComp.height;
+            var imgWidth = bgLayer.source.width;
+            var imgHeight = bgLayer.source.height;
+
+            var scaleFactor = (compWidth / imgWidth) * 100;
+            var newHeight = (imgHeight * scaleFactor) / 100;
+            bgLayer.transform.scale.setValue([scaleFactor, (newHeight / imgHeight) * 100]);
+
+            bgLayer.moveToEnd();
+        } catch (e) {
+            alert("导入背景出错: " + e.toString());
+        }
+        app.endUndoGroup();
+    }
 
     // ================== 底部执行按钮（居中） ==================
     var bottomGroup = win.add("group");
@@ -1036,9 +1285,7 @@ function createMainUI(parentPanel) {
 
     // ================== 执行 ==================
     btnExecute.onClick = function() {
-        if (currentTab === "package") {
-            return;
-        } else if (currentTab === "output") {
+        if (currentTab === "output") {
             var baseName = stripKnownSuffixes(nameInput.text);
             if (!baseName) {
                 alert("请输入基础名称！");
@@ -1121,6 +1368,8 @@ function createMainUI(parentPanel) {
     // ================== 初始化 ==================
     detectCurrentComp();
     refreshPresetList();
+    funcPanel.preferredSize.width = win.preferredSize.width - 12;
+    relayoutFuncButtons();
 
     return win;
 }

@@ -49,7 +49,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-jsx.ps1
 
 构建过程：
 1. 按文件名数字顺序拼接 `src-jsx/*.jsx` → `dist/WorkflowAssist.jsx`
-2. 将 `config/*.json` 复制到 `dist/WorkflowAssist/`
+2. 将 `config/*` 全部文件复制到 `dist/WorkflowAssist/`（预设 JSON + 资源文件）
 
 ## Syntax Verification
 
@@ -128,3 +128,36 @@ Example scenarios (baseName = "全屏座驾a-独角兽"):
 - 预设下拉切换（`presetDropdown.onChange`）必须刷新步骤预览和输出 UI
 - 预设源文件存在 `config/`，构建时自动同步到 `dist/WorkflowAssist/`
 - 不改动 `dist/WorkflowAssist.jsx` 本身
+
+### Built-in Only — 禁止外部脚本调用
+**所有功能必须内联在 src-jsx 模块中**，不得使用 `$.evalFile()` 或类似方式调用外部 JSX 文件。
+
+当需要把外部 JSX 脚本集成到项目时：
+1. 在 `06-main-ui.jsx` 的 `createMainUI` 闭包内创建对应的函数（如 `createMaskLayer()`、`toggleTrackMatte()`）
+2. 按钮的 `onClick` 直接调用该函数
+3. 确认函数使用 `app.beginUndoGroup()` / `app.endUndoGroup()` 包裹操作
+4. 确认函数正确汇报错误（`try/catch` + `alert()`）
+
+### 功能按钮面板约定
+`funcPanel` 中的按钮通过 `addFuncButton()` 创建，自动管理宽度。
+- 添加新按钮：`var btn = addFuncButton("标签", "提示");`
+- 设置点击：`btn.onClick = function() { ... };`
+- 按钮数量变化后调用 `relayoutFuncButtons()` 重排宽度
+
+### 资源文件约定
+`config/` 目录不仅存放 JSON 预设，也存放资源文件（如图片）。通过 `getPresetResourcePath(filename)`（`03-config-store.jsx`）解析运行时路径：
+
+```javascript
+var bgFile = new File(getPresetResourcePath("bg.png"));
+```
+
+构建脚本会将 `config/` 下所有文件同步到 `dist/WorkflowAssist/`，不仅限于 JSON。
+
+### 项目目录导入模式
+对于导入图片等资源的函数，采用"先复制到项目目录再导入"的模式：
+
+1. 检查项目文件是否已保存
+2. 检查项目目录下是否已有该文件 — 有则跳过复制
+3. 没有则从预设目录复制到项目目录
+4. **文件复制操作放在 undo group 外部**，只有导入+图层操作在 undo group 内
+5. 这样撤回不会删除已存在的资源文件，下次执行也无需重新复制

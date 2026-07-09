@@ -54,7 +54,7 @@ if (-not (Test-Path -LiteralPath $configDir)) {
 
 $configSource = Join-Path $root "config"
 if (Test-Path -LiteralPath $configSource) {
-  Get-ChildItem -LiteralPath $configSource -Filter "*.json" | ForEach-Object {
+  Get-ChildItem -LiteralPath $configSource | ForEach-Object {
     $dest = Join-Path $configDir $_.Name
     Copy-Item -Path $_.FullName -Destination $dest -Force
     Write-Host "  Copied preset: $($_.Name)"

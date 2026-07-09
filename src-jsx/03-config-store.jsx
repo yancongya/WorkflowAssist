@@ -21,6 +21,10 @@ function scanPresetFiles() {
     return presets;
 }
 
+function getPresetResourcePath(filename) {
+    return configFolder.fsName + "/" + filename;
+}
+
 function loadPreset(file) {
     if (!file.exists) return null;
     try {
