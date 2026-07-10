@@ -880,15 +880,14 @@ function createMainUI(parentPanel) {
     funcRow.margins = [0, 0, 0, 0];
 
     var funcButtons = [];
-    function addFuncButton(iconKey, tip) {
-        var btn = funcRow.add("button", undefined, "");
+    function addFuncButton(label, iconKey, tip) {
+        var btn = funcRow.add("button", undefined, label);
         btn.helpTip = tip || "";
-        try {
-            var iconFile = new File(getPresetResourcePath("_icons/" + iconKey + ".png"));
-            if (iconFile.exists) {
-                btn.icon = ScriptUI.newImage(iconFile);
-            }
-        } catch (e) {}
+        if (iconKey && typeof ICON_DATA !== 'undefined' && ICON_DATA[iconKey]) {
+            try {
+                btn.icon = ScriptUI.newImage(ICON_DATA[iconKey]);
+            } catch (e) {}
+        }
         funcButtons.push(btn);
         return btn;
     }
@@ -897,27 +896,26 @@ function createMainUI(parentPanel) {
         if (funcButtons.length === 0) return;
         var totalWidth = funcPanel.preferredSize.width - 12;
         var spacing = funcRow.spacing * (funcButtons.length - 1);
-        var btnSize = Math.max(26, Math.min(40, (totalWidth - spacing) / funcButtons.length));
+        var btnWidth = Math.max(60, (totalWidth - spacing) / funcButtons.length);
         for (var fi = 0; fi < funcButtons.length; fi++) {
-            funcButtons[fi].preferredSize.width = btnSize;
-            funcButtons[fi].preferredSize.height = btnSize;
+            funcButtons[fi].preferredSize.width = btnWidth;
         }
         funcRow.layout.layout(true);
     }
 
-    var btnAutoAddMask = addFuncButton("addMask", "自动添加蒙版：创建椭圆蒙版图层（带下拉/模糊/渐显渐隐）");
+    var btnAutoAddMask = addFuncButton("蒙版", "addMask", "自动添加蒙版：创建椭圆蒙版图层（带下拉/模糊/渐显渐隐）");
     btnAutoAddMask.onClick = function() { createMaskLayer(); };
 
-    var btnAutoMask = addFuncButton("trackMatte", "自动蒙版：为所有图层设置/取消轨道遮罩");
+    var btnAutoMask = addFuncButton("轨道", "trackMatte", "自动蒙版：为所有图层设置/取消轨道遮罩");
     btnAutoMask.onClick = function() { toggleTrackMatte(); };
 
-    var btnImportBg = addFuncButton("importBg", "导入背景：从预设目录导入 bg.png 作为背景图层");
+    var btnImportBg = addFuncButton("背景", "importBg", "导入背景：从预设目录导入 bg.png 作为背景图层");
     btnImportBg.onClick = function() { importBgImage(); };
 
-    var btnImportTemplate = addFuncButton("importTemplate", "导入模板：导入高光图并替换模板末尾图层");
+    var btnImportTemplate = addFuncButton("模板", "importTemplate", "导入模板：导入高光图并替换模板末尾图层");
     btnImportTemplate.onClick = function() { importTemplateAndReplace(); };
 
-    var btnOpenSVGA = addFuncButton("svgaPanel", "SVGA面板：打开SVGAConverter面板");
+    var btnOpenSVGA = addFuncButton("SVGA", "svgaPanel", "SVGA面板：打开SVGAConverter面板");
     btnOpenSVGA.onClick = function() {
         var cmdId = app.findMenuCommandId("SVGAConverter_AE");
         if (cmdId !== 0) {
@@ -927,10 +925,10 @@ function createMainUI(parentPanel) {
         }
     };
 
-    var btnCopyBanner = addFuncButton("copyBanner", "复制Banner：根据合成时长选择并复制PAG文件到输出文件夹");
+    var btnCopyBanner = addFuncButton("Banner", "copyBanner", "复制Banner：根据合成时长选择并复制PAG文件到输出文件夹");
     btnCopyBanner.onClick = function() { copyBannerPag(); };
 
-    var btnSortOutput = addFuncButton("sortOutput", "整理输出：整理输出文件夹文件并生成批处理");
+    var btnSortOutput = addFuncButton("整理", "sortOutput", "整理输出：整理输出文件夹文件并生成批处理");
     btnSortOutput.onClick = function() { sortOutputFiles(); };
 
     // ================== 内置功能函数 ==================
