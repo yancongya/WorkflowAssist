@@ -883,9 +883,12 @@ function createMainUI(parentPanel) {
     function addFuncButton(iconKey, tip) {
         var btn = funcRow.add("button", undefined, "");
         btn.helpTip = tip || "";
-        if (typeof ICON_DATA !== 'undefined' && ICON_DATA[iconKey]) {
-            btn.icon = ScriptUI.newImage(ICON_DATA[iconKey]);
-        }
+        try {
+            var iconFile = new File(getPresetResourcePath("_icons/" + iconKey + ".png"));
+            if (iconFile.exists) {
+                btn.icon = ScriptUI.newImage(iconFile);
+            }
+        } catch (e) {}
         funcButtons.push(btn);
         return btn;
     }

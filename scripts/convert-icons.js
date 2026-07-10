@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ICONS_DIR = path.resolve(__dirname, '..', 'icons');
+const CONFIG_ICONS_DIR = path.resolve(__dirname, '..', 'config', '_icons');
 const OUTPUT_FILE = path.resolve(__dirname, '..', 'src-jsx', '01a-icons.jsx');
 const ICON_SIZE = 25;
 
@@ -42,6 +43,12 @@ async function convert() {
             .toBuffer();
 
         iconData[key] = 'data:image/png;base64,' + pngBuf.toString('base64');
+
+        // Also write PNG file for runtime loading (ScriptUI.newImage doesn't support data URIs in AE)
+        if (!fs.existsSync(CONFIG_ICONS_DIR)) {
+            fs.mkdirSync(CONFIG_ICONS_DIR, { recursive: true });
+        }
+        fs.writeFileSync(path.join(CONFIG_ICONS_DIR, key + '.png'), pngBuf);
         console.log('  ' + file + ' → ' + key);
     }
 
