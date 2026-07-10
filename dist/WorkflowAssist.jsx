@@ -32,13 +32,13 @@ WorkflowAssist.jsx
 // Edit source SVG files in icons/ and run the build script.
 //
 var ICON_DATA = {
-  "addMask": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAAAsTAAALEwEAmpwYAAABuUlEQVR4nO2VzU4CMRDHSfRt1JPhKfyI8SX0KcQLnWmyBEh2I0I4wIWPN1Bvogf2Agevhr1BNhw4GAgNUDNNMUWXj929mOg/mWyn05lftpO2icS/oopzfo6IT4joAcAHAAhE3GoAIPR6j/IB4CwQgIiXiCg3meM4slarqe+2tZzziyDIi15gA8CbmVAul2W/35emyKd5cx3lAYCjx89BkAEF0+n0ISK6y8RisSiFEKqwEEL6vr/iU9wAuTqfxoMgiK+DBybE8zxVsNfryVwup+boSz6J4iZE59PY3wliWZacz+eq2Pc+2LYtF4uFiuXz+eiQQqGgikyn08DmTiYTFS+VStEhnHMFIFWr1RVApVJR87PZTGYymegQsm63q4qNRiNZr9dlNpuVjUZD+aROpxOvJ2RUdDgcyiDRPMUjQQDg1dwa2g7Xdb96MB6PZbvdNrdpeU5ew0Bu151ky7LWnnIAuNkZkkql9hlj14h4H8Kums3m3s6QRAzhb4AMlndXTMjRprurpZvnMMaSAHAc1hhjSUS805DWDwjd/9veCAxh9AAG/irn/BQAHhHxPYY9IOJJnC1P/G19AomNkB/qoVCtAAAAAElFTkSuQmCC",
-  "copyBanner": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA+klEQVR4nO3WMUoDQRjF8VQpbXKDBK8QUkgqi/QBG0+Sarp5/1mIB7BIGSuFiBZiIKRKOlFsLJJcQNPZBVaCk9J1ZmWw2Q9eMbDDjzezsFur/fdYa3uSFpI+gO1vkfTknDsPBoCOpB2Qx0ZSPwiRNPKbxs65Y0nNomRZ1gIuPDINbTLzyFlE+7ZH1skRYFP4oDHmyNfe+g0vwOMPeQCMMaYehUi6LHHZg1jkucTbNIlFXks0uauQvEKoEMKQjl+vUiBLSaeSrvz6PgWSH7L/0EnqpkA+gTdJ18BJIfDXOwke4KbEEQ3Dhe8mTWAe8ncCvAO31tpGFJJivgBfvGy6Yzdd0wAAAABJRU5ErkJggg==",
-  "importBg": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAAAsTAAALEwEAmpwYAAABk0lEQVR4nO1VPUsDQRA98Q+oIPgLRAmxEQQt/cIgCDZ2lhYWYmdlYXP73i6GYC9BLYOgYqF2aulPiAY7iSnEgJ/4EVkdZUlWTTwFiwwM3N2bfW9mdncuCOr2r43kEIAtAFmSuVodQFbWD34mMArgmWQpquONJ1EhAuBQApZtJhE8LTz7vkrykkk8YsvjwpP3gQUBYxFFYsJT+FYkk8k0kpwCsESyz0eYSqWaSC6S7PmRCMk5ZzPvlVLtbrxNAsCu9P/cGNNWswiAbffEaK0ny+JZdqp2SqVSQ60iKw7Bkz3iTuyEPabi8ySvpaLZqkSMMV2yDx+tEoI7ADOCXwlGWTst77fGmPFqKjl6v1AAFgA0k1x3LtqNPO/ZfbFrbZvsTZfvx1+JXDjZF7XWYy5uq7DVCJ5LJpMtLh6GYSvJM4fDK/Io4GkYhh0VAcGrULedCCQ7fbhSatgZTZc+gqIFlVK9QQQjuSoiDz7wQHqejjK7SK4Jz4lPJPGbU1gpNeItVWs9QHIz4v9kA0B/lJbXLfhzewGlrHAoHy4zewAAAABJRU5ErkJggg==",
-  "importTemplate": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA/0lEQVR4nN2WsUrEUBBF8xs2Flqm9Afs7QV/QBCELW0VQs7hdTa2lhY2YmO7YrVair2NjYKfYCT4FoPG3WfcYHTgNnNhDvNmBl6W/UaEEFbVK/V5loBRZ4h6plbzBFSdQepdXaQsyy1gpUWHDdBLJ9AUAqy3+cB+9G8asL1eIOqRetCpo2908gCMgfvGrHZ/DFFz4HbGQlwvAmIsVm/gZkMuEhJisfAhvzFsiG8zKONzCEyiN2nkan+nMwQ4Sbl+9XLYnWT/ZvDZZ89YzD4heVyGvDfIVzF4yDawlqjRdLWTIMBp4gFWLTpO7WRZvQCe5n0mfNejel4UxVIS5M/GK5f5RR5KCkFiAAAAAElFTkSuQmCC",
-  "sortOutput": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAAAsTAAALEwEAmpwYAAABCklEQVR4nO2UsUoDQRCGD1/BwlYL0VZ8jjyEjb1lsLhq7/+WK0Jsg5WdTxCxFhsFu1Q2KQLamoDdycAqR9gED0cs4sDPMMPsfDAzbFH822YbcA48ZHRRluWWC0TSC9Cs0KULCHhdA2kkPQK339ANcJIDXAHv6yAd9QZcW982ZOEIaFpa5CB9Sac/FdBfCZG0m9tXXdd7dn1VVW1bbN5iy+fqrU9niKRhevQk6cx8qh+6QWKM+8Bsad4zy7tBQgg7wGQJMrG857gG6dE0jW6a6geekCNg9LnodAgjy7tBupr+DCJpniA9SccO6qV+8zbk/je+FUl3X5AQwqGkMfDsJUnjGOOBx/iLzbIP6xpg+b7zvGgAAAAASUVORK5CYII=",
-  "svgaPanel": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAAAsTAAALEwEAmpwYAAABk0lEQVR4nN2VsUvDQBTG6+LgKk4uFUTBVQQRVJAO4tBBcLSUUlxaB3ESKVly7/uO0qH+Af456qau/gFuCsUWlCqRo5dytmloarr04CMhX/J+effu3mUyMzcAFEk+AHgj+T6p0PvexCkMAsokg7QFoORCnqcEeXQh7SlB2n0IyY41flIK/m3vO0MQrfU+gFwK2hsJAZBNaaVmYyFBEMyZPwFwMqCseVdrvT7okdxOBIlZzh9KqQ2S3Shfa50fG0LyxiwAAJuhSNaMr5Q6tx9XHf/APqtNAukXkr0ROJArxztODDHtYMR0tURkjeRXlC8iR2ND7Es5EamGAlDxfX/ZeI1GY9X1jEjuJCq8iBwC+IzYYC9KqSWSrxGZdERkK8l0NW1NzhzdWr9ir03Hu7ABrxMV3rQFN32t9albeJNt6InI4iSFvxxR+K7WejemXxViIWEXrtfrK57nLdhpcQfMfrBZ5Tlslj3Pmw/jmThDXTg8TwD47ib8h8Rm8uRCSlM6T4pubQ2oAOA+pTP+ziyWP4CZGL9dxOCxervRSwAAAABJRU5ErkJggg==",
-  "trackMatte": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA2ElEQVR4nO2TO27CQBRFaUgVtkEWgEQDHWItlBQuKCdBss99S/AGYBMJQomSKg0RbcQ23DmKmNa/GSQaX+l27+q8z8xg0CtUzrkHYAucJP12NdfcS57nw0rIP0BSGWvguRIi6ccXrYFJgNc+f6qDXHw305B1S5r6/KWH3AYCHP3hXiXlAX7z+UNdJ0ugiHy+hZktakc2sycgUYCAJMuyceNezWwkaQVsulrSyjn32AgB9pE/ftcGco68ybmHlDeFSPqKhHy2gcwlfUj67mrgPU3TWSOk1931B2HvhTDJ5KUMAAAAAElFTkSuQmCC"
+  addMask: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\u00B9IDATx\u009C\u00ED\u0095\u00CDN\x021\x10\u00C7I\u00F4m\u00D4\u0093\u00E1)\u00FC\u0088\u00F1%\u00F4)\u00C4\x0B\u009Di\u00B2\x04Hv#B8\u00C0\u0085\u008F7Po\u00A2\x07\u00F6\x02\x07\u00AF\u0086\u00BDA6\x1C8\x18\x08\rP3M1E\u0097\u008F\u00DD\u00BD\u0098\u00E8?\u0099l\u00A7\u00D3\u0099_\u00B6\u0093\u00B6\u0089\u00C4\u00BF\u00A2\u008As~\u008E\u0088O\u0088\u00E8\x01\u00C0\x07\x00\x08D\u00DCj\x00 \u00F4z\u008F\u00F2\x01\u00E0,\x10\u0080\u0088\u0097\u0088(7\u0099\u00E38\u00B2V\u00AB\u00A9\u00EF\u00B6\u00B5\u009C\u00F3\u008B \u00C8\u008B^`\x03\u00C0\u009B\u0099P.\u0097e\u00BF\u00DF\u0097\u00A6\u00C8\u00A7ys\x1D\u00E5\x01\u0080\u00A3\u00C7\u00CFA\u0090\x01\x05\u00D3\u00E9\u00F4!\"\u00BA\u00CB\u00C4b\u00B1(\u0085\x10\u00AA\u00B0\x10B\u00FA\u00BE\u00BF\u00E2S\u00DC\x00\u00B9:\u009F\u00C6\u0083 \u0088\u00AF\u0083\x07&\u00C4\u00F3<U\u00B0\u00D7\u00EB\u00C9\\.\u00A7\u00E6\u00E8K>\u0089\u00E2&D\u00E7\u00D3\u00D8\u00DF\tbY\u0096\u009C\u00CF\u00E7\u00AA\u00D8\u00F7>\u00D8\u00B6-\x17\u008B\u0085\u008A\u00E5\u00F3\u00F9\u00E8\u0090B\u00A1\u00A0\u008AL\u00A7\u00D3\u00C0\u00E6N&\x13\x15/\u0095J\u00D1!\u009Cs\x05 U\u00AB\u00D5\x15@\u00A5RQ\u00F3\u00B3\u00D9Lf2\u0099\u00E8\x10\u00B2n\u00B7\u00AB\u008A\u008DF#Y\u00AF\u00D7e6\u009B\u0095\u008DFC\u00F9\u00A4N\u00A7\x13\u00AF'dTt8\x1C\u00CA \u00D1<\u00C5#A\x00\u00E0\u00D5\u00DC\x1A\u00DA\x0E\u00D7u\u00BFz0\x1E\u008Fe\u00BB\u00DD6\u00B7iyN^\u00C3@n\u00D7\u009Dd\u00CB\u00B2\u00D6\u009Er\x00\u00B8\u00D9\x19\u0092J\u00A5\u00F6\x19c\u00D7\u0088x\x1F\u00C2\u00AE\u009A\u00CD\u00E6\u00DE\u00CE\u0090D\x0C\u00E1o\u0080\x0C\u0096wWL\u00C8\u00D1\u00A6\u00BB\u00AB\u00A5\u009B\u00E70\u00C6\u0092\x00p\x1C\u00D6\x18cID\u00BC\u00D3\u0090\u00D6\x0F\x08\u00DD\u00FF\u00DB\u00DE\x08\x0Ca\u00F4\x00\x06\u00FE*\u00E7\u00FC\x14\x00\x1E\x11\u00F1=\u0086= \u00E2I\u009C-O\u00FCm}\x02\u0089\u008D\u0090\x1F\u00EA\u00A1P\u00AD\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  copyBanner: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x00\u00FAIDATx\u009C\u00ED\u00D61J\x03A\x18\u00C5\u00F1T)mr\u0083\x04\u00AF\x10RH*\u008B\u00F4\x01\x1BO\u0092j\u00BAy\u00FFY\u0088\x07\u00B0H\x19+\u0085\u0088\x16b \u00A4J:Ql,\u0092\\@\u00D3\u00D9\x05V\u0082\u0093\u00D2ufe\u00B0\u00D9\x0F^1\u00B0\u00C3\u008F7\u00B3\u00B0[\u00AB\u00FD\u00F7Xk{\u0092\x16\u0092>\u0080\u00EDo\u0091\u00F4\u00E4\u009C;\x0F\x06\u0080\u008E\u00A4\x1D\u0090\u00C7FR?\x08\u00914\u00F2\u009B\u00C6\u00CE\u00B9cI\u00CD\u00A2dY\u00D6\x02.<2\rm2\u00F3\u00C8YD\u00FB\u00B6G\u00D6\u00C9\x11`S\u00F8\u00A01\u00E6\u00C8\u00D7\u00DE\u00FA\r/\u00C0\u00E3\x0Fy\x00\u008C1\u00A6\x1E\u0085H\u00BA,q\u00D9\u0083X\u00E4\u00B9\u00C4\u00DB4\u0089E^K4\u00B9\u00AB\u0090\u00BCB\u00A8\x10\u00C2\u0090\u008E_\u00AFR KI\u00A7\u0092\u00AE\u00FC\u00FA>\x05\u0092\x1F\u00B2\u00FF\u00D0I\u00EA\u00A6@>\u00817I\u00D7\u00C0I!\u00F0\u00D7;\t\x1E\u00E0\u00A6\u00C4\x11\r\u00C3\u0085\u00EF&M`\x1E\u00F2w\x02\u00BC\x03\u00B7\u00D6\u00DAF\x14\u0092b\u00BE\x00_\u00BCl\u00BAc7]\u00D3\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  importBg: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\u0093IDATx\u009C\u00EDU=K\x03A\x10=\u00F1\x0F\u00A8 \u00F8\x0BD\t\u00B1\x11\x04-\u00FD\u00C2 \x086v\u0096\x16\x16bgeas\u00FB\u00DE.\u0086`/A-\u0083\u00A0b\u00A1vj\u00E9O\u0088\x06;\u0089)\u00C4\u0080\u009F\u00F8\x11Y\x1DeIVM<\x05\u008B\x0C\x0C\u00DC\u00DD\u009B}ofvw.\x08\u00EA\u00F6\u00AF\u008D\u00E4\x10\u0080-\x00Y\u0092\u00B9Z\x1D@V\u00D6\x0F~&0\n\u00E0\u0099d)\u00AA\u00E3\u008D'Q!\x02\u00E0P\x02\u0096m&\x11<-<\u00FB\u00BEJ\u00F2\u0092I<b\u00CB\u00E3\u00C2\u0093\u00F7\u0081\x05\x01c\x11Eb\u00C2S\u00F8V$\u0093\u00C94\u0092\u009C\x02\u00B0D\u00B2\u00CFG\u0098J\u00A5\u009AH.\u0092\u00EC\u00F9\u0091\x08\u00C99g3\u00EF\u0095R\u00EDn\u00BCM\x02\u00C0\u00AE\u00F4\u00FF\u00DC\x18\u00D3V\u00B3\x08\u0080m\u00F7\u00C4h\u00AD'\u00CB\u00E2Yv\u00AAvJ\u00A5RC\u00AD\"+\x0E\u00C1\u0093=\u00E2N\u00EC\u0084=\u00A6\u00E2\u00F3$\u00AF\u00A5\u00A2\u00D9\u00AAD\u008C1]\u00B2\x0F\x1F\u00AD\x12\u0082;\x003\u0082_\tFY;-\u00EF\u00B7\u00C6\u0098\u00F1j*9z\u00BFP\x00\x16\x004\u0093\\w.\u00DA\u008D<\u00EF\u00D9}\u00B1km\u009B\u00ECM\u0097\u00EF\u00C7_\u0089\\8\u00D9\x17\u00B5\u00D6c.n\u00AB\u00B0\u00D5\x08\u009EK&\u0093-.\x1E\u0086a+\u00C93\u0087\u00C3+\u00F2(\u00E0i\x18\u0086\x1D\x15\x01\u00C1\u00ABP\u00B7\u009D\x08$;}\u00B8Rj\u00D8\x19M\u0097>\u0082\u00A2\x05\u0095R\u00BDA\x04#\u00B9*\"\x0F>\u00F0@z\u009E\u008E2\u00BBH\u00AE\t\u00CF\u0089O$\u00F1\u009BSX)5\u00E2-Uk=@r3\u00E2\u00FFd\x03@\x7F\u0094\u0096\u00D7-\u00F8s{\x01\u00A5\u00ACp(\x1F.3{\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  importTemplate: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x00\u00FFIDATx\u009C\u00DD\u0096\u00B1J\u00C4P\x10E\u00F3\x1B6\x16Z\u00A6\u00F4\x07\u00EC\u00ED\x05\x7F@\x10\u0084-m\x15B\u00CE\u00E1u6\u00B6\u0096\x166bc\u00BBb\u00B5Z\u008A\u00BD\u008D\u008D\u0082\u009F`$\u00F8\x16\u0083\u00C6\u00DDg\u00DC`t\u00E06sa\x0E\u00F3f\x06^\u0096\u00FDF\u0084\x10V\u00D5+\u00F5y\u0096\u0080Qg\u0088z\u00A6V\u00F3\x04T\u009DA\u00EA]]\u00A4,\u00CB-`\u00A5E\u0087\r\u00D0K'\u00D0\x14\x02\u00AC\u00B7\u00F9\u00C0~\u00F4o\x1A\u00B0\u00BD^ \u00EA\u0091z\u00D0\u00A9\u00A3ot\u00F2\x00\u008C\u0081\u00FB\u00C6\u00ACv\x7F\x0CQs\u00E0v\u00C6B\\/\x02b,Vo\u00E0fC.\x12\x12b\u00B1\u00F0!\u00BF1l\u0088o3(\u00E3s\x08L\u00A27i\u00E4j\x7F\u00A73\x048I\u00B9~\u00F5r\u00D8\u009Dd\u00FFf\u00F0\u00D9g\u00CFX\u00CC>!y\\\u0086\u00BC7\u00C8W1x\u00C86\u00B0\u0096\u00A8\u00D1t\u00B5\u0093 \u00C0i\u00E2\x01V-:N\u00EDdY\u00BD\x00\u009E\u00E6}&|\u00D7\u00A3z^\x14\u00C5R\x12\u00E4\u00CF\u00C6+\u0097\u00F9E\x1EJ\nAb\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  sortOutput: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\nIDATx\u009C\u00ED\u0094\u00B1J\x03A\x10\u0086\x0F_\u00C1\u00C2V\x0B\u00D1V|\u008E<\u0084\u008D\u00BDe\u00B0\u00B8j\u00EF\u00FF\u0096+Bl\u0083\u0095\u009DO\x10\u00B1\x16\x1B\x05\u00BBT6)\x02\u00DA\u009A\u0080\u00DD\u00C9\u00C0*G\u00D8\x04\x0FG,\u00E2\u00C0\u00CF0\u00C3\u00EC|03lQ\u00FC\u00DBf\x1Bp\x0E<dtQ\u0096\u00E5\u0096\x0BD\u00D2\x0B\u00D0\u00AC\u00D0\u00A5\x0B\x08x]\x03i$=\x02\u00B7\u00DF\u00D0\rp\u0092\x03\\\x01\u00EF\u00EB \x1D\u00F5\x06\\[\u00DF6d\u00E1\x08hZZ\u00E4 }I\u00A7?\x15\u00D0_\t\u0091\u00B4\u009B\u00DBW]\u00D7{v}UUm[l\u00DEb\u00CB\u00E7\u00EA\u00ADOg\u0088\u00A4az\u00F4$\u00E9\u00CC|\u00AA\x1F\u00BAAb\u008C\u00FB\u00C0li\u00DE3\u00CB\u00BBAB\x08;\u00C0d\t2\u00B1\u00BC\u00E7\u00B8\x06\u00E9\u00D14\u008Dn\u009A\u00EA\x07\u009E\u0090#`\u00F4\u00B9\u00E8t\x08#\u00CB\u00BBA\u00BA\u009A\u00FE\x0C\"i\u009E =I\u00C7\x0E\u00EA\u00A5~\u00F36\u00E4\u00FE7\u00BE\x15Iw_\u0090\x10\u00C2\u00A1\u00A41\u00F0\u00EC%I\u00E3\x18\u00E3\u0081\u00C7\u00F8\u008B\u00CD\u00B2\x0F\u00EB\x1A`\u00F9\u00BE\u00F3\u00BCh\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  svgaPanel: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\u0093IDATx\u009C\u00DD\u0095\u00B1K\u00C3@\x14\u00C6\u00EB\u00E2\u00E0*N.\x15D\u00C1U\x04\x11T\u0090\x0E\u00E2\u00D0Ap\u00B4\u0094R\\Z\x07q\x12)Yr\u00EF\u00FB\u008E\u00D2\u00A1\u00FE\x01\u00FE9\u00EA\u00A6\u00AE\u00FE\x01n\n\u00C5\x16\u0094*\u0091\u00A3\u0097r\u00B6ihj\u00BA\u00F4\u00E0#!_\u00F2~y\u00F7\u00EE\u00DEe237\x00\x14I>\x00x#\u00F9>\u00A9\u00D0\u00FB\u00DE\u00C4)\x0C\x02\u00CA$\u0083\u00B4\x05\u00A0\u00E4B\u009E\u00A7\x04yt!\u00ED)A\u00DA}\x08\u00C9\u008E5~R\n\u00FEm\u00EF;C\x10\u00AD\u00F5>\u0080\\\n\u00DA\x1B\t\x01\u0090Mi\u00A5fc!A\x10\u00CC\u0099?\x01p2\u00A0\u00ACyWk\u00BD>\u00E8\u0091\u00DCN\x04\u0089Y\u00CE\x1FJ\u00A9\r\u0092\u00DD(_k\u009D\x1F\x1BB\u00F2\u00C6,\x00\x00\u009B\u00A1H\u00D6\u008C\u00AF\u0094:\u00B7\x1FW\x1D\u00FF\u00C0>\u00ABM\x02\u00E9\x17\u0092\u00BD\x118\u0090+\u00C7;N\x0C1\u00ED`\u00C4t\u00B5Dd\u008D\u00E4W\u0094/\"GcC\u00ECK9\x11\u00A9\u0086\x02P\u00F1}\x7F\u00D9x\u008DFc\u00D5\u00F5\u008CH\u00EE$*\u00BC\u0088\x1C\x02\u00F8\u008C\u00D8`/J\u00A9%\u0092\u00AF\x11\u0099tDd+\u00C9t5mM\u00CE\x1C\u00DDZ\u00BFb\u00AFM\u00C7\u00BB\u00B0\x01\u00AF\x13\x15\u00DE\u00B4\x057}\u00AD\u00F5\u00A9[x\u0093m\u00E8\u0089\u00C8\u00E2$\u0085\u00BF\x1CQ\u00F8\u00AE\u00D6z7\u00A6_\x15b!a\x17\u00AE\u00D7\u00EB+\u009E\u00E7-\u00D8iq\x07\u00CC~\u00B0Y\u00E59l\u0096=\u00CF\u009B\x0F\u00E3\u00998C]8<O\x00\u00F8\u00EE&\u00FC\u0087\u00C4f\u00F2\u00E4BJS:O\u008Anm\r\u00A8\x00\u00E0>\u00A53\u00FE\u00CE,\u0096?\u0080\u0099\x18\u00BF]\u00C4\u00E0\u00B1z\u00BB\u00D1K\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  trackMatte: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x00\u00D8IDATx\u009C\u00ED\u0093;n\u00C2@\x14EiH\x15\u00B6A\x16\u0080D\x03\x1Db-\u0094\x14.('A\u00B2\u00CF}K\u00F0\x06`\x13\tB\u0089\u0092*\r\x11m\u00C46\u00DC9\u008A\u0098\u00D6\u00BF\x19$\x1A_\u00E9v\u00EF\u00EA\u00BC\u00CF\u00CC`\u00D0+T\u00CE\u00B9\x07`\x0B\u009C$\u00FDv5\u00D7\u00DCK\u009E\u00E7\u00C3J\u00C8?@R\x19k\u00E0\u00B9\x12\"\u00E9\u00C7\x17\u00AD\u0081I\u0080\u00D7>\x7F\u00AA\u0083\\|7\u00D3\u0090uK\u009A\u00FA\u00FC\u00A5\u0087\u00DC\x06\x02\x1C\u00FD\u00E1^%\u00E5\x01~\u00F3\u00F9C]'K\u00A0\u0088|\u00BE\u0085\u0099-jG6\u00B3' Q\u0080\u0080$\u00CB\u00B2q\u00E3^\u00CDl$i\x05l\u00BAZ\u00D2\u00CA9\u00F7\u00D8\x08\x01\u00F6\u0091?~\u00D7\x06r\u008E\u00BC\u00C9\u00B9\u0087\u00947\u0085H\u00FA\u008A\u0084|\u00B6\u0081\u00CC%}H\u00FA\u00EEj\u00E0=M\u00D3Y#\u00A4\u00D7\u00DD\u00F5\x07a\u00EF\u00850\u00C9\u00E4\u00A5\x0C\x00\x00\x00\x00IEND\u00AEB`\u0082",
 };
 
 // ===== END 01a-icons.jsx =====
@@ -568,6 +568,7 @@ function createMainUI(parentPanel) {
 
     win.onResizing = win.onResize = function() {
         try { this.layout.resize(); } catch(e) {}
+        try { relayoutFuncButtons(); } catch(e) {}
     };
 
     win.parentPanel = parentPanel;
@@ -881,7 +882,32 @@ function createMainUI(parentPanel) {
 
     var funcButtons = [];
 
-    function addFuncButton(label, tip) {
+    function addFuncButton(label, iconKey, tip) {
+        if (iconKey && typeof ICON_DATA !== 'undefined' && ICON_DATA[iconKey]) {
+            try {
+                var group = funcRow.add("group");
+                group.orientation = "column";
+                group.alignChildren = ["center", "center"];
+                group.spacing = 0;
+                group.helpTip = tip || "";
+                group.preferredSize = [40, 42];
+
+                var icon;
+                try {
+                    icon = group.add("iconbutton", undefined, ICON_DATA[iconKey], {style: "toolbutton"});
+                } catch(e2) {
+                    icon = group.add("image", undefined, ICON_DATA[iconKey]);
+                }
+                icon.preferredSize = [26, 26];
+                icon.helpTip = tip || "";
+
+                var lbl = group.add("statictext", undefined, label);
+                lbl.alignment = ["center", "center"];
+
+                funcButtons.push(group);
+                return icon;
+            } catch (e) {}
+        }
         var btn = funcRow.add("button", undefined, label);
         btn.helpTip = tip || "";
         btn.preferredSize.height = 26;
@@ -891,28 +917,39 @@ function createMainUI(parentPanel) {
 
     function relayoutFuncButtons() {
         if (funcButtons.length === 0) return;
-        var totalWidth = funcPanel.preferredSize.width - 12;
+        var pw = funcPanel.preferredSize.width;
+        var totalWidth = pw - 12;
         var spacing = funcRow.spacing * (funcButtons.length - 1);
-        var btnWidth = Math.max(60, (totalWidth - spacing) / funcButtons.length);
+        var unitWidth = Math.max(36, (totalWidth - spacing) / funcButtons.length);
         for (var fi = 0; fi < funcButtons.length; fi++) {
-            funcButtons[fi].preferredSize.width = btnWidth;
+            var item = funcButtons[fi];
+            if (item.type === "group") {
+                item.preferredSize.width = unitWidth;
+            } else if (item.type === "iconbutton" || item.type === "image") {
+                item.preferredSize = [26, 26];
+            } else {
+                item.preferredSize.width = Math.max(60, unitWidth);
+            }
         }
         funcRow.layout.layout(true);
     }
 
-    var btnAutoAddMask = addFuncButton("自动添加蒙版", "创建椭圆蒙版图层（带下拉/模糊/渐显渐隐）");
-    btnAutoAddMask.onClick = function() { createMaskLayer(); };
+    var btnMask = addFuncButton("蒙版", "addMask", "单击: 创建蒙版 | Ctrl+单击: 设置轨道遮罩");
+    btnMask.onClick = function() {
+        if (ScriptUI.environment.keyboardState.ctrlKey) {
+            toggleTrackMatte();
+        } else {
+            createMaskLayer();
+        }
+    };
 
-    var btnAutoMask = addFuncButton("自动蒙版", "为所有图层设置/取消轨道遮罩");
-    btnAutoMask.onClick = function() { toggleTrackMatte(); };
-
-    var btnImportBg = addFuncButton("导入背景", "从预设目录导入 bg.png 作为背景图层");
+    var btnImportBg = addFuncButton("背景", "importBg", "从预设目录导入 bg.png 作为背景图层");
     btnImportBg.onClick = function() { importBgImage(); };
 
-    var btnImportTemplate = addFuncButton("导入模板", "导入高光图并替换模板末尾图层");
+    var btnImportTemplate = addFuncButton("模板", "importTemplate", "导入高光图并替换模板末尾图层");
     btnImportTemplate.onClick = function() { importTemplateAndReplace(); };
 
-    var btnOpenSVGA = addFuncButton("SVGA面板", "打开SVGAConverter面板");
+    var btnOpenSVGA = addFuncButton("SVGA", "svgaPanel", "打开SVGAConverter面板");
     btnOpenSVGA.onClick = function() {
         var cmdId = app.findMenuCommandId("SVGAConverter_AE");
         if (cmdId !== 0) {
@@ -922,10 +959,10 @@ function createMainUI(parentPanel) {
         }
     };
 
-    var btnCopyBanner = addFuncButton("复制Banner", "根据合成时长选择并复制PAG文件到输出文件夹");
+    var btnCopyBanner = addFuncButton("Banner", "copyBanner", "根据合成时长选择并复制PAG文件到输出文件夹");
     btnCopyBanner.onClick = function() { copyBannerPag(); };
 
-    var btnSortOutput = addFuncButton("整理输出", "整理输出文件夹文件并生成批处理");
+    var btnSortOutput = addFuncButton("输出", "sortOutput", "整理输出文件夹文件并生成批处理");
     btnSortOutput.onClick = function() { sortOutputFiles(); };
 
     // ================== 内置功能函数 ==================

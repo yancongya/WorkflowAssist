@@ -7,6 +7,7 @@ WorkflowAssist/
 ├── src-jsx/              # 开发源码（模块化）
 │   00-header.jsx         文件头 IIFE 包装
 │   01-constants.jsx      常量（版本/标题/日志级别）
+│   01a-icons.jsx         图标 PNG 二进制数据（自动生成）
 │   02-logger.jsx         日志模块
 │   03-config-store.jsx   JSON 配置读写 + 预设扫描
 │   04-ae-utils.jsx       AE 工具函数（合成/图层/嵌套）
@@ -14,9 +15,11 @@ WorkflowAssist/
 │   05a-render-engine.jsx 渲染引擎（序列帧渲染+导入）
 │   06-main-ui.jsx        主 ScriptUI 界面
 │   07-bootstrap.jsx      入口 + NOUI 生成触发
+├── icons/                # SVG 图标源文件（构建时转为 PNG 编码）
 ├── config/               # 预设 JSON 源文件（开发用）
 ├── scripts/
 │   build-jsx.ps1         构建脚本（拼接 JSX + 复制预设）
+│   convert-icons.js      图标转换脚本（SVG → PNG → ExtendScript 二进制编码）
 ├── dist/
 │   WorkflowAssist.jsx    生成的可运行脚本（不手动编辑）
 │   WorkflowAssist/       运行时预设目录（自动同步）
@@ -30,7 +33,7 @@ This project follows a skill-driven development flow. Always load the relevant s
 | Scenario | Skill to Load |
 |----------|---------------|
 | Modular refactor / splitting JSX modules | `jsx-modular-refactor` |
-| Icon conversion (SVG/PNG → base64 button icons) | `iconizing` |
+| Icon conversion (SVG/PNG → .toSource() format for AE) | `iconizing` |
 | CEP extension development (AE panels) | `cep-extension-dev` |
 | CEP/JSX 开发标准与可复用资产 | `cep-playground` |
 | Writing docs for AE scripts | `writing` |
@@ -49,8 +52,29 @@ powershell -ExecutionPolicy Bypass -File scripts/build-jsx.ps1
 ```
 
 构建过程：
-1. 按文件名数字顺序拼接 `src-jsx/*.jsx` → `dist/WorkflowAssist.jsx`
-2. 将 `config/*` 全部文件复制到 `dist/WorkflowAssist/`（预设 JSON + 资源文件）
+1. `scripts/convert-icons.js` 将 `icons/*.svg` 转为 PNG → 用 `toSource()` 格式编码为 ExtendScript 二进制字符串 → 写入 `src-jsx/01a-icons.jsx`
+2. 按文件名数字顺序拼接 `src-jsx/*.jsx` → `dist/WorkflowAssist.jsx`
+3. 将 `config/*` 全部文件复制到 `dist/WorkflowAssist/`（预设 JSON + 资源文件）
+
+## Icon Encoding for AE ScriptUI (重要发现)
+
+AE ScriptUI `image` / `iconbutton` 控件**不支持**以下方式：
+- base64 data URI（`ScriptUI.newImage()` 会当文件路径打开）
+- 文件路径（`"jsx 不支持图片文件"`）
+
+**唯一有效的方式**：PNG 文件二进制数据经过 `.toSource()` 转义后直接传给控件：
+
+```javascript
+// image 控件（显示图标，无按钮背景/hover）
+group.add("image", undefined, "\u0089PNG\r\n\x1A\n...");
+
+// iconbutton 控件（有按钮背景+hover，推荐）
+group.add("iconbutton", undefined, "\u0089PNG\r\n\x1A\n...", {style: "toolbutton"});
+```
+
+`scripts/convert-icons.js` 中使用 `sharp` 渲染 SVG→PNG，然后实现 `toSource()` 转换函数将 Buffer 转为 ExtendScript 兼容的转义字符串（`\xNN` / `\u00NN` / 字面字符），输出到 `01a-icons.jsx`。
+
+此发现记录于 `scripts/convert-icons.js` 顶部注释，作为 AE 图标转换的权威参考。
 
 ## Syntax Verification
 
@@ -61,7 +85,7 @@ node -e "const fs=require('fs'); new Function(fs.readFileSync('dist/WorkflowAssi
 ## Module Order (loaded in this order)
 
 ```
-00-header.jsx → 01-constants.jsx → 02-logger.jsx → 03-config-store.jsx
+00-header.jsx → 01-constants.jsx → 01a-icons.jsx → 02-logger.jsx → 03-config-store.jsx
 → 04-ae-utils.jsx → 05-workflow-engine.jsx → 05a-render-engine.jsx
 → 06-main-ui.jsx → 07-bootstrap.jsx
 ```
@@ -141,9 +165,11 @@ Example scenarios (baseName = "全屏座驾a-独角兽"):
 
 ### 功能按钮面板约定
 `funcPanel` 中的按钮通过 `addFuncButton()` 创建，自动管理宽度。
-- 添加新按钮：`var btn = addFuncButton("标签", "提示");`
+- 添加新按钮：`var btn = addFuncButton("标题", "iconKey", "提示");`
 - 设置点击：`btn.onClick = function() { ... };`
 - 按钮数量变化后调用 `relayoutFuncButtons()` 重排宽度
+- 图标源文件放 `icons/`（SVG），构建时自动通过 `convert-icons.js` 转为 `.toSource()` 格式嵌入 `01a-icons.jsx`
+- 控件优先级：`iconbutton`（有按钮背景+hover）→ `image`（纯图标）→ `button`（文字 fallback）
 
 ### 资源文件约定
 `config/` 目录不仅存放 JSON 预设，也存放资源文件（如图片）。通过 `getPresetResourcePath(filename)`（`03-config-store.jsx`）解析运行时路径：

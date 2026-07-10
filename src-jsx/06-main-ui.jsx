@@ -22,6 +22,7 @@ function createMainUI(parentPanel) {
 
     win.onResizing = win.onResize = function() {
         try { this.layout.resize(); } catch(e) {}
+        try { relayoutFuncButtons(); } catch(e) {}
     };
 
     win.parentPanel = parentPanel;
@@ -335,7 +336,32 @@ function createMainUI(parentPanel) {
 
     var funcButtons = [];
 
-    function addFuncButton(label, tip) {
+    function addFuncButton(label, iconKey, tip) {
+        if (iconKey && typeof ICON_DATA !== 'undefined' && ICON_DATA[iconKey]) {
+            try {
+                var group = funcRow.add("group");
+                group.orientation = "column";
+                group.alignChildren = ["center", "center"];
+                group.spacing = 0;
+                group.helpTip = tip || "";
+                group.preferredSize = [40, 42];
+
+                var icon;
+                try {
+                    icon = group.add("iconbutton", undefined, ICON_DATA[iconKey], {style: "toolbutton"});
+                } catch(e2) {
+                    icon = group.add("image", undefined, ICON_DATA[iconKey]);
+                }
+                icon.preferredSize = [26, 26];
+                icon.helpTip = tip || "";
+
+                var lbl = group.add("statictext", undefined, label);
+                lbl.alignment = ["center", "center"];
+
+                funcButtons.push(group);
+                return icon;
+            } catch (e) {}
+        }
         var btn = funcRow.add("button", undefined, label);
         btn.helpTip = tip || "";
         btn.preferredSize.height = 26;
@@ -345,28 +371,39 @@ function createMainUI(parentPanel) {
 
     function relayoutFuncButtons() {
         if (funcButtons.length === 0) return;
-        var totalWidth = funcPanel.preferredSize.width - 12;
+        var pw = funcPanel.preferredSize.width;
+        var totalWidth = pw - 12;
         var spacing = funcRow.spacing * (funcButtons.length - 1);
-        var btnWidth = Math.max(60, (totalWidth - spacing) / funcButtons.length);
+        var unitWidth = Math.max(36, (totalWidth - spacing) / funcButtons.length);
         for (var fi = 0; fi < funcButtons.length; fi++) {
-            funcButtons[fi].preferredSize.width = btnWidth;
+            var item = funcButtons[fi];
+            if (item.type === "group") {
+                item.preferredSize.width = unitWidth;
+            } else if (item.type === "iconbutton" || item.type === "image") {
+                item.preferredSize = [26, 26];
+            } else {
+                item.preferredSize.width = Math.max(60, unitWidth);
+            }
         }
         funcRow.layout.layout(true);
     }
 
-    var btnAutoAddMask = addFuncButton("自动添加蒙版", "创建椭圆蒙版图层（带下拉/模糊/渐显渐隐）");
-    btnAutoAddMask.onClick = function() { createMaskLayer(); };
+    var btnMask = addFuncButton("蒙版", "addMask", "单击: 创建蒙版 | Ctrl+单击: 设置轨道遮罩");
+    btnMask.onClick = function() {
+        if (ScriptUI.environment.keyboardState.ctrlKey) {
+            toggleTrackMatte();
+        } else {
+            createMaskLayer();
+        }
+    };
 
-    var btnAutoMask = addFuncButton("自动蒙版", "为所有图层设置/取消轨道遮罩");
-    btnAutoMask.onClick = function() { toggleTrackMatte(); };
-
-    var btnImportBg = addFuncButton("导入背景", "从预设目录导入 bg.png 作为背景图层");
+    var btnImportBg = addFuncButton("背景", "importBg", "从预设目录导入 bg.png 作为背景图层");
     btnImportBg.onClick = function() { importBgImage(); };
 
-    var btnImportTemplate = addFuncButton("导入模板", "导入高光图并替换模板末尾图层");
+    var btnImportTemplate = addFuncButton("模板", "importTemplate", "导入高光图并替换模板末尾图层");
     btnImportTemplate.onClick = function() { importTemplateAndReplace(); };
 
-    var btnOpenSVGA = addFuncButton("SVGA面板", "打开SVGAConverter面板");
+    var btnOpenSVGA = addFuncButton("SVGA", "svgaPanel", "打开SVGAConverter面板");
     btnOpenSVGA.onClick = function() {
         var cmdId = app.findMenuCommandId("SVGAConverter_AE");
         if (cmdId !== 0) {
@@ -376,10 +413,10 @@ function createMainUI(parentPanel) {
         }
     };
 
-    var btnCopyBanner = addFuncButton("复制Banner", "根据合成时长选择并复制PAG文件到输出文件夹");
+    var btnCopyBanner = addFuncButton("Banner", "copyBanner", "根据合成时长选择并复制PAG文件到输出文件夹");
     btnCopyBanner.onClick = function() { copyBannerPag(); };
 
-    var btnSortOutput = addFuncButton("整理输出", "整理输出文件夹文件并生成批处理");
+    var btnSortOutput = addFuncButton("输出", "sortOutput", "整理输出文件夹文件并生成批处理");
     btnSortOutput.onClick = function() { sortOutputFiles(); };
 
     // ================== 内置功能函数 ==================
