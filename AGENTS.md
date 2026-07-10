@@ -30,6 +30,7 @@ This project follows a skill-driven development flow. Always load the relevant s
 | Scenario | Skill to Load |
 |----------|---------------|
 | Modular refactor / splitting JSX modules | `jsx-modular-refactor` |
+| Icon conversion (SVG/PNG → base64 button icons) | `iconizing` |
 | CEP extension development (AE panels) | `cep-extension-dev` |
 | CEP/JSX 开发标准与可复用资产 | `cep-playground` |
 | Writing docs for AE scripts | `writing` |

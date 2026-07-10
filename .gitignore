@@ -1,1 +1,5 @@
-reference/compas
+node_modules/
+src-jsx/01a-icons.jsx
+Thumbs.db
+nul
+reference/

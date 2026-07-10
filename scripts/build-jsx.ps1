@@ -25,6 +25,15 @@ if ($files.Count -eq 0) {
   throw "No .jsx files found in: $src"
 }
 
+# Step 1: Convert SVG icons to base64 constants
+$iconsScript = Join-Path (Join-Path $root "scripts") "convert-icons.js"
+if (Test-Path -LiteralPath $iconsScript) {
+  node $iconsScript
+  if ($LASTEXITCODE -ne 0) {
+    throw "Icon conversion failed (exit code: $LASTEXITCODE)"
+  }
+}
+
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 $builder = New-Object System.Text.StringBuilder
 
