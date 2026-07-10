@@ -365,6 +365,16 @@ function createMainUI(parentPanel) {
     var btnImportTemplate = addFuncButton("导入模板", "导入高光图并替换模板末尾图层");
     btnImportTemplate.onClick = function() { importTemplateAndReplace(); };
 
+    var btnOpenSVGA = addFuncButton("SVGA面板", "打开SVGAConverter面板");
+    btnOpenSVGA.onClick = function() {
+        var cmdId = app.findMenuCommandId("SVGAConverter_AE");
+        if (cmdId !== 0) {
+            app.executeCommand(cmdId);
+        } else {
+            alert("未找到 SVGAConverter_AE 面板命令！\n请确认该扩展已安装。");
+        }
+    };
+
     // ================== 内置功能函数 ==================
 
     function createMaskLayer() {
