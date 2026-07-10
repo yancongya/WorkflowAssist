@@ -1450,9 +1450,9 @@ function createMainUI(parentPanel) {
                 batFile.close();
 
                 if (batFile.exists) {
-                    logText.text += "批处理文件创建成功: " + batFile.fsName + "\n";
-                    logText.text += "请手动运行批处理文件来压缩文件并删除源文件。\n";
-                    outputFolder.execute();
+                    logText.text += "批处理文件创建成功并已自动运行: " + batFile.fsName + "\n";
+                    logText.text += "运行中：打包PAG文件 -> 删除源文件 -> 复制成品到剪贴板\n";
+                    batFile.execute();
 
                     var wxBatContent = '@echo off\r\n';
                     wxBatContent += 'timeout /t 6 /nobreak >nul\r\n';
