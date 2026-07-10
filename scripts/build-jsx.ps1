@@ -56,7 +56,10 @@ $configSource = Join-Path $root "config"
 if (Test-Path -LiteralPath $configSource) {
   Get-ChildItem -LiteralPath $configSource | ForEach-Object {
     $dest = Join-Path $configDir $_.Name
-    Copy-Item -Path $_.FullName -Destination $dest -Force
+    if ((Test-Path -LiteralPath $_.FullName -PathType Container) -and (Test-Path -LiteralPath $dest)) {
+      Remove-Item -LiteralPath $dest -Recurse -Force
+    }
+    Copy-Item -Path $_.FullName -Destination $dest -Force -Recurse
     Write-Host "  Copied preset: $($_.Name)"
   }
 }

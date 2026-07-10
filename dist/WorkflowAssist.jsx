@@ -890,6 +890,9 @@ function createMainUI(parentPanel) {
     var btnImportBg = addFuncButton("导入背景", "从预设目录导入 bg.png 作为背景图层");
     btnImportBg.onClick = function() { importBgImage(); };
 
+    var btnImportTemplate = addFuncButton("导入模板", "导入高光图并替换模板末尾图层");
+    btnImportTemplate.onClick = function() { importTemplateAndReplace(); };
+
     // ================== 内置功能函数 ==================
 
     function createMaskLayer() {
@@ -1145,6 +1148,127 @@ function createMainUI(parentPanel) {
             alert("导入背景出错: " + e.toString());
         }
         app.endUndoGroup();
+    }
+
+    function importTemplateAndReplace() {
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+
+        var projectDir = app.project.file.parent.fsName;
+        var templateFile = new File(projectDir + "/xx2.aep");
+
+        if (!templateFile.exists) {
+            var sourceFile = new File(getPresetResourcePath("xx2.aep"));
+            if (!sourceFile.exists) {
+                alert("找不到 xx2.aep 模板文件！\n请确保模板文件在预设目录:\n" + configFolder.fsName);
+                return;
+            }
+            sourceFile.copy(templateFile.fsName);
+            if (!templateFile.exists) {
+                alert("复制 xx2.aep 到项目目录失败！");
+                return;
+            }
+        }
+
+        var matFolder = new Folder(projectDir + "/(素材)");
+        if (!matFolder.exists) {
+            var sourceMatFolder = new Folder(getPresetResourcePath("(素材)"));
+            if (sourceMatFolder.exists) {
+                copyFolderRecursively(sourceMatFolder, matFolder);
+            }
+        }
+
+        app.beginUndoGroup("Import Template and Replace");
+        try {
+            var importedFile = app.project.importFile(new ImportOptions(templateFile));
+
+            var projectFolder = app.project.file.parent;
+            var subFolders = projectFolder.getFiles(function(item) { return item instanceof Folder; });
+
+            var ggt = null;
+            for (var fi = 0; fi < subFolders.length; fi++) {
+                ggt = findHighlightImageInFolder(subFolders[fi]);
+                if (ggt) break;
+            }
+
+            var fullscreenComp = null;
+            for (var i = 1; i <= app.project.items.length; i++) {
+                var item = app.project.item(i);
+                if (item instanceof CompItem && item.name === "全屏礼物") {
+                    fullscreenComp = item;
+                    break;
+                }
+            }
+
+            if (!fullscreenComp) {
+                alert("未找到名为 '全屏礼物' 的合成！");
+                app.endUndoGroup();
+                return;
+            }
+
+            fullscreenComp.openInViewer();
+
+            var lastLayer = fullscreenComp.layer(fullscreenComp.layers.length);
+
+            if (!ggt) {
+                alert("没有找到高光图（文件名含'高光图'的 PNG）！");
+                app.endUndoGroup();
+                return;
+            }
+
+            lastLayer.replaceSource(ggt, true);
+
+            var opacityProperty = lastLayer.property("Opacity");
+            if (opacityProperty.numKeys > 0) {
+                var keyframes = [];
+                for (var ki = 1; ki <= opacityProperty.numKeys; ki++) {
+                    keyframes.push({ time: opacityProperty.keyTime(ki), value: opacityProperty.keyValue(ki) });
+                }
+                for (var kj = opacityProperty.numKeys; kj >= 1; kj--) {
+                    opacityProperty.removeKey(kj);
+                }
+                for (var kk = 0; kk < keyframes.length; kk++) {
+                    opacityProperty.setValueAtTime(keyframes[kk].time, keyframes[kk].value);
+                }
+            } else {
+                opacityProperty.setValue(100);
+            }
+        } catch (e) {
+            alert("导入模板出错: " + e.toString());
+        }
+        app.endUndoGroup();
+    }
+
+    function copyFolderRecursively(source, dest) {
+        if (!dest.exists) dest.create();
+        var items = source.getFiles();
+        for (var fi = 0; fi < items.length; fi++) {
+            if (items[fi] instanceof Folder) {
+                var subDest = new Folder(dest.fsName + "/" + items[fi].name);
+                copyFolderRecursively(items[fi], subDest);
+            } else if (items[fi] instanceof File) {
+                items[fi].copy(dest.fsName + "/" + items[fi].name);
+            }
+        }
+    }
+
+    function findHighlightImageInFolder(directory) {
+        var items = directory.getFiles(function(f) {
+            if (f instanceof File) {
+                var name = decodeURIComponent(f.name.trim());
+                return name.match(/.*高光图.*\.png$/i);
+            }
+            return false;
+        });
+        for (var fi2 = 0; fi2 < items.length; fi2++) {
+            if (items[fi2] instanceof File) {
+                var opts = new ImportOptions(items[fi2]);
+                return app.project.importFile(opts);
+            }
+        }
+        return null;
     }
 
     // ================== 底部执行按钮（居中） ==================
