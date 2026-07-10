@@ -375,6 +375,9 @@ function createMainUI(parentPanel) {
         }
     };
 
+    var btnCopyBanner = addFuncButton("复制Banner", "根据合成时长选择并复制PAG文件到输出文件夹");
+    btnCopyBanner.onClick = function() { copyBannerPag(); };
+
     // ================== 内置功能函数 ==================
 
     function createMaskLayer() {
@@ -750,6 +753,56 @@ function createMainUI(parentPanel) {
                 return app.project.importFile(opts);
             }
         }
+        return null;
+    }
+
+    function copyBannerPag() {
+        var comp = app.project.activeItem;
+        if (!comp || !(comp instanceof CompItem)) {
+            alert("请先选中一个合成！");
+            return;
+        }
+
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+
+        var duration = Math.round(comp.duration);
+        var folderName = getBannerFolderName(duration);
+        if (!folderName) {
+            alert("未找到对应时长的文件夹！当前支持的时长范围：3-15秒");
+            return;
+        }
+
+        var bannerDir = new Folder(getPresetResourcePath("banner/" + folderName));
+        if (!bannerDir.exists) {
+            alert("目标文件夹不存在: " + bannerDir.fsName);
+            return;
+        }
+
+        var pagFile = bannerDir.openDlg("请选择PAG文件", "*.pag");
+        if (!pagFile) return;
+
+        var projectFolder = app.project.file.parent;
+        var outputFolder = new Folder(projectFolder.fsName + "/输出");
+        if (!outputFolder.exists) outputFolder.create();
+
+        var destFile = new File(outputFolder.fsName + "/" + pagFile.name);
+        pagFile.copy(destFile.fsName);
+        alert("文件已复制到: " + destFile.fsName);
+    }
+
+    function getBannerFolderName(duration) {
+        var exactMap = {
+            3: "3s用的", 4: "4S用的", 5: "5S用的",
+            6: "6S用的", 7: "7S用的", 8: "8S用的",
+            11: "11S用的", 15: "15s用的"
+        };
+        if (exactMap[duration]) return exactMap[duration];
+        if (duration >= 8 && duration <= 9) return "8-9S用的";
+        if (duration >= 10 && duration <= 11) return "10-11S用的";
+        if (duration >= 12 && duration <= 14) return "12-14S用的";
         return null;
     }
 
