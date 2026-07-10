@@ -880,53 +880,11 @@ function createMainUI(parentPanel) {
     funcRow.margins = [0, 0, 0, 0];
 
     var funcButtons = [];
-    var iconFileCache = null;
 
-    function getIconPath(iconKey) {
-        if (iconFileCache === null) {
-            iconFileCache = {};
-            if (typeof ICON_DATA === 'undefined') return null;
-            try {
-                var tempDir = new Folder(Folder.temp.fsName + "/WorkflowAssistIcons");
-                if (!tempDir.exists) tempDir.create();
-                var psCmds = [];
-                for (var k in ICON_DATA) {
-                    if (ICON_DATA.hasOwnProperty(k)) {
-                        var b64 = String(ICON_DATA[k]).replace("data:image/png;base64,", "");
-                        var outPath = tempDir.fsName + "\\" + k + ".png";
-                        iconFileCache[k] = outPath;
-                        psCmds.push("[System.IO.File]::WriteAllBytes('" + outPath + "',[System.Convert]::FromBase64String('" + b64 + "'))");
-                    }
-                }
-                if (psCmds.length > 0) {
-                    var psFile = new File(Folder.temp.fsName + "/decode_icons.ps1");
-                    psFile.encoding = "UTF-8";
-                    psFile.open("w");
-                    psFile.write(psCmds.join("\r\n"));
-                    psFile.close();
-                    system.callSystem('powershell -ExecutionPolicy Bypass -File "' + psFile.fsName + '" 2>nul');
-                    psFile.remove();
-                }
-            } catch (e) {}
-        }
-        return iconFileCache[iconKey] || null;
-    }
-
-    function addFuncButton(label, iconKey, tip) {
+    function addFuncButton(label, tip) {
         var btn = funcRow.add("button", undefined, label);
         btn.helpTip = tip || "";
         btn.preferredSize.height = 26;
-        if (iconKey) {
-            try {
-                var iconPath = getIconPath(iconKey);
-                if (iconPath) {
-                    var iconFile = new File(iconPath);
-                    if (iconFile.exists) {
-                        btn.icon = ScriptUI.newImage(iconFile);
-                    }
-                }
-            } catch (e) {}
-        }
         funcButtons.push(btn);
         return btn;
     }
@@ -942,19 +900,19 @@ function createMainUI(parentPanel) {
         funcRow.layout.layout(true);
     }
 
-    var btnAutoAddMask = addFuncButton("自动添加蒙版", "addMask", "创建椭圆蒙版图层（带下拉/模糊/渐显渐隐）");
+    var btnAutoAddMask = addFuncButton("自动添加蒙版", "创建椭圆蒙版图层（带下拉/模糊/渐显渐隐）");
     btnAutoAddMask.onClick = function() { createMaskLayer(); };
 
-    var btnAutoMask = addFuncButton("自动蒙版", "trackMatte", "为所有图层设置/取消轨道遮罩");
+    var btnAutoMask = addFuncButton("自动蒙版", "为所有图层设置/取消轨道遮罩");
     btnAutoMask.onClick = function() { toggleTrackMatte(); };
 
-    var btnImportBg = addFuncButton("导入背景", "importBg", "从预设目录导入 bg.png 作为背景图层");
+    var btnImportBg = addFuncButton("导入背景", "从预设目录导入 bg.png 作为背景图层");
     btnImportBg.onClick = function() { importBgImage(); };
 
-    var btnImportTemplate = addFuncButton("导入模板", "importTemplate", "导入高光图并替换模板末尾图层");
+    var btnImportTemplate = addFuncButton("导入模板", "导入高光图并替换模板末尾图层");
     btnImportTemplate.onClick = function() { importTemplateAndReplace(); };
 
-    var btnOpenSVGA = addFuncButton("SVGA面板", "svgaPanel", "打开SVGAConverter面板");
+    var btnOpenSVGA = addFuncButton("SVGA面板", "打开SVGAConverter面板");
     btnOpenSVGA.onClick = function() {
         var cmdId = app.findMenuCommandId("SVGAConverter_AE");
         if (cmdId !== 0) {
@@ -964,10 +922,10 @@ function createMainUI(parentPanel) {
         }
     };
 
-    var btnCopyBanner = addFuncButton("复制Banner", "copyBanner", "根据合成时长选择并复制PAG文件到输出文件夹");
+    var btnCopyBanner = addFuncButton("复制Banner", "根据合成时长选择并复制PAG文件到输出文件夹");
     btnCopyBanner.onClick = function() { copyBannerPag(); };
 
-    var btnSortOutput = addFuncButton("整理输出", "sortOutput", "整理输出文件夹文件并生成批处理");
+    var btnSortOutput = addFuncButton("整理输出", "整理输出文件夹文件并生成批处理");
     btnSortOutput.onClick = function() { sortOutputFiles(); };
 
     // ================== 内置功能函数 ==================
