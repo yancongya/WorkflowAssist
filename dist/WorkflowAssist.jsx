@@ -906,6 +906,9 @@ function createMainUI(parentPanel) {
     var btnCopyBanner = addFuncButton("复制Banner", "根据合成时长选择并复制PAG文件到输出文件夹");
     btnCopyBanner.onClick = function() { copyBannerPag(); };
 
+    var btnSortOutput = addFuncButton("整理输出", "整理输出文件夹文件并生成批处理");
+    btnSortOutput.onClick = function() { sortOutputFiles(); };
+
     // ================== 内置功能函数 ==================
 
     function createMaskLayer() {
@@ -1332,6 +1335,148 @@ function createMainUI(parentPanel) {
         if (duration >= 10 && duration <= 11) return "10-11S用的";
         if (duration >= 12 && duration <= 14) return "12-14S用的";
         return null;
+    }
+
+    function sortOutputFiles() {
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+
+        var projectPath = app.project.file;
+        var defaultPrefix = decodeUrlString(projectPath.name.replace(/\.[^\.]+$/, ''));
+
+        var dialog = new Window("dialog", "输出文件整理");
+        dialog.orientation = "column";
+        dialog.alignChildren = "left";
+
+        dialog.add("statictext", undefined, "请输入前缀名称:");
+        var prefixInput = dialog.add("edittext", undefined, defaultPrefix);
+        prefixInput.characters = 20;
+
+        dialog.add("statictext", undefined, "运行日志:");
+        var logText = dialog.add("edittext", undefined, "", {multiline: true, scrolling: true});
+        logText.preferredSize = [400, 200];
+
+        var buttonGroup = dialog.add("group");
+        var confirmButton = buttonGroup.add("button", undefined, "确认");
+        var cancelButton = buttonGroup.add("button", undefined, "取消");
+
+        confirmButton.onClick = function() {
+            var output_name = prefixInput.text.trim();
+            if (!output_name) {
+                alert("请输入前缀名称！");
+                return;
+            }
+            var projectFolder = projectPath.parent;
+            var outputFolder = new Folder(projectFolder.fullName + "/输出");
+
+            if (!outputFolder.exists) {
+                logText.text += "错误：未找到'输出'文件夹\n";
+                return;
+            }
+
+            var files = outputFolder.getFiles();
+            var hasAnimPag = false;
+            var hasBannerPag = false;
+            var hasPng = false;
+            var hasSvga = false;
+            var hasAnimBmpPag = false;
+
+            for (var si = 0; si < files.length; si++) {
+                var sf = files[si];
+                var sName = decodeUrlString(sf.name);
+                if (sName === "animated.pag") hasAnimPag = true;
+                if (sName === "animated_bmp.pag") hasAnimBmpPag = true;
+                if (sName === "banner.pag") hasBannerPag = true;
+                var sExt = sName.substring(sName.lastIndexOf(".") + 1).toLowerCase();
+                if (sExt === "png") hasPng = true;
+                if (sExt === "svga") hasSvga = true;
+            }
+
+            var missing = [];
+            if (!hasAnimPag && !hasAnimBmpPag) missing.push("animated.pag / animated_bmp.pag");
+            if (!hasBannerPag) missing.push("banner.pag");
+            if (!hasPng) missing.push("PNG 图片（高光图）");
+            if (!hasSvga) missing.push("SVGA 文件");
+            if (missing.length > 0) {
+                alert("输出文件夹缺少以下文件：\n- " + missing.join("\n- ") + "\n\n请先执行其他步骤生成所需文件。");
+                return;
+            }
+
+            logText.text += "\n========== 开始处理文件 ==========\n";
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                var fileName = decodeUrlString(file.name);
+                var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+
+                if (fileName === "animated_bmp.pag") {
+                    var newFile = new File(file.parent.fsName + "/animated.pag");
+                    if (file.rename(newFile)) {
+                        logText.text += "重命名成功: animated_bmp.pag -> animated.pag\n";
+                    } else {
+                        logText.text += "重命名失败: animated_bmp.pag\n";
+                    }
+                } else if (fileExt === "png") {
+                    var newFileName = output_name + "高光图.png";
+                    if (file.rename(newFileName)) {
+                        logText.text += "重命名成功: " + fileName + " -> " + newFileName + "\n";
+                    }
+                } else if (fileExt === "svga") {
+                    var newFileName = output_name + ".svga";
+                    if (file.rename(newFileName)) {
+                        logText.text += "重命名成功: " + fileName + " -> " + newFileName + "\n";
+                    }
+                }
+            }
+
+            var batContent = '@echo off\r\n';
+            batContent += 'chcp 65001\r\n';
+            batContent += 'cd /d "%~dp0"\r\n';
+            batContent += 'powershell -NoProfile -Command "& {';
+            batContent += 'Compress-Archive -Path \'animated.pag\',\'banner.pag\' ';
+            batContent += '-DestinationPath \'' + output_name + 'PAG.zip\' -Force}"\r\n';
+            batContent += 'del "animated.pag" "banner.pag"\r\n';
+            batContent += 'timeout /t 1 /nobreak >nul\r\n';
+            batContent += 'powershell -Command "Get-Item \'' + output_name + '.svga\',\'' + output_name + 'PAG.zip\',\'' + output_name + '高光图.png\' | Set-Clipboard"\r\n';
+            batContent += 'echo 文件已复制到剪贴板\r\n';
+            batContent += '(goto) 2>nul & del "%~f0"\r\n';
+
+            var batFile = new File(outputFolder.fsName + "/compress.bat");
+            batFile.encoding = "UTF8";
+            if (batFile.open("w")) {
+                batFile.write(batContent);
+                batFile.close();
+
+                if (batFile.exists) {
+                    logText.text += "批处理文件创建成功: " + batFile.fsName + "\n";
+                    logText.text += "请手动运行批处理文件来压缩文件并删除源文件。\n";
+                    outputFolder.execute();
+
+                    var wxBatContent = '@echo off\r\n';
+                    wxBatContent += 'timeout /t 6 /nobreak >nul\r\n';
+                    wxBatContent += 'start "" "C:\\Program Files (x86)\\WXWork\\WXWork.exe"\r\n';
+                    wxBatContent += '(goto) 2>nul & del "%~f0"\r\n';
+
+                    var wxBatFile = new File(outputFolder.fsName + "/start_wxwork.bat");
+                    wxBatFile.encoding = "UTF8";
+                    if (wxBatFile.open("w")) {
+                        wxBatFile.write(wxBatContent);
+                        wxBatFile.close();
+                        if (wxBatFile.exists) {
+                            wxBatFile.execute();
+                        }
+                    }
+                }
+            }
+        };
+
+        cancelButton.onClick = function() {
+            dialog.close();
+        };
+
+        dialog.show();
     }
 
     // ================== 底部执行按钮（居中） ==================
