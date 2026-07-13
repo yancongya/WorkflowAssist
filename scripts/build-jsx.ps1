@@ -72,3 +72,21 @@ if (Test-Path -LiteralPath $configSource) {
     Write-Host "  Copied preset: $($_.Name)"
   }
 }
+
+# Step 4: Copy to AE ScriptUI Panels (if AE is installed)
+$aeScriptUIPath = "C:\Program Files\Adobe\Adobe After Effects 2023\Support Files\Scripts\ScriptUI Panels"
+if (Test-Path -LiteralPath $aeScriptUIPath) {
+  $aeDest = Join-Path $aeScriptUIPath "WorkflowAssist.jsx"
+  $isLink = $false
+  if (Test-Path -LiteralPath $aeDest) {
+    $item = Get-Item -LiteralPath $aeDest
+    if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+      $isLink = $true
+      Write-Host "  AE ScriptUI Panels: symbolic link exists, skipping copy"
+    }
+  }
+  if (-not $isLink) {
+    Copy-Item -Path $out -Destination $aeDest -Force
+    Write-Host "  Copied to AE ScriptUI Panels"
+  }
+}

@@ -55,6 +55,24 @@ powershell -ExecutionPolicy Bypass -File scripts/build-jsx.ps1
 1. `scripts/convert-icons.js` 将 `icons/*.svg` 转为 PNG → 用 `toSource()` 格式编码为 ExtendScript 二进制字符串 → 写入 `src-jsx/01a-icons.jsx`
 2. 按文件名数字顺序拼接 `src-jsx/*.jsx` → `dist/WorkflowAssist.jsx`
 3. 将 `config/*` 全部文件复制到 `dist/WorkflowAssist/`（预设 JSON + 资源文件）
+4. 如果 AE ScriptUI Panels 存在软连接则跳过复制，否则自动复制到 AE
+
+## Link to AE
+
+```powershell
+npm run link-ae
+```
+
+创建软连接将 `dist/WorkflowAssist.jsx` 链接到 AE 的 ScriptUI Panels 目录：
+- 首次运行需要管理员权限（自动提升）
+- 已存在软连接时会显示当前链接信息
+- 支持指定 AE 版本：`powershell -ExecutionPolicy Bypass -File scripts/link-to-ae.ps1 -AeVersion 2024`
+
+**原理**：需要同时链接两个资源：
+1. **文件软连接**：`WorkflowAssist.jsx` → 脚本文件
+2. **目录连接**：`WorkflowAssist/` → 预设目录
+
+因为脚本通过 `$.fileName` 获取路径，拼接 `/WorkflowAssist` 找预设目录。软连接后 `$.fileName` 返回 AE 目录，必须用目录连接让预设目录在同位置可访问。
 
 ## Icon Encoding for AE ScriptUI (重要发现)
 
@@ -154,11 +172,41 @@ Example scenarios (baseName = "全屏座驾a-独角兽"):
 - 预设源文件存在 `config/`，构建时自动同步到 `dist/WorkflowAssist/`
 - 不改动 `dist/WorkflowAssist.jsx` 本身
 
-### Built-in Only — 禁止外部脚本调用
-**所有功能必须内联在 src-jsx 模块中**，不得使用 `$.evalFile()` 或类似方式调用外部 JSX 文件。
+### ScriptUI 实时键盘检测
+使用 `win.addEventListener("keydown"/"keyup")` 可实时检测键盘状态，配合 `mouseover/mouseout` 实现悬停时按键响应：
 
-当需要把外部 JSX 脚本集成到项目时：
-1. 在 `06-main-ui.jsx` 的 `createMainUI` 闭包内创建对应的函数（如 `createMaskLayer()`、`toggleTrackMatte()`）
+```javascript
+win.addEventListener("keydown", function() {
+    if (isHovered) updateBtnText(); // 按键时更新
+});
+win.addEventListener("keyup", function() {
+    if (isHovered) updateBtnText(); // 松开时恢复
+});
+```
+
+参考：TYC_CompAssist 脚本 `presetLabel` 实现，`cep-playground` skill `ref/extendscript.md`
+
+### Built-in Only — 内联为主，外部脚本通过 EXT_SCRIPTS 引用
+**优先内联功能在 src-jsx 模块中。** 当需要调用外部 JSX 脚本时，使用 `EXT_SCRIPTS` 配置模式：
+
+```javascript
+// 01-constants.jsx 中配置路径
+var EXT_SCRIPTS = {
+    compress: "F:/path/to/script.jsx"
+    // 以后新增外部脚本在此添加
+};
+
+// 06-main-ui.jsx 中引用
+btn.onClick = function() {
+    var scriptFile = new File(EXT_SCRIPTS.compress);
+    if (scriptFile.exists) {
+        $.evalFile(scriptFile);
+    }
+};
+```
+
+内联功能的约定（适用于不需要外部引用的情况）：
+1. 在 `06-main-ui.jsx` 的 `createMainUI` 闭包内创建对应的函数
 2. 按钮的 `onClick` 直接调用该函数
 3. 确认函数使用 `app.beginUndoGroup()` / `app.endUndoGroup()` 包裹操作
 4. 确认函数正确汇报错误（`try/catch` + `alert()`）
@@ -168,8 +216,9 @@ Example scenarios (baseName = "全屏座驾a-独角兽"):
 - 添加新按钮：`var btn = addFuncButton("标题", "iconKey", "提示");`
 - 设置点击：`btn.onClick = function() { ... };`
 - 按钮数量变化后调用 `relayoutFuncButtons()` 重排宽度
-- 图标源文件放 `icons/`（SVG），构建时自动通过 `convert-icons.js` 转为 `.toSource()` 格式嵌入 `01a-icons.jsx`
+- 图标源文件放 `icons/`（SVG 或 PNG），构建时自动通过 `convert-icons.js` 转为 `.toSource()` 格式嵌入 `01a-icons.jsx`
 - 控件优先级：`iconbutton`（有按钮背景+hover）→ `image`（纯图标）→ `button`（文字 fallback）
+- 外部脚本调用使用 `EXT_SCRIPTS` 配置模式，路径定义在 `01-constants.jsx`
 
 ### 资源文件约定
 `config/` 目录不仅存放 JSON 预设，也存放资源文件（如图片）。通过 `getPresetResourcePath(filename)`（`03-config-store.jsx`）解析运行时路径：

@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "convert-icons": "node scripts/convert-icons.js",
-    "build": "powershell -ExecutionPolicy Bypass -File scripts/build-jsx.ps1"
+    "build": "powershell -ExecutionPolicy Bypass -File scripts/build-jsx.ps1",
+    "link-ae": "powershell -ExecutionPolicy Bypass -File scripts/link-to-ae.ps1"
   },
   "dependencies": {
     "sharp": "^0.33.0"

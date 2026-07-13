@@ -39,19 +39,29 @@ function createMainUI(parentPanel) {
         }
     }
 
-    // ================== 当前合成行（含图标按钮） ==================
-    var currentCompRow = win.add("group");
-    currentCompRow.orientation = "row";
-    currentCompRow.alignment = ["fill", "top"];
-    currentCompRow.alignChildren = ["fill", "center"];
-    currentCompRow.spacing = 2;
-    currentCompRow.margins = [0, 0, 0, 2];
+    // ================== 当前合成信息（hover显示） ==================
+    var currentCompName = "（无）";
 
-    var curLabel = currentCompRow.add("statictext", undefined, "当前合成:");
-    curLabel.alignment = ["left", "center"];
+    // ================== 基础名称输入行 ==================
+    var nameGroup = win.add("group");
+    nameGroup.orientation = "row";
+    nameGroup.alignment = ["fill", "top"];
+    nameGroup.alignChildren = ["fill", "center"];
+    nameGroup.spacing = 4;
+    nameGroup.margins = [0, 0, 0, 4];
 
-    var curCompText = currentCompRow.add("statictext", undefined, "（无）");
-    curCompText.alignment = ["fill", "center"];
+    var nameLabel = nameGroup.add("statictext", undefined, "基础名称:");
+    nameLabel.alignment = ["left", "center"];
+
+    var nameInput = nameGroup.add("edittext", undefined, "");
+    nameInput.characters = 18;
+    nameInput.alignment = ["fill", "center"];
+    nameInput.minimumSize.width = 140;
+    nameInput.helpTip = "输入基础名称，源合成将被重命名为此名称\n当前合成: " + currentCompName;
+    nameInput.onChange = function() {
+        updateStepPreview();
+        refreshOutputUI();
+    };
 
     function makeIconButton(parent, symbol, tip) {
         var btn = parent.add("iconbutton", undefined, undefined, {style: "toolbutton"});
@@ -61,9 +71,9 @@ function createMainUI(parentPanel) {
         return btn;
     }
 
-    var btnRefresh = makeIconButton(currentCompRow, "↻", "重新获取当前活动合成");
-    var btnGetComp = makeIconButton(currentCompRow, "◎", "取合成名 → 填入输入框");
-    var btnGetProject = makeIconButton(currentCompRow, "▣", "取项目名 → 填入输入框");
+    var btnRefresh = makeIconButton(nameGroup, "↻", "重新获取当前活动合成");
+    var btnGetComp = makeIconButton(nameGroup, "◎", "取合成名 → 填入输入框");
+    var btnGetProject = makeIconButton(nameGroup, "▣", "取项目名 → 填入输入框");
 
     function stripKnownSuffixes(name) {
         var presetFile = getSelectedPresetFile();
@@ -82,12 +92,14 @@ function createMainUI(parentPanel) {
     function detectCurrentComp() {
         var name = getActiveCompName();
         if (name) {
-            curCompText.text = name;
+            currentCompName = name;
+            nameInput.helpTip = "输入基础名称，源合成将被重命名为此名称\n当前合成: " + currentCompName;
             if (!nameInput.text || nameInput.text === "") {
                 nameInput.text = stripKnownSuffixes(name);
             }
         } else {
-            curCompText.text = "（无活动合成）";
+            currentCompName = "（无活动合成）";
+            nameInput.helpTip = "输入基础名称，源合成将被重命名为此名称\n当前合成: " + currentCompName;
         }
     }
 
@@ -116,27 +128,6 @@ function createMainUI(parentPanel) {
         } else {
             alert("当前项目尚未保存！");
         }
-    };
-
-    // ================== 基础名称输入行 ==================
-    var nameGroup = win.add("group");
-    nameGroup.orientation = "row";
-    nameGroup.alignment = ["fill", "top"];
-    nameGroup.alignChildren = ["fill", "center"];
-    nameGroup.spacing = 4;
-    nameGroup.margins = [0, 0, 0, 4];
-
-    var nameLabel = nameGroup.add("statictext", undefined, "基础名称:");
-    nameLabel.alignment = ["left", "center"];
-
-    var nameInput = nameGroup.add("edittext", undefined, "");
-    nameInput.characters = 18;
-    nameInput.alignment = ["fill", "center"];
-    nameInput.minimumSize.width = 140;
-    nameInput.helpTip = "输入基础名称，源合成将被重命名为此名称";
-    nameInput.onChange = function() {
-        updateStepPreview();
-        refreshOutputUI();
     };
 
     // ================== 预设选择行（通用，始终可见） ==================
@@ -293,14 +284,12 @@ function createMainUI(parentPanel) {
     }
 
     var currentTab = "organize";
+    var tabHovered = null; // 跟踪哪个 tab 被 hover
 
     function showOrganizeTab() {
         currentTab = "organize";
         organizeGroup.visible = true;
         outputGroup.visible = false;
-        btnExecute.text = "▶ 执行工作流";
-        btnExecute.helpTip = "重命名当前合成并按预设步骤创建嵌套合成";
-        bottomGroup.visible = true;
         tabContent.layout.layout(true);
     }
 
@@ -308,15 +297,121 @@ function createMainUI(parentPanel) {
         currentTab = "output";
         organizeGroup.visible = false;
         outputGroup.visible = true;
-        btnExecute.text = "▶ 执行输出";
-        btnExecute.helpTip = "依次渲染并导入序列帧";
-        bottomGroup.visible = true;
         refreshOutputUI();
         tabContent.layout.layout(true);
     }
 
-    tabOrganize.onClick = function() { showOrganizeTab(); };
-    tabOutput.onClick = function() { showOutputTab(); };
+    function executeCurrentTab() {
+        if (currentTab === "output") {
+            var baseName = stripKnownSuffixes(nameInput.text);
+            if (!baseName) { alert("请输入基础名称！"); return; }
+            if (!app.project.file) { alert("请先保存项目文件！"); return; }
+            var presetFile = getSelectedPresetFile();
+            if (!presetFile) { alert("请先选择一个预设！"); return; }
+            var projectDir = app.project.file.parent.fsName;
+            var presetData = loadPreset(presetFile);
+            if (!presetData || !presetData.steps) { alert("预设数据无效！"); return; }
+            if (renderActiveStates.length === 0) { alert("没有可渲染的步骤！"); return; }
+            for (var i = 0; i < presetData.steps.length; i++) {
+                if (!renderActiveStates[i] || !renderActiveStates[i].value) continue;
+                var s = presetData.steps[i];
+                var compName = resolveOutputName(baseName, s);
+                var comp = getCompByName(compName);
+                if (!comp) {
+                    alert("未找到合成: " + compName + "\n请先执行工作流创建合成。");
+                    renderStatusTexts[i].text = "未找到";
+                    setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
+                    continue;
+                }
+                renderStatusTexts[i].text = "渲染中...";
+                setTextColor(renderStatusTexts[i], [0.2, 0.4, 0.8, 1]);
+                outputStepContainer.layout.layout(true);
+                var settings = { importBack: importActiveStates[i] && importActiveStates[i].value };
+                var success = renderCompToSequence(comp, projectDir, settings);
+                if (success) {
+                    renderStatusTexts[i].text = "完成";
+                    setTextColor(renderStatusTexts[i], [0.2, 0.6, 0.2, 1]);
+                } else {
+                    renderStatusTexts[i].text = "出错";
+                    setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
+                }
+                outputStepContainer.layout.layout(true);
+            }
+            alert("输出处理完成！");
+        } else {
+            var sourceComp = getActiveComp();
+            if (!sourceComp) { alert("请先在 After Effects 中选择一个活动合成！"); return; }
+            var baseName = nameInput.text;
+            if (!baseName) { alert("请输入基础名称！"); return; }
+            var presetFile = getSelectedPresetFile();
+            if (!presetFile) { alert("请先选择一个预设！"); return; }
+            executeWorkflow(sourceComp, baseName, presetFile, stepActiveStates);
+        }
+    }
+
+    function updateTabText() {
+        var ctrlKey = ScriptUI.environment.keyboardState.ctrlKey;
+        if (tabHovered === "organize") {
+            if (ctrlKey) {
+                tabOrganize.text = "执行";
+                tabOrganize.helpTip = "执行工作流 (Ctrl)";
+            } else {
+                tabOrganize.text = "整理";
+                tabOrganize.helpTip = "切换到整理标签 | Ctrl+单击: 执行工作流";
+            }
+        } else if (tabHovered === "output") {
+            if (ctrlKey) {
+                tabOutput.text = "执行";
+                tabOutput.helpTip = "执行输出 (Ctrl)";
+            } else {
+                tabOutput.text = "输出";
+                tabOutput.helpTip = "切换到输出标签 | Ctrl+单击: 执行输出";
+            }
+        }
+    }
+
+    // 鼠标悬停事件
+    tabOrganize.addEventListener("mouseover", function() {
+        tabHovered = "organize";
+        updateTabText();
+    });
+    tabOrganize.addEventListener("mouseout", function() {
+        tabHovered = null;
+        tabOrganize.text = "整理";
+        tabOrganize.helpTip = "切换到整理标签 | Ctrl+单击: 执行工作流";
+    });
+    tabOutput.addEventListener("mouseover", function() {
+        tabHovered = "output";
+        updateTabText();
+    });
+    tabOutput.addEventListener("mouseout", function() {
+        tabHovered = null;
+        tabOutput.text = "输出";
+        tabOutput.helpTip = "切换到输出标签 | Ctrl+单击: 执行输出";
+    });
+
+    // 键盘事件监听，实时更新 tab 文本
+    win.addEventListener("keydown", function() {
+        if (tabHovered) updateTabText();
+    });
+    win.addEventListener("keyup", function() {
+        if (tabHovered) updateTabText();
+    });
+
+    tabOrganize.onClick = function() {
+        if (ScriptUI.environment.keyboardState.ctrlKey) {
+            executeCurrentTab();
+        } else {
+            showOrganizeTab();
+        }
+    };
+    tabOutput.onClick = function() {
+        if (ScriptUI.environment.keyboardState.ctrlKey) {
+            executeCurrentTab();
+        } else {
+            showOutputTab();
+        }
+    };
 
     // ================== 功能按钮面板 ==================
     var funcPanel = win.add("panel");
@@ -400,6 +495,9 @@ function createMainUI(parentPanel) {
     var btnImportBg = addFuncButton("背景", "importBg", "从预设目录导入 bg.png 作为背景图层");
     btnImportBg.onClick = function() { importBgImage(); };
 
+    var btnPag = addFuncButton("PAG", "pagExport", "独显选中图层 → 打标记 → 预合成为 animated → 生成高光图");
+    btnPag.onClick = function() { pagExport(); };
+
     var btnImportTemplate = addFuncButton("模板", "importTemplate", "导入高光图并替换模板末尾图层");
     btnImportTemplate.onClick = function() { importTemplateAndReplace(); };
 
@@ -415,6 +513,25 @@ function createMainUI(parentPanel) {
 
     var btnCopyBanner = addFuncButton("Banner", "copyBanner", "根据合成时长选择并复制PAG文件到输出文件夹");
     btnCopyBanner.onClick = function() { copyBannerPag(); };
+
+    var btnCompress = addFuncButton("压缩", "autoTiny", "打开 Auto_Tinify 图片压缩工具");
+    btnCompress.onClick = function() {
+        try {
+            var scriptPath = EXT_SCRIPTS.compress;
+            if (!scriptPath) {
+                alert("未配置压缩脚本路径！\n请在 01-constants.jsx 中设置 EXT_SCRIPTS.compress");
+                return;
+            }
+            var scriptFile = new File(scriptPath);
+            if (!scriptFile.exists) {
+                alert("压缩脚本不存在: " + scriptPath);
+                return;
+            }
+            $.evalFile(scriptFile);
+        } catch(e) {
+            alert("加载压缩脚本出错: " + e.toString());
+        }
+    };
 
     var btnSortOutput = addFuncButton("输出", "sortOutput", "整理输出文件夹文件并生成批处理");
     btnSortOutput.onClick = function() { sortOutputFiles(); };
@@ -632,6 +749,37 @@ function createMainUI(parentPanel) {
             return;
         }
 
+        // Check for existing "bg" layer
+        var existingBg = null;
+        for (var i = 1; i <= currentComp.layers.length; i++) {
+            if (currentComp.layer(i).name === "bg") {
+                existingBg = currentComp.layer(i);
+                break;
+            }
+        }
+
+        if (existingBg) {
+            var useExisting = confirm("找到图层 'bg'，是否使用它作为背景？\n\n是 = 使用该图层（移到底层）\n否 = 重新导入 bg.png", false, "背景图层");
+            if (useExisting) {
+                app.beginUndoGroup("Use existing bg layer");
+                try {
+                    existingBg.moveToEnd();
+                    var compWidth = currentComp.width;
+                    var layerSrc = existingBg.source;
+                    if (layerSrc) {
+                        var imgWidth = layerSrc.width;
+                        var scaleFactor = (compWidth / imgWidth) * 100;
+                        var newHeight = (layerSrc.height * scaleFactor) / 100;
+                        existingBg.transform.scale.setValue([scaleFactor, (newHeight / layerSrc.height) * 100]);
+                    }
+                } catch(e) {
+                    alert("设置背景出错: " + e.toString());
+                }
+                app.endUndoGroup();
+                return;
+            }
+        }
+
         if (!app.project.file) {
             alert("请先保存项目文件！");
             return;
@@ -659,9 +807,9 @@ function createMainUI(parentPanel) {
             var importedFile = app.project.importFile(importOptions);
 
             var bgLayer = currentComp.layers.add(importedFile);
+            bgLayer.name = "bg";
 
             var compWidth = currentComp.width;
-            var compHeight = currentComp.height;
             var imgWidth = bgLayer.source.width;
             var imgHeight = bgLayer.source.height;
 
@@ -673,6 +821,60 @@ function createMainUI(parentPanel) {
         } catch (e) {
             alert("导入背景出错: " + e.toString());
         }
+        app.endUndoGroup();
+    }
+
+    function pagExport() {
+        var comp = app.project.activeItem;
+        if (!(comp instanceof CompItem)) {
+            alert("请选择一个合成！");
+            return;
+        }
+        var selectedLayers = comp.selectedLayers;
+        if (selectedLayers.length === 0) {
+            alert("请选择至少一个图层！");
+            return;
+        }
+
+        app.beginUndoGroup("PAG Export");
+
+        try {
+            // Solo selected layers
+            for (var i = 1; i <= comp.layers.length; i++) {
+                comp.layers[i].enabled = false;
+            }
+            for (var i = 0; i < selectedLayers.length; i++) {
+                selectedLayers[i].enabled = true;
+            }
+
+            // Add markers with shader code
+            var shaderCode = "#version 100\nprecision mediump float;\nvarying highp vec2 vertexColor;\nuniform float uWidth;\nuniform float uHeight;\nuniform sampler2D inputImageTexture;\nvoid main() {\nvec2 uv = vertexColor;\nvec4 color = texture2D(inputImageTexture, uv);\nfloat sharpness = 0.3;\nfloat xOffset = 1./uWidth;\nfloat yOffset = 1./uHeight;\nvec4 neighbors[4];\nneighbors[0]=texture2D(inputImageTexture,uv+vec2(-xOffset,-yOffset));\nneighbors[1]=texture2D(inputImageTexture,uv+vec2(xOffset,yOffset));\nneighbors[2]=texture2D(inputImageTexture,uv+vec2(xOffset,-yOffset));\nneighbors[3]=texture2D(inputImageTexture,uv+vec2(-xOffset,yOffset));\nvec4 sharpenedColor=color*(sharpness*4.+1.);\nsharpenedColor-=neighbors[0]*sharpness;\nsharpenedColor-=neighbors[1]*sharpness;\nsharpenedColor-=neighbors[2]*sharpness;\nsharpenedColor-=neighbors[3]*sharpness;\ngl_FragColor=sharpenedColor;\n}";
+            for (var i = 0; i < selectedLayers.length; i++) {
+                try {
+                    var myMarker = new MarkerValue("Shader");
+                    myMarker.comment = shaderCode;
+                    selectedLayers[i].property("Marker").setValueAtTime(comp.time, myMarker);
+                } catch(e) {}
+            }
+
+            // Pre-compose selected layers into "animated"
+            var layerIndices = [];
+            for (var i = 0; i < selectedLayers.length; i++) {
+                layerIndices.push(selectedLayers[i].index);
+            }
+            comp.layers.precompose(layerIndices, "animated", true);
+
+            // Generate highlight composition
+            var newComp = app.project.items.addComp("高光图", 675, 1125, comp.pixelAspect, comp.duration, comp.frameRate);
+            var precompLayer = newComp.layers.add(comp);
+            var scaleFactor = (newComp.width / comp.width) * 100;
+            precompLayer.property("Scale").setValue([scaleFactor, scaleFactor]);
+            precompLayer.property("Position").setValue([newComp.width / 2, newComp.height / 2]);
+            newComp.openInViewer();
+        } catch(e) {
+            alert("PAG导出出错: " + e.toString());
+        }
+
         app.endUndoGroup();
     }
 
@@ -989,18 +1191,6 @@ function createMainUI(parentPanel) {
         dialog.show();
     }
 
-    // ================== 底部执行按钮（居中） ==================
-    var bottomGroup = win.add("group");
-    bottomGroup.orientation = "row";
-    bottomGroup.alignment = ["center", "top"];
-    bottomGroup.spacing = 4;
-    bottomGroup.margins = [0, 6, 0, 0];
-
-    var btnExecute = bottomGroup.add("button", undefined, "▶ 执行工作流");
-    btnExecute.alignment = ["center", "center"];
-    btnExecute.preferredSize.width = 140;
-    btnExecute.helpTip = "重命名当前合成并按预设步骤创建嵌套合成";
-
     // ================== 缓存预设文件列表 ==================
     var cachedPresetFiles = [];
 
@@ -1124,88 +1314,6 @@ function createMainUI(parentPanel) {
             }
         };
     }
-
-    // ================== 执行 ==================
-    btnExecute.onClick = function() {
-        if (currentTab === "output") {
-            var baseName = stripKnownSuffixes(nameInput.text);
-            if (!baseName) {
-                alert("请输入基础名称！");
-                return;
-            }
-
-            if (!app.project.file) {
-                alert("请先保存项目文件！");
-                return;
-            }
-
-            var presetFile = getSelectedPresetFile();
-            if (!presetFile) {
-                alert("请先选择一个预设！");
-                return;
-            }
-
-            var projectDir = app.project.file.parent.fsName;
-            var presetData = loadPreset(presetFile);
-            if (!presetData || !presetData.steps) {
-                alert("预设数据无效！");
-                return;
-            }
-
-            for (var i = 0; i < presetData.steps.length; i++) {
-                if (!renderActiveStates[i] || !renderActiveStates[i].value) continue;
-
-                var s = presetData.steps[i];
-                var compName = baseName + s.suffix;
-                var comp = getCompByName(compName);
-
-                if (!comp) {
-                    alert("未找到合成: " + compName + "\n请先执行工作流创建合成。");
-                    renderStatusTexts[i].text = "未找到";
-                    setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
-                    continue;
-                }
-
-                renderStatusTexts[i].text = "渲染中...";
-                setTextColor(renderStatusTexts[i], [0.2, 0.4, 0.8, 1]);
-                outputStepContainer.layout.layout(true);
-
-                var settings = { importBack: importActiveStates[i] && importActiveStates[i].value };
-                var success = renderCompToSequence(comp, projectDir, settings);
-
-                if (success) {
-                    renderStatusTexts[i].text = "完成";
-                    setTextColor(renderStatusTexts[i], [0.2, 0.6, 0.2, 1]);
-                } else {
-                    renderStatusTexts[i].text = "出错";
-                    setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
-                }
-                outputStepContainer.layout.layout(true);
-            }
-
-            alert("输出处理完成！");
-        } else {
-            var sourceComp = getActiveComp();
-            if (!sourceComp) {
-                alert("请先在 After Effects 中选择一个活动合成！");
-                return;
-            }
-
-            var baseName = nameInput.text;
-            if (!baseName) {
-                alert("请输入基础名称！");
-                return;
-            }
-
-            var presetFile = getSelectedPresetFile();
-            if (!presetFile) {
-                alert("请先选择一个预设！");
-                return;
-            }
-
-            executeWorkflow(sourceComp, baseName, presetFile, stepActiveStates);
-        }
-    };
 
     // ================== 初始化 ==================
     detectCurrentComp();

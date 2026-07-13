@@ -33,9 +33,11 @@ WorkflowAssist.jsx
 //
 var ICON_DATA = {
   addMask: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\u00B9IDATx\u009C\u00ED\u0095\u00CDN\x021\x10\u00C7I\u00F4m\u00D4\u0093\u00E1)\u00FC\u0088\u00F1%\u00F4)\u00C4\x0B\u009Di\u00B2\x04Hv#B8\u00C0\u0085\u008F7Po\u00A2\x07\u00F6\x02\x07\u00AF\u0086\u00BDA6\x1C8\x18\x08\rP3M1E\u0097\u008F\u00DD\u00BD\u0098\u00E8?\u0099l\u00A7\u00D3\u0099_\u00B6\u0093\u00B6\u0089\u00C4\u00BF\u00A2\u008As~\u008E\u0088O\u0088\u00E8\x01\u00C0\x07\x00\x08D\u00DCj\x00 \u00F4z\u008F\u00F2\x01\u00E0,\x10\u0080\u0088\u0097\u0088(7\u0099\u00E38\u00B2V\u00AB\u00A9\u00EF\u00B6\u00B5\u009C\u00F3\u008B \u00C8\u008B^`\x03\u00C0\u009B\u0099P.\u0097e\u00BF\u00DF\u0097\u00A6\u00C8\u00A7ys\x1D\u00E5\x01\u0080\u00A3\u00C7\u00CFA\u0090\x01\x05\u00D3\u00E9\u00F4!\"\u00BA\u00CB\u00C4b\u00B1(\u0085\x10\u00AA\u00B0\x10B\u00FA\u00BE\u00BF\u00E2S\u00DC\x00\u00B9:\u009F\u00C6\u0083 \u0088\u00AF\u0083\x07&\u00C4\u00F3<U\u00B0\u00D7\u00EB\u00C9\\.\u00A7\u00E6\u00E8K>\u0089\u00E2&D\u00E7\u00D3\u00D8\u00DF\tbY\u0096\u009C\u00CF\u00E7\u00AA\u00D8\u00F7>\u00D8\u00B6-\x17\u008B\u0085\u008A\u00E5\u00F3\u00F9\u00E8\u0090B\u00A1\u00A0\u008AL\u00A7\u00D3\u00C0\u00E6N&\x13\x15/\u0095J\u00D1!\u009Cs\x05 U\u00AB\u00D5\x15@\u00A5RQ\u00F3\u00B3\u00D9Lf2\u0099\u00E8\x10\u00B2n\u00B7\u00AB\u008A\u008DF#Y\u00AF\u00D7e6\u009B\u0095\u008DFC\u00F9\u00A4N\u00A7\x13\u00AF'dTt8\x1C\u00CA \u00D1<\u00C5#A\x00\u00E0\u00D5\u00DC\x1A\u00DA\x0E\u00D7u\u00BFz0\x1E\u008Fe\u00BB\u00DD6\u00B7iyN^\u00C3@n\u00D7\u009Dd\u00CB\u00B2\u00D6\u009Er\x00\u00B8\u00D9\x19\u0092J\u00A5\u00F6\x19c\u00D7\u0088x\x1F\u00C2\u00AE\u009A\u00CD\u00E6\u00DE\u00CE\u0090D\x0C\u00E1o\u0080\x0C\u0096wWL\u00C8\u00D1\u00A6\u00BB\u00AB\u00A5\u009B\u00E70\u00C6\u0092\x00p\x1C\u00D6\x18cID\u00BC\u00D3\u0090\u00D6\x0F\x08\u00DD\u00FF\u00DB\u00DE\x08\x0Ca\u00F4\x00\x06\u00FE*\u00E7\u00FC\x14\x00\x1E\x11\u00F1=\u0086= \u00E2I\u009C-O\u00FCm}\x02\u0089\u008D\u0090\x1F\u00EA\u00A1P\u00AD\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  autoTiny: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0E\u00C4\x00\x00\x0E\u00C4\x01\u0095+\x0E\x1B\x00\x00\x05]IDATx\u009C\u0095VmLSW\x18\u00BE\x1B\u00A4kZ\u00DA\u00B4\u00D22\u00CA\x0C\u00FD\u00A6\u00AB\x12\u0083\u00C8F{Ak\u00D4\u008121#\u009B\u00EE\x07\u00F0c:a\u009B\x11\u0091d\x13\u009C\u00A2Y\x14\u00D7\u0089\x0Cg\u00A7\u0099\u009A\u0091\x05LF\u00F6\u00E9~hR\u0084(\u00D1d\u00993Da\u00990\x02\u00C1\u008E\u00B6F\x01?\u0080\x01m\u00EF\u00B3\u009CCOm;\u00E6\u00B27y\u00EF9\u00F7\u00BE\u00E7<\u00CFy?\u00CE9\u0097\u00E3\u00E6\u00E5\x19\u00F2\x18\x18\x18xN$\x12\x1DP\u00A9\u00D47\u008DFc\u00AFN\u00A7\u00EF\u00D5\u00EB\u00F5}a\u00ED\rk\u00E4]\u00A7\u00D3\u00F5\x1A\x0C\u0086\u009Biii\u0083/h\u00B5\x1F\u0085\u00B1\x12\x18^\u00BC\x10\x03'\x16\u008B\u009B\u00B7m\u00DB\u0086\u00A1\u00A1\u00A1\u00E0\u00F0\u00F00iA\u00DA\u0085thh\x18\x7F\x0C\x0Ebll\x0C\u00CE\u008F\u009D!\u008E\u00E3\u00F0\u00BC\u00C1p8\u008C\u0097\x18OD_\u00B4Z\u00AD\u00C2j\u00B5\u00DE}\u00F4\u00E8\x11\x00\x04\x00\u0084\u00FEK\u0083\u00C1 m]--\u00C1]\u0092\u00A4\u00B9\u00D7\u00D5)\u00E0\u00D4\u00EAh\u008FbIT*\u0095f\u00E5\u00CA\u0095\x0F\x02\u0081\x00\u0082\u00C1\u00A0\u0080\x05D\x10\x04\u00CC\u00CD\u00CD!\x14\nQ\u009D\u009D\u009D\u00A5\u00DF\x1BO\x7F\u0081=Ira\";'\u00C0\u00CBd\u00E0T\u00AA\u00FDQ\x1E=!\u0091H$\u00A9v\u00BB\u00FD\x01\u00994;;+\u009C?\x7F\x1E555(++Ce\u00E5;p\u00B9\\\u00F0\u00FB\u00FD\x144\x18\x0CRB\u00D2\x12i:{\x06\u00BB\u00A42\u00CC\u00D8\u00EC\u0082'gy\u00A0pQ2\u00C4ii\x1F\u0086\u00F1\u009F\u008D\u0090p\x1C\u00A7)((x\u00E8v\u00BB\u0091\u0099\u0099)8\x1C\x0E\u00D4\u00D7\u00D7\u00E3\u00E4\u00C9\u0093hll\u00C4\u0096-[\u00A0\u00D3\u00E9\u00D0\u00D0\u00D0@\u0081\u00997Dzo\u00DF\u0086I&C\u00DB\u00A2d\\\u00D1j\u0085K\u008B\u00D3\x03\u00FA\u00C4DH\u00D4\u00EA\x0F(2\x00Jr\u00F4\u00E8\u00D1\x14\u0085B1n\u00B5Z\u00E1v\u00BBi\u00B8\u00C8j\u00A3[\u008F\u00C7\x03\u009E\u00E7QZZ:O$<!\u00BAp\u00A9\x03\u00EB\n\n\u00B0\u00CE\u00E1@\u00D1\u00DAu\u00C2\u00ABk\u00D6 9%\u00E5qII\u00C9\u00E2H\u0082RSS\x1DK\u0096,\u0081\u00D7\u00EB\u00A5\u00B8$7$\u00FE\u008C\u0080\u0080\u00B1>\u00F1r\u00DF\u00BE}1\u00A1\u008B[\u0090@\u00BE\u00DB\u00ED\u00F6I\u0085B\u00A1\u008Dx#\u0097\u00CB\x7F\u00EE\u00EE\u00EE\u00A6x,\u00B9D\u00FA\u00FB\u00FB\u00B1gO-#\u00A7222\x02\u00A3\u00D1HK\u009C\x08\x19K@CaBBB0l\u00B9\u00B6)\u00A5R\u0099\u00CE\u0092\u00BF\u00B9\u00BC\u00BC\u009C\x18\u0083\u00C4\x03\"\u00AC\u00DD\u00B9s'\u00C8:N\u009D:E\u00DF\u00FDw\u00EF\u00D2\u00B6\u00BC\u00AC\x0CN\u00A73fl\u00BC'6[\x14\u0089X,\u00FE\u00FE\u00E2\u00C5\u008B\u0094\u0084U\x0C\u00F3\u0084xWRRBWO$\u00CF\u00FE2x\u00BB\x1D\u0096\u00A5Y\u00C8\u00CB\u00CF\u00A7\u00DF\u00C8v!DQ!\u008D%\u00E1y^f\u00B1X\u00FE\u00BC\x7F\x7F\u008C\x18C\u00D1U\u00C3\u0084\u00C5{\u00F8\u008E\x17|\u00A6\x06\u00EE\u00FDz\\=bEaN\n\u008E|z\u0086\r\u00A2Mx.%\u00C9\u00CD\u00CD\u009Db9Y\u00B6aC\x11\x1B\x10\u00A9\u00AAh\u008F\u00D8\u00A6;\u00E6\u00FA\x12\x1B\u00B3e\u0098\u00FA:\x0Fuo\x180r:\x07\u009Br\u00E4x\u00C9\u00C6\u00E3p\u00A3\x0BW\u00AE\u00FD\u00CA\u00E6\u00D1\u00C2\u0089\u0090\u00C8d\u00B2M\u0095\u0095\u0095\x14\u008F<&&&p\u00E3\u00C6\r\nJ\x06\u00CE\u00CC\u00CC\u00D0\u00FE\u00E5\u00EEk0/N\u00C2\u009D\u00AFr\u0081ox\u00F4~\u0092\u0085\u0087g\u00B2\u0081\u00EFx\u00B8\u00EB\x0C\u00A8*\\\u0084\u00D7lj\u00EC\u00AA\u00AE\u00A6$da\x11\x12\u00BD^\u00BFc\u00EF\u00DE\u00BD4\u00B4\u00E41>>\x0E\u008B\u00C5\u0082\u00F6\u00F6\u00F6\x08\x11\u0091\u00AE\u00CBW\u0091eV\u00E0\u00EC{\u00E9\u00F8\u00BDi)\u00F0\x03\x0F\u00FC\u00E4\u0080\u00F0\u00E3*\x08\u009Dk\u0081+\u00AF`G\u00A1\x1C\u009B\u00DF,\u008D!\u00A19\u00D1j\u00B55\x07\x0F\x1C\u00A4$,,}}}BVV\u0096P\\\\\u008Cc\u00C7\u009Ap\u00FC\u00F8q\u00D4\u00D5\u00D5B\u009A$\u00C7\u00B2\x15y\u00E0m+`{Q\u0081\u00D2U\n\u00D4\x16+Q\u00BD1\x19\u00B6e\u00A9(\x7F\u00EB]LNNF\u00C2E\x12/\x16+\u00B4\u009CN\u00A7\u00AB\u00A8\u00AD\u00AD\u00A5$\u00C4\u00C0\u0092L\u00C2\u00D4\u00DA\u00DA\u008A\u008A\u008AJTUUA.\u0097\u00C3u\u00E23j\u009B\u009A\u00FE\x0B\u00D7{\u00FA\u00D0\u00D2\u00F6-\x0E64\u00E1\u00F3\u00D3\u00AD\u00E8\x1F\x1C\u00F9G\u00E2\u00E7I\u00C4Z.!!\u00A1p\u00FB\u00F6\njg\u00A1a\x15\u00C6\u00AA\u00AC\u00A7\u00A7\x07\u00ABW\u00AF\u008ET\x1A[H\u00BC\u00D0\r\x19G\u00C2\u00AAkiQQlu10\u0096\u00F4\u00E6\u00E6fl\u00DD\u00BA5\u0092#b#`\u00A4\u00CF\u0094-h\u00C1}b\u00B1\u00F02\u00AB\u00D5:J\u00AA\u008A\u009EyQ\u00ABd\u009E\x1D:t\u0088\u009E\u00C8\u00F1\u00BB{!\u00F9\u00D7\x1D/\u0095J/tuu\u00C5\u00EC\u00F8h@\u00E2I\u00F5\u00EE\u00DD\u00FF\u008B\u0084%>\u00FA\u00ECz;\x1C\u008E9Ra\u00ECde\u0080\x1D\x1D\x1DX\u00BF~=\u00ED\u00B3\u0093\u00F9i\u00CA\x0EH\u009E\u00E7\x1Fk4\u009Ay\x12\x00\"\u0089D\u00F2K[[\x1B\x19@\u00EA\u0098\u00B8#D\u00AB\u00DDn\x17:;;i?\u009C\u00BB\u00A7i\u00E0\u00DE\u00BD{0\u009B\u00CD\x1E\u0087\u00C3\u0091\x14\u00B9\x1E\u00F3\u00F3\u00F3\rR\u00A9\u00F47r\u00E5\u00DE\u00BAu+\u00E4\u00F3\u00F9\u00E8u;::\u008A\u00E9\u00E9i\u00B4\u009D;\u0087\u00F4\u00F4t\u00B8\u00DD\x1D \x00^\u00EF\u00BC\u009D\\\x01\u00D1J\u00E6y<\u009E \u00B9\u00B6E\"Q}\u00F4\u00CF\x04%r:\u009D2\u008E\u00E3\u00DEW*\u0095\u00D7322\u00BC\x19\x19\x19>\u00A2&\u0093\u00C9\u00B7|y\u00B6O\u00A9T\u00FA\u00C4b\u00B1\u00CFl6\u00FBM&\u0093\u00DFd6\u00F9\u008DF\u0093o^\u008D~\u00A3\u00D1H\u00C6\u00FB5\x1A\u00CD@bbb5C\u00FF\x1BI\x15\u008D\u0094\u00A2b)\u00BD\x00\x00\x00\x00IEND\u00AEB`\u0082",
   copyBanner: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x00\u00FAIDATx\u009C\u00ED\u00D61J\x03A\x18\u00C5\u00F1T)mr\u0083\x04\u00AF\x10RH*\u008B\u00F4\x01\x1BO\u0092j\u00BAy\u00FFY\u0088\x07\u00B0H\x19+\u0085\u0088\x16b \u00A4J:Ql,\u0092\\@\u00D3\u00D9\x05V\u0082\u0093\u00D2ufe\u00B0\u00D9\x0F^1\u00B0\u00C3\u008F7\u00B3\u00B0[\u00AB\u00FD\u00F7Xk{\u0092\x16\u0092>\u0080\u00EDo\u0091\u00F4\u00E4\u009C;\x0F\x06\u0080\u008E\u00A4\x1D\u0090\u00C7FR?\x08\u00914\u00F2\u009B\u00C6\u00CE\u00B9cI\u00CD\u00A2dY\u00D6\x02.<2\rm2\u00F3\u00C8YD\u00FB\u00B6G\u00D6\u00C9\x11`S\u00F8\u00A01\u00E6\u00C8\u00D7\u00DE\u00FA\r/\u00C0\u00E3\x0Fy\x00\u008C1\u00A6\x1E\u0085H\u00BA,q\u00D9\u0083X\u00E4\u00B9\u00C4\u00DB4\u0089E^K4\u00B9\u00AB\u0090\u00BCB\u00A8\x10\u00C2\u0090\u008E_\u00AFR KI\u00A7\u0092\u00AE\u00FC\u00FA>\x05\u0092\x1F\u00B2\u00FF\u00D0I\u00EA\u00A6@>\u00817I\u00D7\u00C0I!\u00F0\u00D7;\t\x1E\u00E0\u00A6\u00C4\x11\r\u00C3\u0085\u00EF&M`\x1E\u00F2w\x02\u00BC\x03\u00B7\u00D6\u00DAF\x14\u0092b\u00BE\x00_\u00BCl\u00BAc7]\u00D3\x00\x00\x00\x00IEND\u00AEB`\u0082",
   importBg: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\u0093IDATx\u009C\u00EDU=K\x03A\x10=\u00F1\x0F\u00A8 \u00F8\x0BD\t\u00B1\x11\x04-\u00FD\u00C2 \x086v\u0096\x16\x16bgeas\u00FB\u00DE.\u0086`/A-\u0083\u00A0b\u00A1vj\u00E9O\u0088\x06;\u0089)\u00C4\u0080\u009F\u00F8\x11Y\x1DeIVM<\x05\u008B\x0C\x0C\u00DC\u00DD\u009B}ofvw.\x08\u00EA\u00F6\u00AF\u008D\u00E4\x10\u0080-\x00Y\u0092\u00B9Z\x1D@V\u00D6\x0F~&0\n\u00E0\u0099d)\u00AA\u00E3\u008D'Q!\x02\u00E0P\x02\u0096m&\x11<-<\u00FB\u00BEJ\u00F2\u0092I<b\u00CB\u00E3\u00C2\u0093\u00F7\u0081\x05\x01c\x11Eb\u00C2S\u00F8V$\u0093\u00C94\u0092\u009C\x02\u00B0D\u00B2\u00CFG\u0098J\u00A5\u009AH.\u0092\u00EC\u00F9\u0091\x08\u00C99g3\u00EF\u0095R\u00EDn\u00BCM\x02\u00C0\u00AE\u00F4\u00FF\u00DC\x18\u00D3V\u00B3\x08\u0080m\u00F7\u00C4h\u00AD'\u00CB\u00E2Yv\u00AAvJ\u00A5RC\u00AD\"+\x0E\u00C1\u0093=\u00E2N\u00EC\u0084=\u00A6\u00E2\u00F3$\u00AF\u00A5\u00A2\u00D9\u00AAD\u008C1]\u00B2\x0F\x1F\u00AD\x12\u0082;\x003\u0082_\tFY;-\u00EF\u00B7\u00C6\u0098\u00F1j*9z\u00BFP\x00\x16\x004\u0093\\w.\u00DA\u008D<\u00EF\u00D9}\u00B1km\u009B\u00ECM\u0097\u00EF\u00C7_\u0089\\8\u00D9\x17\u00B5\u00D6c.n\u00AB\u00B0\u00D5\x08\u009EK&\u0093-.\x1E\u0086a+\u00C93\u0087\u00C3+\u00F2(\u00E0i\x18\u0086\x1D\x15\x01\u00C1\u00ABP\u00B7\u009D\x08$;}\u00B8Rj\u00D8\x19M\u0097>\u0082\u00A2\x05\u0095R\u00BDA\x04#\u00B9*\"\x0F>\u00F0@z\u009E\u008E2\u00BBH\u00AE\t\u00CF\u0089O$\u00F1\u009BSX)5\u00E2-Uk=@r3\u00E2\u00FFd\x03@\x7F\u0094\u0096\u00D7-\u00F8s{\x01\u00A5\u00ACp(\x1F.3{\x00\x00\x00\x00IEND\u00AEB`\u0082",
   importTemplate: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x00\u00FFIDATx\u009C\u00DD\u0096\u00B1J\u00C4P\x10E\u00F3\x1B6\x16Z\u00A6\u00F4\x07\u00EC\u00ED\x05\x7F@\x10\u0084-m\x15B\u00CE\u00E1u6\u00B6\u0096\x166bc\u00BBb\u00B5Z\u008A\u00BD\u008D\u008D\u0082\u009F`$\u00F8\x16\u0083\u00C6\u00DDg\u00DC`t\u00E06sa\x0E\u00F3f\x06^\u0096\u00FDF\u0084\x10V\u00D5+\u00F5y\u0096\u0080Qg\u0088z\u00A6V\u00F3\x04T\u009DA\u00EA]]\u00A4,\u00CB-`\u00A5E\u0087\r\u00D0K'\u00D0\x14\x02\u00AC\u00B7\u00F9\u00C0~\u00F4o\x1A\u00B0\u00BD^ \u00EA\u0091z\u00D0\u00A9\u00A3ot\u00F2\x00\u008C\u0081\u00FB\u00C6\u00ACv\x7F\x0CQs\u00E0v\u00C6B\\/\x02b,Vo\u00E0fC.\x12\x12b\u00B1\u00F0!\u00BF1l\u0088o3(\u00E3s\x08L\u00A27i\u00E4j\x7F\u00A73\x048I\u00B9~\u00F5r\u00D8\u009Dd\u00FFf\u00F0\u00D9g\u00CFX\u00CC>!y\\\u0086\u00BC7\u00C8W1x\u00C86\u00B0\u0096\u00A8\u00D1t\u00B5\u0093 \u00C0i\u00E2\x01V-:N\u00EDdY\u00BD\x00\u009E\u00E6}&|\u00D7\u00A3z^\x14\u00C5R\x12\u00E4\u00CF\u00C6+\u0097\u00F9E\x1EJ\nAb\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  pagExport: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x05UIDATx\u009C\u00B5\u0096yl\x14e\x18\u00C6\x17,X) E@N\u00B9\u00AA\x049D!\u0080\x12\u00FE\x16\u00A5&\u009A4\u0084\x1Bzp\u00B5KK\u0081R\u0084\u00D2b0\u0091C\x10\u00B0UQ\u00B0r\u0098@k\u00C0 w 5\x06\u00EFRZ\\\u00CA\u00EE\x1C\u00BB\u00B3\u00DB\u009D.\u00DD\u00B6\u00B4@\u00CB\u00B2\u009D\u00DD\u00F9\u0099\x19\u00DAP\u00CAa\u00A3q\u0092/\u00EFL\u00F2\u00BD\u00CF3\u00CF\u00FB\u00BD\u00C7g\u00B1\u00B4\u00E3\u00A1\u00A8(\x02\u009B\u00AD3p\x7F\x19\u00DFEE\x11\u00ED\u00F1\x7F<0thY\u00ED\u00DAg\u00B1<q\u00DF\u00C3\u008E99\x1D\u008De\u00BCW_\u00BB\u00D6\r[Y\n~\u00F5 \u00A1@\x01\u0084\nM\u00EB\u00F7\x1E\u00E2\u00CA\u00A5\u00A5\u00EA\u009E\u00E3]\u00DA\u00FA\u00B4G\u0081\u00B9\u00B1\u00F4\u00C0\u00D9(dq\x13M\u00B7+\x03\u0081\u00B0v\u00BD\x1E\u00C4ZpT\u0083\u00BD\x1A<\u00B5:\rw\t\u00A1:%\u008E\x1EM\u00C8\u00B1X\u008C0vl\u00F1\u00FFG\u0082z\u00D1\x13C\u00B5\u00AF\x14\u00E0G\u00BB\u00A6'\u00EC\u00F1\u00E9\x136\u00B8\u00B5W\u00D7)Z\u00EC6\u008F6+W\u00D5\u00DE\u00DE\u00AAj\u00D6\u00FDU\u00FA\u00F9\u00F2&]\x0F\x03\u00C5\u00BF\u009D\u0094V\u00E5\u00F4iQ\u00F5D\u0082\u00BA\u00CB\u0097\u0087\x10ht\u00F8\x03\u00B0b\u00BF/4b\u0095\u00ACO\u00C8R\u0098\u009C\u00EDf\u00E2\x067om\u00F10\u00F3\u00D3J\u00E6\u00E4V\u0092\u00F4\u00A5\u008Fi\u009B=\u00FA\u00CAC~\u00AD\u00E6.P^\u00F6\u00C7\u00AD\u00E5\u00EF\u00F7~\"\u0091-\u00B7\u00A0+\u00B5\u00FE?\u00BD\u00B7 n\u00A7W\x1B\u0095\u00E1b\u00CAF7\x06\u00C9k\u00EB\x14\u00C6\u00AFW\x18\u00B1\u00CA\u00C5\u00E8L\u0085I\x1B\x14\u00A6nT\u0098\u009D[\u00C9\u00BB\u00DB+\x0C\u00DBTi\x10])>^`\u00B1t~\u0094\n33\u0090\u00A4\x0F\u008D\x10Y\u00F3\r\x05N&g+\u008CY{o\u00BD\u00B2Vad\u0086\u00C2\u00B4\u008F\x14v\u00FC\u00E0\u00E3\u00CC\u00E5:\x04\u00F5\x0E\u00B9g\u00AA\u0099\u00B1\u00CBK\u00EC\x16/\u00A9\x07\u00AAB\u0086?\u00C7\u008E%\u00B6\u00C6\u00B5\u00B4\u00A4^~N~$\u00A1\x06\u00F5\u00C2\u00D5 \u0083\u0097K\u00BA\x11\u009A\u0091\x19.^\u00CEp1j\u008D\u008B\u0098t'\u00B3v\u00BB9|\u00B1\u009A\u00B8\x1D.\x06.+g\u00F31\u009F\u00899}\u008B\u00C2;\u00DB\u00BCL\u00DD\u00E8\u00D6\u00CF]\u00D5\u00C0\u00A7\u00D8\x1F$i.(lW\u00AC\u008D\u008DAf\u00E7\u00F9\x18\u0095\u00E9b\u00E4j\x17/\u00AEt\u0099\u00E1\x19\u00BA\u00C2\u00C5\u00D4\x0F\\\x14\u00FER\u00CB\u00E852\u0083R\u009D\x0CN3T\u00B9\u00D1C!\u00E2\u00B6\x1B\u00FB\u009C\u00C4\u00EDT\u00F5\u00C4\u00BD~n\u00DEh\x08\u00B07o\u00BA\u0089[P\u00F0\u0094\u00C5\u00A8\\\u00F3\u00C3\u00AF\x1ET\u00EB`x\u00BAK3\u00FE|l\u00A6\u0093\u0098\x1521+\u009D\x0C\u00B4\u00CA|q\u00CEO\u00ECf'\u00FDSd\u00C6d*\u00F4Hr\u00B0\u00E1\u0088\x0F=\x1Cf\u00D2z'\u00FD\u0092e\u00DE\u00DC\u00ECa\\\u0096'$)w\u00E0\u00C2\u00A9\\\x13\u00B7\u00B8\u00B8\u0093!\u00E9\x1EI8X`\u00BB\x0E\u00C3\u00D2dmh\u009A\u0093\u00C4\u00CF\u00DD\u008C\\-\u009B\u00A0\u00E3\u00D7\u00C9\x14\u00FEZ\u00CB\u0090T\u00C9T\x15\x15/\x10\u00F7\u0089\u0087\u0086\u0080\u00C6\u00D6\u00EF}\x0CH\u0096\x18\u0090\"3%GaB\u0096[+U\x00\u00B9\u00FC\u00DB{\x11\u00B2u\u00BEOB\u00A8\u00B0\u00B4\x12\u0086\u00A4I\u00DA\u0080\x14\u0089\u00AC\u00C3*CSE:\u00CD\x17I\u00DF\u00AF\u00B2\u00B1\u00C0K\u0097x\u0089\u00DE\u008B\x1D\u00A4\u00E6\u00AB\u00D474\u00F1\u00D5\u00F9*\x06Y\x05\u00FA\u00A5\u00C8<\u00BFLbR\u0096\u0099\u00E6Z\u0089Ar\u00BD\u00E2\u00C8\u00C3$\u00E1`\u00C1_>\x18d\u0095\u00B4\u00FE\u00C9\x12\u00CB\u00F7y\u00D9u\u00CAO\u00B7\u00856\x0E\u00FETOB\u009E\u008C\u00F5k/gJo\u00E1\u00A9\u00BE\u008Bu\u009F\u0087\u00BEK\x1D\u00F4Zl\u00A8\u0090xn\u00B1\u00C8\u00C4,\u0085\u00B1k\x15\u00AD\u00C4\u00A9\u0083\u00D8ZI\u00AB3\u00A9\u00A8\u0085\u00BE\u00C9\u00B2fdRt\u0092\u00C0\u00CAo*8]r\x13\u009B'@z\u00BE\u008B\x13\u0097\u00EA\u00C98P\u00C1\u00B0T\x07]\u00E3\x05z.\u0096\u00E8\u00BD\u00C4 \u0090\u00E8\u00B9H\u00E2\u00F5l71\u00AB\u00DD!\u00D1\u00D5\u00F6LZe\u00D7\u009D\u00C6 \u00EF\u00EDP\x19\u0098\"\u0099\u00F2;\u00CEq08\u00C5N\u0091\u00ED\x16\x13\u00D7\u0089Xf\\\u00A5\u00F3|\u0081\u00A8x\u0091\u00E8E\x12\u00D1\u008BDz$\u0089tO\x14\u00CD3\u0099\u0098\u00A5\u00E83\u00F3\u00AA\u00B8]\u00D76\u00BB\u009A\u00EB$gA~$\u00E1\x06\u00F5TY\u0090\u00C8yv\u00DDH\u00C9\u00A7\x17\x08\x0CO\x13\u00F8\u00D9~\u009B\u00A992\x11\u00F3\x1C<\u009B(\u00D2-A\u00A0k\u0082`Z#\t\u009EY 0)\u00DBM\u009F%\u0082~\u00A2\u00AC\t\u00AA\u00DA\u00D4\u00C9\u00A3*~N\u009E\x1A2\x00\u008C\u00CCz)]\u00E0tI\x1D\u00E32E:\u00CC\u00B6\u00D3\u00A5\x194r\u0081`\u00AA\u00EA4O`t\u00A6\u008B\x17\u00AC\"\u00F3>\u00AB4+>t\u00EC\u00BB\x07+\u00FEQ\u00BDK\u00BD\u008D\u00D1R4\x03hX\u009ALtB9\x11s\u00EDf\u00F8:\u00CCv\u00986b\u00AE\u0083\u00E8$\u00D1\u00ECc}\u0096\u0088\u00BC\u0091\u00EDi\u00AAj\x02l\u008F\u00E9]\u00AD\u00BBp\u00A0\u00B9\x0B\u00D7\x04a\u00D6no\u00C82\u00EB\u009A\u00DEk\u0089H\u00FFd\u0091\u00BE\u00CB$\u00FA.\x13\u00E9\u0097,2h\u00B9\u00CC\u00D04\u0099\u00C8\u00F9v}f\u00AEO\u00BBa\x10\\kG\x17n!\u00AAj\u009E'a\x1DN\u0096\x05\u00F5\u00D8\u00AD^\u00BD\u00CBBQ\u00EB\u0096 h\u00D1\u0089\u00A2\u00D6=Q\u00D0\u00A2\u00E2E-\u00F6\u00E3\n\u00FDDY\u00D0\u00E8,\u00ED\u009B'm\u0089J\u00B7\u009D\u008DB\x147\x11n\u00ACl\n\u00A2yj\u00A1\u00C4\x0B\u00BF{\u00EEYw\u008DN0D\x08\u009FS\u00A2\u00B0\u00B0\u00FD\u0093\u00F1\u00913\u00FEb\u00F3\u008C\u00AFQ\x0F\x12n\u009E\u00F1\u0086\u00AD\u00F1\x1E\u00A2\u00F4\u00D2\u00D2\u00E2\x7F3\u00E3[)\u00FA\x7Fo+\x0F\x01\u00FD\u00C7{\u00D7\u00DFQ-\u00D7\u009D\x03\x15\\\u0099\x00\x00\x00\x00IEND\u00AEB`\u0082",
   sortOutput: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\nIDATx\u009C\u00ED\u0094\u00B1J\x03A\x10\u0086\x0F_\u00C1\u00C2V\x0B\u00D1V|\u008E<\u0084\u008D\u00BDe\u00B0\u00B8j\u00EF\u00FF\u0096+Bl\u0083\u0095\u009DO\x10\u00B1\x16\x1B\x05\u00BBT6)\x02\u00DA\u009A\u0080\u00DD\u00C9\u00C0*G\u00D8\x04\x0FG,\u00E2\u00C0\u00CF0\u00C3\u00EC|03lQ\u00FC\u00DBf\x1Bp\x0E<dtQ\u0096\u00E5\u0096\x0BD\u00D2\x0B\u00D0\u00AC\u00D0\u00A5\x0B\x08x]\x03i$=\x02\u00B7\u00DF\u00D0\rp\u0092\x03\\\x01\u00EF\u00EB \x1D\u00F5\x06\\[\u00DF6d\u00E1\x08hZZ\u00E4 }I\u00A7?\x15\u00D0_\t\u0091\u00B4\u009B\u00DBW]\u00D7{v}UUm[l\u00DEb\u00CB\u00E7\u00EA\u00ADOg\u0088\u00A4az\u00F4$\u00E9\u00CC|\u00AA\x1F\u00BAAb\u008C\u00FB\u00C0li\u00DE3\u00CB\u00BBAB\x08;\u00C0d\t2\u00B1\u00BC\u00E7\u00B8\x06\u00E9\u00D14\u008Dn\u009A\u00EA\x07\u009E\u0090#`\u00F4\u00B9\u00E8t\x08#\u00CB\u00BBA\u00BA\u009A\u00FE\x0C\"i\u009E =I\u00C7\x0E\u00EA\u00A5~\u00F36\u00E4\u00FE7\u00BE\x15Iw_\u0090\x10\u00C2\u00A1\u00A41\u00F0\u00EC%I\u00E3\x18\u00E3\u0081\u00C7\u00F8\u008B\u00CD\u00B2\x0F\u00EB\x1A`\u00F9\u00BE\u00F3\u00BCh\x00\x00\x00\x00IEND\u00AEB`\u0082",
   svgaPanel: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\u0093IDATx\u009C\u00DD\u0095\u00B1K\u00C3@\x14\u00C6\u00EB\u00E2\u00E0*N.\x15D\u00C1U\x04\x11T\u0090\x0E\u00E2\u00D0Ap\u00B4\u0094R\\Z\x07q\x12)Yr\u00EF\u00FB\u008E\u00D2\u00A1\u00FE\x01\u00FE9\u00EA\u00A6\u00AE\u00FE\x01n\n\u00C5\x16\u0094*\u0091\u00A3\u0097r\u00B6ihj\u00BA\u00F4\u00E0#!_\u00F2~y\u00F7\u00EE\u00DEe237\x00\x14I>\x00x#\u00F9>\u00A9\u00D0\u00FB\u00DE\u00C4)\x0C\x02\u00CA$\u0083\u00B4\x05\u00A0\u00E4B\u009E\u00A7\x04yt!\u00ED)A\u00DA}\x08\u00C9\u008E5~R\n\u00FEm\u00EF;C\x10\u00AD\u00F5>\u0080\\\n\u00DA\x1B\t\x01\u0090Mi\u00A5fc!A\x10\u00CC\u0099?\x01p2\u00A0\u00ACyWk\u00BD>\u00E8\u0091\u00DCN\x04\u0089Y\u00CE\x1FJ\u00A9\r\u0092\u00DD(_k\u009D\x1F\x1BB\u00F2\u00C6,\x00\x00\u009B\u00A1H\u00D6\u008C\u00AF\u0094:\u00B7\x1FW\x1D\u00FF\u00C0>\u00ABM\x02\u00E9\x17\u0092\u00BD\x118\u0090+\u00C7;N\x0C1\u00ED`\u00C4t\u00B5Dd\u008D\u00E4W\u0094/\"GcC\u00ECK9\x11\u00A9\u0086\x02P\u00F1}\x7F\u00D9x\u008DFc\u00D5\u00F5\u008CH\u00EE$*\u00BC\u0088\x1C\x02\u00F8\u008C\u00D8`/J\u00A9%\u0092\u00AF\x11\u0099tDd+\u00C9t5mM\u00CE\x1C\u00DDZ\u00BFb\u00AFM\u00C7\u00BB\u00B0\x01\u00AF\x13\x15\u00DE\u00B4\x057}\u00AD\u00F5\u00A9[x\u0093m\u00E8\u0089\u00C8\u00E2$\u0085\u00BF\x1CQ\u00F8\u00AE\u00D6z7\u00A6_\x15b!a\x17\u00AE\u00D7\u00EB+\u009E\u00E7-\u00D8iq\x07\u00CC~\u00B0Y\u00E59l\u0096=\u00CF\u009B\x0F\u00E3\u00998C]8<O\x00\u00F8\u00EE&\u00FC\u0087\u00C4f\u00F2\u00E4BJS:O\u008Anm\r\u00A8\x00\u00E0>\u00A53\u00FE\u00CE,\u0096?\u0080\u0099\x18\u00BF]\u00C4\u00E0\u00B1z\u00BB\u00D1K\x00\x00\x00\x00IEND\u00AEB`\u0082",
   trackMatte: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x19\x00\x00\x00\x19\x08\x06\x00\x00\x00\u00C4\u00E9\u0085c\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x00\u00D8IDATx\u009C\u00ED\u0093;n\u00C2@\x14EiH\x15\u00B6A\x16\u0080D\x03\x1Db-\u0094\x14.('A\u00B2\u00CF}K\u00F0\x06`\x13\tB\u0089\u0092*\r\x11m\u00C46\u00DC9\u008A\u0098\u00D6\u00BF\x19$\x1A_\u00E9v\u00EF\u00EA\u00BC\u00CF\u00CC`\u00D0+T\u00CE\u00B9\x07`\x0B\u009C$\u00FDv5\u00D7\u00DCK\u009E\u00E7\u00C3J\u00C8?@R\x19k\u00E0\u00B9\x12\"\u00E9\u00C7\x17\u00AD\u0081I\u0080\u00D7>\x7F\u00AA\u0083\\|7\u00D3\u0090uK\u009A\u00FA\u00FC\u00A5\u0087\u00DC\x06\x02\x1C\u00FD\u00E1^%\u00E5\x01~\u00F3\u00F9C]'K\u00A0\u0088|\u00BE\u0085\u0099-jG6\u00B3' Q\u0080\u0080$\u00CB\u00B2q\u00E3^\u00CDl$i\x05l\u00BAZ\u00D2\u00CA9\u00F7\u00D8\x08\x01\u00F6\u0091?~\u00D7\x06r\u008E\u00BC\u00C9\u00B9\u0087\u00947\u0085H\u00FA\u008A\u0084|\u00B6\u0081\u00CC%}H\u00FA\u00EEj\u00E0=M\u00D3Y#\u00A4\u00D7\u00DD\u00F5\x07a\u00EF\u00850\u00C9\u00E4\u00A5\x0C\x00\x00\x00\x00IEND\u00AEB`\u0082",
@@ -60,6 +62,13 @@ var scriptDir = scriptFile.parent;
 var configFolder = new Folder(scriptDir.fsName + "/WorkflowAssist");
 
 var CONFIG_DIR_NAME = "WorkflowAssist";
+
+// ======================== 外部脚本路径配置 ========================
+// 修改以下路径可自定义外部脚本位置
+var EXT_SCRIPTS = {
+    compress: "F:/插件脚本开发/auto_tiny/source/auto_tiny2.0.6.jsx"
+    // 以后新增外部脚本在此添加，格式: key: "路径"
+};
 
 // ===== END 01-constants.jsx =====
 
@@ -585,19 +594,29 @@ function createMainUI(parentPanel) {
         }
     }
 
-    // ================== 当前合成行（含图标按钮） ==================
-    var currentCompRow = win.add("group");
-    currentCompRow.orientation = "row";
-    currentCompRow.alignment = ["fill", "top"];
-    currentCompRow.alignChildren = ["fill", "center"];
-    currentCompRow.spacing = 2;
-    currentCompRow.margins = [0, 0, 0, 2];
+    // ================== 当前合成信息（hover显示） ==================
+    var currentCompName = "（无）";
 
-    var curLabel = currentCompRow.add("statictext", undefined, "当前合成:");
-    curLabel.alignment = ["left", "center"];
+    // ================== 基础名称输入行 ==================
+    var nameGroup = win.add("group");
+    nameGroup.orientation = "row";
+    nameGroup.alignment = ["fill", "top"];
+    nameGroup.alignChildren = ["fill", "center"];
+    nameGroup.spacing = 4;
+    nameGroup.margins = [0, 0, 0, 4];
 
-    var curCompText = currentCompRow.add("statictext", undefined, "（无）");
-    curCompText.alignment = ["fill", "center"];
+    var nameLabel = nameGroup.add("statictext", undefined, "基础名称:");
+    nameLabel.alignment = ["left", "center"];
+
+    var nameInput = nameGroup.add("edittext", undefined, "");
+    nameInput.characters = 18;
+    nameInput.alignment = ["fill", "center"];
+    nameInput.minimumSize.width = 140;
+    nameInput.helpTip = "输入基础名称，源合成将被重命名为此名称\n当前合成: " + currentCompName;
+    nameInput.onChange = function() {
+        updateStepPreview();
+        refreshOutputUI();
+    };
 
     function makeIconButton(parent, symbol, tip) {
         var btn = parent.add("iconbutton", undefined, undefined, {style: "toolbutton"});
@@ -607,9 +626,9 @@ function createMainUI(parentPanel) {
         return btn;
     }
 
-    var btnRefresh = makeIconButton(currentCompRow, "↻", "重新获取当前活动合成");
-    var btnGetComp = makeIconButton(currentCompRow, "◎", "取合成名 → 填入输入框");
-    var btnGetProject = makeIconButton(currentCompRow, "▣", "取项目名 → 填入输入框");
+    var btnRefresh = makeIconButton(nameGroup, "↻", "重新获取当前活动合成");
+    var btnGetComp = makeIconButton(nameGroup, "◎", "取合成名 → 填入输入框");
+    var btnGetProject = makeIconButton(nameGroup, "▣", "取项目名 → 填入输入框");
 
     function stripKnownSuffixes(name) {
         var presetFile = getSelectedPresetFile();
@@ -628,12 +647,14 @@ function createMainUI(parentPanel) {
     function detectCurrentComp() {
         var name = getActiveCompName();
         if (name) {
-            curCompText.text = name;
+            currentCompName = name;
+            nameInput.helpTip = "输入基础名称，源合成将被重命名为此名称\n当前合成: " + currentCompName;
             if (!nameInput.text || nameInput.text === "") {
                 nameInput.text = stripKnownSuffixes(name);
             }
         } else {
-            curCompText.text = "（无活动合成）";
+            currentCompName = "（无活动合成）";
+            nameInput.helpTip = "输入基础名称，源合成将被重命名为此名称\n当前合成: " + currentCompName;
         }
     }
 
@@ -662,27 +683,6 @@ function createMainUI(parentPanel) {
         } else {
             alert("当前项目尚未保存！");
         }
-    };
-
-    // ================== 基础名称输入行 ==================
-    var nameGroup = win.add("group");
-    nameGroup.orientation = "row";
-    nameGroup.alignment = ["fill", "top"];
-    nameGroup.alignChildren = ["fill", "center"];
-    nameGroup.spacing = 4;
-    nameGroup.margins = [0, 0, 0, 4];
-
-    var nameLabel = nameGroup.add("statictext", undefined, "基础名称:");
-    nameLabel.alignment = ["left", "center"];
-
-    var nameInput = nameGroup.add("edittext", undefined, "");
-    nameInput.characters = 18;
-    nameInput.alignment = ["fill", "center"];
-    nameInput.minimumSize.width = 140;
-    nameInput.helpTip = "输入基础名称，源合成将被重命名为此名称";
-    nameInput.onChange = function() {
-        updateStepPreview();
-        refreshOutputUI();
     };
 
     // ================== 预设选择行（通用，始终可见） ==================
@@ -839,14 +839,12 @@ function createMainUI(parentPanel) {
     }
 
     var currentTab = "organize";
+    var tabHovered = null; // 跟踪哪个 tab 被 hover
 
     function showOrganizeTab() {
         currentTab = "organize";
         organizeGroup.visible = true;
         outputGroup.visible = false;
-        btnExecute.text = "▶ 执行工作流";
-        btnExecute.helpTip = "重命名当前合成并按预设步骤创建嵌套合成";
-        bottomGroup.visible = true;
         tabContent.layout.layout(true);
     }
 
@@ -854,15 +852,121 @@ function createMainUI(parentPanel) {
         currentTab = "output";
         organizeGroup.visible = false;
         outputGroup.visible = true;
-        btnExecute.text = "▶ 执行输出";
-        btnExecute.helpTip = "依次渲染并导入序列帧";
-        bottomGroup.visible = true;
         refreshOutputUI();
         tabContent.layout.layout(true);
     }
 
-    tabOrganize.onClick = function() { showOrganizeTab(); };
-    tabOutput.onClick = function() { showOutputTab(); };
+    function executeCurrentTab() {
+        if (currentTab === "output") {
+            var baseName = stripKnownSuffixes(nameInput.text);
+            if (!baseName) { alert("请输入基础名称！"); return; }
+            if (!app.project.file) { alert("请先保存项目文件！"); return; }
+            var presetFile = getSelectedPresetFile();
+            if (!presetFile) { alert("请先选择一个预设！"); return; }
+            var projectDir = app.project.file.parent.fsName;
+            var presetData = loadPreset(presetFile);
+            if (!presetData || !presetData.steps) { alert("预设数据无效！"); return; }
+            if (renderActiveStates.length === 0) { alert("没有可渲染的步骤！"); return; }
+            for (var i = 0; i < presetData.steps.length; i++) {
+                if (!renderActiveStates[i] || !renderActiveStates[i].value) continue;
+                var s = presetData.steps[i];
+                var compName = resolveOutputName(baseName, s);
+                var comp = getCompByName(compName);
+                if (!comp) {
+                    alert("未找到合成: " + compName + "\n请先执行工作流创建合成。");
+                    renderStatusTexts[i].text = "未找到";
+                    setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
+                    continue;
+                }
+                renderStatusTexts[i].text = "渲染中...";
+                setTextColor(renderStatusTexts[i], [0.2, 0.4, 0.8, 1]);
+                outputStepContainer.layout.layout(true);
+                var settings = { importBack: importActiveStates[i] && importActiveStates[i].value };
+                var success = renderCompToSequence(comp, projectDir, settings);
+                if (success) {
+                    renderStatusTexts[i].text = "完成";
+                    setTextColor(renderStatusTexts[i], [0.2, 0.6, 0.2, 1]);
+                } else {
+                    renderStatusTexts[i].text = "出错";
+                    setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
+                }
+                outputStepContainer.layout.layout(true);
+            }
+            alert("输出处理完成！");
+        } else {
+            var sourceComp = getActiveComp();
+            if (!sourceComp) { alert("请先在 After Effects 中选择一个活动合成！"); return; }
+            var baseName = nameInput.text;
+            if (!baseName) { alert("请输入基础名称！"); return; }
+            var presetFile = getSelectedPresetFile();
+            if (!presetFile) { alert("请先选择一个预设！"); return; }
+            executeWorkflow(sourceComp, baseName, presetFile, stepActiveStates);
+        }
+    }
+
+    function updateTabText() {
+        var ctrlKey = ScriptUI.environment.keyboardState.ctrlKey;
+        if (tabHovered === "organize") {
+            if (ctrlKey) {
+                tabOrganize.text = "执行";
+                tabOrganize.helpTip = "执行工作流 (Ctrl)";
+            } else {
+                tabOrganize.text = "整理";
+                tabOrganize.helpTip = "切换到整理标签 | Ctrl+单击: 执行工作流";
+            }
+        } else if (tabHovered === "output") {
+            if (ctrlKey) {
+                tabOutput.text = "执行";
+                tabOutput.helpTip = "执行输出 (Ctrl)";
+            } else {
+                tabOutput.text = "输出";
+                tabOutput.helpTip = "切换到输出标签 | Ctrl+单击: 执行输出";
+            }
+        }
+    }
+
+    // 鼠标悬停事件
+    tabOrganize.addEventListener("mouseover", function() {
+        tabHovered = "organize";
+        updateTabText();
+    });
+    tabOrganize.addEventListener("mouseout", function() {
+        tabHovered = null;
+        tabOrganize.text = "整理";
+        tabOrganize.helpTip = "切换到整理标签 | Ctrl+单击: 执行工作流";
+    });
+    tabOutput.addEventListener("mouseover", function() {
+        tabHovered = "output";
+        updateTabText();
+    });
+    tabOutput.addEventListener("mouseout", function() {
+        tabHovered = null;
+        tabOutput.text = "输出";
+        tabOutput.helpTip = "切换到输出标签 | Ctrl+单击: 执行输出";
+    });
+
+    // 键盘事件监听，实时更新 tab 文本
+    win.addEventListener("keydown", function() {
+        if (tabHovered) updateTabText();
+    });
+    win.addEventListener("keyup", function() {
+        if (tabHovered) updateTabText();
+    });
+
+    tabOrganize.onClick = function() {
+        if (ScriptUI.environment.keyboardState.ctrlKey) {
+            executeCurrentTab();
+        } else {
+            showOrganizeTab();
+        }
+    };
+    tabOutput.onClick = function() {
+        if (ScriptUI.environment.keyboardState.ctrlKey) {
+            executeCurrentTab();
+        } else {
+            showOutputTab();
+        }
+    };
 
     // ================== 功能按钮面板 ==================
     var funcPanel = win.add("panel");
@@ -946,6 +1050,9 @@ function createMainUI(parentPanel) {
     var btnImportBg = addFuncButton("背景", "importBg", "从预设目录导入 bg.png 作为背景图层");
     btnImportBg.onClick = function() { importBgImage(); };
 
+    var btnPag = addFuncButton("PAG", "pagExport", "独显选中图层 → 打标记 → 预合成为 animated → 生成高光图");
+    btnPag.onClick = function() { pagExport(); };
+
     var btnImportTemplate = addFuncButton("模板", "importTemplate", "导入高光图并替换模板末尾图层");
     btnImportTemplate.onClick = function() { importTemplateAndReplace(); };
 
@@ -961,6 +1068,25 @@ function createMainUI(parentPanel) {
 
     var btnCopyBanner = addFuncButton("Banner", "copyBanner", "根据合成时长选择并复制PAG文件到输出文件夹");
     btnCopyBanner.onClick = function() { copyBannerPag(); };
+
+    var btnCompress = addFuncButton("压缩", "autoTiny", "打开 Auto_Tinify 图片压缩工具");
+    btnCompress.onClick = function() {
+        try {
+            var scriptPath = EXT_SCRIPTS.compress;
+            if (!scriptPath) {
+                alert("未配置压缩脚本路径！\n请在 01-constants.jsx 中设置 EXT_SCRIPTS.compress");
+                return;
+            }
+            var scriptFile = new File(scriptPath);
+            if (!scriptFile.exists) {
+                alert("压缩脚本不存在: " + scriptPath);
+                return;
+            }
+            $.evalFile(scriptFile);
+        } catch(e) {
+            alert("加载压缩脚本出错: " + e.toString());
+        }
+    };
 
     var btnSortOutput = addFuncButton("输出", "sortOutput", "整理输出文件夹文件并生成批处理");
     btnSortOutput.onClick = function() { sortOutputFiles(); };
@@ -1178,6 +1304,37 @@ function createMainUI(parentPanel) {
             return;
         }
 
+        // Check for existing "bg" layer
+        var existingBg = null;
+        for (var i = 1; i <= currentComp.layers.length; i++) {
+            if (currentComp.layer(i).name === "bg") {
+                existingBg = currentComp.layer(i);
+                break;
+            }
+        }
+
+        if (existingBg) {
+            var useExisting = confirm("找到图层 'bg'，是否使用它作为背景？\n\n是 = 使用该图层（移到底层）\n否 = 重新导入 bg.png", false, "背景图层");
+            if (useExisting) {
+                app.beginUndoGroup("Use existing bg layer");
+                try {
+                    existingBg.moveToEnd();
+                    var compWidth = currentComp.width;
+                    var layerSrc = existingBg.source;
+                    if (layerSrc) {
+                        var imgWidth = layerSrc.width;
+                        var scaleFactor = (compWidth / imgWidth) * 100;
+                        var newHeight = (layerSrc.height * scaleFactor) / 100;
+                        existingBg.transform.scale.setValue([scaleFactor, (newHeight / layerSrc.height) * 100]);
+                    }
+                } catch(e) {
+                    alert("设置背景出错: " + e.toString());
+                }
+                app.endUndoGroup();
+                return;
+            }
+        }
+
         if (!app.project.file) {
             alert("请先保存项目文件！");
             return;
@@ -1205,9 +1362,9 @@ function createMainUI(parentPanel) {
             var importedFile = app.project.importFile(importOptions);
 
             var bgLayer = currentComp.layers.add(importedFile);
+            bgLayer.name = "bg";
 
             var compWidth = currentComp.width;
-            var compHeight = currentComp.height;
             var imgWidth = bgLayer.source.width;
             var imgHeight = bgLayer.source.height;
 
@@ -1219,6 +1376,60 @@ function createMainUI(parentPanel) {
         } catch (e) {
             alert("导入背景出错: " + e.toString());
         }
+        app.endUndoGroup();
+    }
+
+    function pagExport() {
+        var comp = app.project.activeItem;
+        if (!(comp instanceof CompItem)) {
+            alert("请选择一个合成！");
+            return;
+        }
+        var selectedLayers = comp.selectedLayers;
+        if (selectedLayers.length === 0) {
+            alert("请选择至少一个图层！");
+            return;
+        }
+
+        app.beginUndoGroup("PAG Export");
+
+        try {
+            // Solo selected layers
+            for (var i = 1; i <= comp.layers.length; i++) {
+                comp.layers[i].enabled = false;
+            }
+            for (var i = 0; i < selectedLayers.length; i++) {
+                selectedLayers[i].enabled = true;
+            }
+
+            // Add markers with shader code
+            var shaderCode = "#version 100\nprecision mediump float;\nvarying highp vec2 vertexColor;\nuniform float uWidth;\nuniform float uHeight;\nuniform sampler2D inputImageTexture;\nvoid main() {\nvec2 uv = vertexColor;\nvec4 color = texture2D(inputImageTexture, uv);\nfloat sharpness = 0.3;\nfloat xOffset = 1./uWidth;\nfloat yOffset = 1./uHeight;\nvec4 neighbors[4];\nneighbors[0]=texture2D(inputImageTexture,uv+vec2(-xOffset,-yOffset));\nneighbors[1]=texture2D(inputImageTexture,uv+vec2(xOffset,yOffset));\nneighbors[2]=texture2D(inputImageTexture,uv+vec2(xOffset,-yOffset));\nneighbors[3]=texture2D(inputImageTexture,uv+vec2(-xOffset,yOffset));\nvec4 sharpenedColor=color*(sharpness*4.+1.);\nsharpenedColor-=neighbors[0]*sharpness;\nsharpenedColor-=neighbors[1]*sharpness;\nsharpenedColor-=neighbors[2]*sharpness;\nsharpenedColor-=neighbors[3]*sharpness;\ngl_FragColor=sharpenedColor;\n}";
+            for (var i = 0; i < selectedLayers.length; i++) {
+                try {
+                    var myMarker = new MarkerValue("Shader");
+                    myMarker.comment = shaderCode;
+                    selectedLayers[i].property("Marker").setValueAtTime(comp.time, myMarker);
+                } catch(e) {}
+            }
+
+            // Pre-compose selected layers into "animated"
+            var layerIndices = [];
+            for (var i = 0; i < selectedLayers.length; i++) {
+                layerIndices.push(selectedLayers[i].index);
+            }
+            comp.layers.precompose(layerIndices, "animated", true);
+
+            // Generate highlight composition
+            var newComp = app.project.items.addComp("高光图", 675, 1125, comp.pixelAspect, comp.duration, comp.frameRate);
+            var precompLayer = newComp.layers.add(comp);
+            var scaleFactor = (newComp.width / comp.width) * 100;
+            precompLayer.property("Scale").setValue([scaleFactor, scaleFactor]);
+            precompLayer.property("Position").setValue([newComp.width / 2, newComp.height / 2]);
+            newComp.openInViewer();
+        } catch(e) {
+            alert("PAG导出出错: " + e.toString());
+        }
+
         app.endUndoGroup();
     }
 
@@ -1535,18 +1746,6 @@ function createMainUI(parentPanel) {
         dialog.show();
     }
 
-    // ================== 底部执行按钮（居中） ==================
-    var bottomGroup = win.add("group");
-    bottomGroup.orientation = "row";
-    bottomGroup.alignment = ["center", "top"];
-    bottomGroup.spacing = 4;
-    bottomGroup.margins = [0, 6, 0, 0];
-
-    var btnExecute = bottomGroup.add("button", undefined, "▶ 执行工作流");
-    btnExecute.alignment = ["center", "center"];
-    btnExecute.preferredSize.width = 140;
-    btnExecute.helpTip = "重命名当前合成并按预设步骤创建嵌套合成";
-
     // ================== 缓存预设文件列表 ==================
     var cachedPresetFiles = [];
 
@@ -1670,88 +1869,6 @@ function createMainUI(parentPanel) {
             }
         };
     }
-
-    // ================== 执行 ==================
-    btnExecute.onClick = function() {
-        if (currentTab === "output") {
-            var baseName = stripKnownSuffixes(nameInput.text);
-            if (!baseName) {
-                alert("请输入基础名称！");
-                return;
-            }
-
-            if (!app.project.file) {
-                alert("请先保存项目文件！");
-                return;
-            }
-
-            var presetFile = getSelectedPresetFile();
-            if (!presetFile) {
-                alert("请先选择一个预设！");
-                return;
-            }
-
-            var projectDir = app.project.file.parent.fsName;
-            var presetData = loadPreset(presetFile);
-            if (!presetData || !presetData.steps) {
-                alert("预设数据无效！");
-                return;
-            }
-
-            for (var i = 0; i < presetData.steps.length; i++) {
-                if (!renderActiveStates[i] || !renderActiveStates[i].value) continue;
-
-                var s = presetData.steps[i];
-                var compName = baseName + s.suffix;
-                var comp = getCompByName(compName);
-
-                if (!comp) {
-                    alert("未找到合成: " + compName + "\n请先执行工作流创建合成。");
-                    renderStatusTexts[i].text = "未找到";
-                    setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
-                    continue;
-                }
-
-                renderStatusTexts[i].text = "渲染中...";
-                setTextColor(renderStatusTexts[i], [0.2, 0.4, 0.8, 1]);
-                outputStepContainer.layout.layout(true);
-
-                var settings = { importBack: importActiveStates[i] && importActiveStates[i].value };
-                var success = renderCompToSequence(comp, projectDir, settings);
-
-                if (success) {
-                    renderStatusTexts[i].text = "完成";
-                    setTextColor(renderStatusTexts[i], [0.2, 0.6, 0.2, 1]);
-                } else {
-                    renderStatusTexts[i].text = "出错";
-                    setTextColor(renderStatusTexts[i], [0.8, 0.2, 0.2, 1]);
-                }
-                outputStepContainer.layout.layout(true);
-            }
-
-            alert("输出处理完成！");
-        } else {
-            var sourceComp = getActiveComp();
-            if (!sourceComp) {
-                alert("请先在 After Effects 中选择一个活动合成！");
-                return;
-            }
-
-            var baseName = nameInput.text;
-            if (!baseName) {
-                alert("请输入基础名称！");
-                return;
-            }
-
-            var presetFile = getSelectedPresetFile();
-            if (!presetFile) {
-                alert("请先选择一个预设！");
-                return;
-            }
-
-            executeWorkflow(sourceComp, baseName, presetFile, stepActiveStates);
-        }
-    };
 
     // ================== 初始化 ==================
     detectCurrentComp();

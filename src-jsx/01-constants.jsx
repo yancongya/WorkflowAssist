@@ -14,3 +14,10 @@ var scriptDir = scriptFile.parent;
 var configFolder = new Folder(scriptDir.fsName + "/WorkflowAssist");
 
 var CONFIG_DIR_NAME = "WorkflowAssist";
+
+// ======================== 外部脚本路径配置 ========================
+// 修改以下路径可自定义外部脚本位置
+var EXT_SCRIPTS = {
+    compress: "F:/插件脚本开发/auto_tiny/source/auto_tiny2.0.6.jsx"
+    // 以后新增外部脚本在此添加，格式: key: "路径"
+};
