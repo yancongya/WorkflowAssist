@@ -237,3 +237,26 @@ var bgFile = new File(getPresetResourcePath("bg.png"));
 3. 没有则从预设目录复制到项目目录
 4. **文件复制操作放在 undo group 外部**，只有导入+图层操作在 undo group 内
 5. 这样撤回不会删除已存在的资源文件，下次执行也无需重新复制
+
+### 第二行功能按钮（`addIconButton2`）
+`addIconButton2` 与 `addFuncButton` 的区别：
+- `addFuncButton`：图标不可用时回退到 `image` 控件 → `button`
+- `addIconButton2`：图标不可用时**直接回退到 `button`**（跳过 `image`，因为 `image` 不支持 `onClick`）
+
+### 生成 .bat 文件的编码陷阱
+`encoding = "UTF8"` 写入 .bat 文件 + `chcp 65001` 的组合**不可靠**，因为：
+- cmd.exe 用系统 ANSI 编码（中文系统 = GBK）读取 .bat 文件，而非 `chcp` 设置的代码页
+- `chcp 65001` 只改变控制台的**输出**编码，不改变 cmd **读取 .bat 文件**的编码
+- 因此 .bat 中的中文（如 `pushd "预览文件夹名"`）始终会被 GBK 解码乱码
+
+**可靠做法**：在 ExtendScript 侧完成文件夹发现，在文件夹**内部**生成纯 ASCII 的 .bat，运行时通过 `%~dp0` 定位自身目录，通过 PowerShell `$((Get-Item .).Name)` 获取文件夹名：
+```javascript
+var batFile = new File(folder.fsName + "/render.bat"); // 放在目标文件夹内
+// bat 内容不含任何中文字符
+var content = '@echo off\r\n';
+content += 'cd /d "%~dp0"\r\n';
+content += 'powershell -NoProfile -Command "...$(Get-Item .).Name...\r\n';
+```
+不需要 `encoding = "UTF8"`，不需要 `chcp 65001`。
+
+**进阶：如果 bat 必须包含中文（如路径含中文），则必须用 `encoding = "UTF8"` + `chcp 65001` 组合**。原因：Windows "Beta: Use Unicode UTF-8 for worldwide language support" 设置开启后，系统 ANSI 编码变为 UTF-8 而 OEM 编码维持原值（如 GBK），两方不一致导致乱码。显式设定 UTF-8 读写和 chcp 65001 可确保两端统一。参考 `sortOutputFiles` 和 `renderPreviewToMp4` 的最终实现。

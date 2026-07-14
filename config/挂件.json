@@ -1,0 +1,36 @@
+{
+  "name": "挂件",
+  "description": "挂件工作流 - 先创建输出层再创建预览层",
+  "steps": [
+    {
+      "name": "输出",
+      "width": 750,
+      "height": 150,
+      "frameRate": 12,
+      "duration": 2,
+      "suffix": "_输出",
+      "scaleMode": "fit_width",
+      "render": {
+        "enabled": true,
+        "importBack": true
+      }
+    },
+    {
+      "name": "预览",
+      "width": 750,
+      "height": 150,
+      "frameRate": 24,
+      "duration": 4,
+      "suffix": "_预览",
+      "scaleMode": "fit_width",
+      "stagger": {
+        "enabled": true,
+        "count": 2
+      },
+      "render": {
+        "enabled": true,
+        "importBack": true
+      }
+    }
+  ]
+}

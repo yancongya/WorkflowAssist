@@ -441,12 +441,7 @@ function createMainUI(parentPanel) {
                 group.helpTip = tip || "";
                 group.preferredSize = [40, 42];
 
-                var icon;
-                try {
-                    icon = group.add("iconbutton", undefined, ICON_DATA[iconKey], {style: "toolbutton"});
-                } catch(e2) {
-                    icon = group.add("image", undefined, ICON_DATA[iconKey]);
-                }
+                var icon = group.add("iconbutton", undefined, ICON_DATA[iconKey], {style: "toolbutton"});
                 icon.preferredSize = [26, 26];
                 icon.helpTip = tip || "";
 
@@ -455,7 +450,9 @@ function createMainUI(parentPanel) {
 
                 funcButtons.push(group);
                 return icon;
-            } catch (e) {}
+            } catch (e) {
+                // iconbutton failed, will fall through to text button below
+            }
         }
         var btn = funcRow.add("button", undefined, label);
         btn.helpTip = tip || "";
@@ -535,6 +532,70 @@ function createMainUI(parentPanel) {
 
     var btnSortOutput = addFuncButton("输出", "sortOutput", "整理输出文件夹文件并生成批处理");
     btnSortOutput.onClick = function() { sortOutputFiles(); };
+
+    var btnFolderSync = addFuncButton("同步", "folderSync", "复制源文件+输出到项目文件夹，并同步到共享目录");
+    btnFolderSync.onClick = function() { syncProjectFolder(); };
+
+    // ================== 第二行功能按钮 ==================
+    var funcRow2 = funcPanel.add("group");
+    funcRow2.orientation = "row";
+    funcRow2.alignment = ["fill", "top"];
+    funcRow2.alignChildren = ["fill", "center"];
+    funcRow2.spacing = 6;
+    funcRow2.margins = [0, 0, 0, 0];
+
+    var funcButtons2 = [];
+
+    function addIconButton2(label, iconKey, tip) {
+        if (iconKey && typeof ICON_DATA !== 'undefined' && ICON_DATA[iconKey]) {
+            try {
+                var group = funcRow2.add("group");
+                group.orientation = "column";
+                group.alignChildren = ["center", "center"];
+                group.spacing = 0;
+                group.helpTip = tip || "";
+                group.preferredSize = [40, 42];
+
+                var icon = group.add("iconbutton", undefined, ICON_DATA[iconKey], {style: "toolbutton"});
+                icon.preferredSize = [26, 26];
+                icon.helpTip = tip || "";
+
+                var lbl = group.add("statictext", undefined, label);
+                lbl.alignment = ["center", "center"];
+
+                funcButtons2.push(group);
+                return icon;
+            } catch (e) {}
+        }
+        var btn = funcRow2.add("button", undefined, label);
+        btn.helpTip = tip || "";
+        btn.preferredSize.height = 26;
+        funcButtons2.push(btn);
+        return btn;
+    }
+
+    function relayoutFuncButtons2() {
+        if (funcButtons2.length === 0) return;
+        var pw = funcPanel.preferredSize.width;
+        var totalWidth = pw - 12;
+        var spacing = funcRow2.spacing * (funcButtons2.length - 1);
+        var unitWidth = Math.max(36, (totalWidth - spacing) / funcButtons2.length);
+        for (var fi = 0; fi < funcButtons2.length; fi++) {
+            var item = funcButtons2[fi];
+            if (item.type === "group") {
+                item.preferredSize.width = unitWidth;
+            } else if (item.type === "iconbutton" || item.type === "image") {
+                item.preferredSize = [26, 26];
+            } else {
+                item.preferredSize.width = Math.max(60, unitWidth);
+            }
+        }
+        funcRow2.layout.layout(true);
+    }
+
+    var btnRenderMp4 = addIconButton2("渲染合成", "renderMp4", "将'预览'文件夹中的序列帧重命名并合成为MP4视频");
+    btnRenderMp4.onClick = function() { renderPreviewToMp4(); };
+    relayoutFuncButtons2();
 
     // ================== 内置功能函数 ==================
 
@@ -1049,6 +1110,171 @@ function createMainUI(parentPanel) {
         return null;
     }
 
+    function syncProjectFolder() {
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+
+        var projectFile = app.project.file;
+        var projectDir = projectFile.parent;
+        var projectName = decodeUrlString(projectFile.name.replace(/\.[^\.]+$/, "")); // 去掉扩展名并解码
+        var targetFolderName = projectName + "文件夹";
+        var targetFolder = new Folder(projectDir.fsName + "/" + targetFolderName);
+
+        // 第一步：检查目标文件夹是否存在
+        if (!targetFolder.exists) {
+            alert("未找到文件夹：" + targetFolderName + "\n请在项目旁边创建该文件夹。");
+            return;
+        }
+
+        // 定义源文件夹
+        var sourceFolder = new Folder(projectDir.fsName + "/源文件");
+        var outputFolder = new Folder(projectDir.fsName + "/输出");
+
+        // 第二步：复制源文件和输出文件夹到目标文件夹
+        app.beginUndoGroup("同步项目文件夹");
+        try {
+            var copiedItems = [];
+
+            // 复制源文件夹
+            if (sourceFolder.exists) {
+                var destSource = new Folder(targetFolder.fsName + "/源文件");
+                copyFolder(sourceFolder, destSource);
+                copiedItems.push("源文件");
+            }
+
+            // 复制输出文件夹
+            if (outputFolder.exists) {
+                var destOutput = new Folder(targetFolder.fsName + "/输出");
+                copyFolder(outputFolder, destOutput);
+                copiedItems.push("输出");
+            }
+
+            if (copiedItems.length === 0) {
+                alert("项目旁边没有找到'源文件'或'输出'文件夹！");
+                return;
+            }
+
+            // 第三步：复制目标文件夹到网络共享目录
+            var networkPath = "\\\\172.19.241.43\\互娱中台设计-文件共享\\A礼物";
+            var networkDest = new Folder(networkPath + "/" + targetFolderName);
+
+            try {
+                copyFolder(targetFolder, networkDest);
+
+                // 验证复制是否成功
+                var verifyPassed = true;
+                var verifyMsg = "";
+
+                // 检查网络目录中的文件夹是否存在
+                if (copiedItems.indexOf("源文件") >= 0) {
+                    var verifySource = new Folder(networkDest.fsName + "/源文件");
+                    if (!verifySource.exists) {
+                        verifyPassed = false;
+                        verifyMsg += "\n- 源文件夹未找到";
+                    }
+                }
+                if (copiedItems.indexOf("输出") >= 0) {
+                    var verifyOutput = new Folder(networkDest.fsName + "/输出");
+                    if (!verifyOutput.exists) {
+                        verifyPassed = false;
+                        verifyMsg += "\n- 输出文件夹未找到";
+                    }
+                }
+
+                // 检查源文件夹中的文件数量
+                if (verifyPassed) {
+                    var localCount = countFiles(targetFolder);
+                    var remoteCount = countFiles(networkDest);
+                    if (remoteCount < localCount) {
+                        verifyPassed = false;
+                        verifyMsg += "\n- 文件数量不匹配（本地：" + localCount + "，远程：" + remoteCount + "）";
+                    }
+                }
+
+                if (verifyPassed) {
+                    var confirmMsg = "同步完成并验证通过！\n\n已复制：" + copiedItems.join("、") + "\n目标：" + networkPath + "\\" + targetFolderName;
+                    confirmMsg += "\n\n是否清理项目目录中'" + targetFolderName + "'以外的文件？";
+
+                    if (confirm(confirmMsg)) {
+                        // 清理项目目录中除指定目录以外的文件
+                        var cleanedCount = 0;
+                        var items = projectDir.getFiles();
+                        for (var i = 0; i < items.length; i++) {
+                            var item = items[i];
+                            // 跳过指定目录和项目文件
+                            if (item.fsName === targetFolder.fsName || item.fsName === projectFile.fsName) {
+                                continue;
+                            }
+                            // 删除其他文件/文件夹
+                            if (item instanceof Folder) {
+                                cleanedCount += cleanFolder(item);
+                                item.remove();
+                            } else {
+                                item.remove();
+                            }
+                            cleanedCount++;
+                        }
+                        alert("已清理项目目录，删除了 " + cleanedCount + " 个文件/文件夹。");
+                    }
+                } else {
+                    alert("同步完成但验证失败：" + verifyMsg + "\n\n请手动检查网络目录。");
+                }
+            } catch(e) {
+                alert("复制到网络共享目录失败：" + e.message + "\n\n已复制：" + copiedItems.join("、") + "\n请检查网络连接或权限。");
+            }
+        } catch(e) {
+            alert("同步出错：" + e.toString());
+        }
+        app.endUndoGroup();
+    }
+
+    function copyFolder(src, dest) {
+        if (!dest.exists) {
+            dest.create();
+        }
+        var files = src.getFiles();
+        for (var i = 0; i < files.length; i++) {
+            var f = files[i];
+            if (f instanceof Folder) {
+                var subDest = new Folder(dest.fsName + "/" + f.name);
+                copyFolder(f, subDest);
+            } else {
+                var destFile = new File(dest.fsName + "/" + f.name);
+                f.copy(destFile.fsName);
+            }
+        }
+    }
+
+    function countFiles(folder) {
+        var count = 0;
+        var files = folder.getFiles();
+        for (var i = 0; i < files.length; i++) {
+            if (files[i] instanceof Folder) {
+                count += countFiles(files[i]);
+            } else {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    function cleanFolder(folder) {
+        var count = 0;
+        var files = folder.getFiles();
+        for (var i = 0; i < files.length; i++) {
+            if (files[i] instanceof Folder) {
+                count += cleanFolder(files[i]);
+                files[i].remove();
+            } else {
+                files[i].remove();
+            }
+            count++;
+        }
+        return count;
+    }
+
     function sortOutputFiles() {
         if (!app.project.file) {
             alert("请先保存项目文件！");
@@ -1189,6 +1415,78 @@ function createMainUI(parentPanel) {
         };
 
         dialog.show();
+    }
+
+    // ================== 将预览序列帧合成为MP4 ==================
+    function renderPreviewToMp4() {
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+
+        var projectDir = app.project.file.parent;
+        var outFs = projectDir.fsName + "\\\u8F93\u51FA";
+
+        var items = projectDir.getFiles();
+
+        var previewFolders = [];
+        for (var i = 0; i < items.length; i++) {
+            if (items[i] instanceof Folder) {
+                var folderName = decodeURIComponent(items[i].name);
+                if (folderName.indexOf("预览") >= 0) {
+                    previewFolders.push(items[i]);
+                }
+            }
+        }
+
+        if (previewFolders.length === 0) {
+            alert("未找到包含'预览'的文件夹！");
+            return;
+        }
+
+        var folderListStr = "";
+        for (var fi = 0; fi < previewFolders.length; fi++) {
+            folderListStr += "\n  " + (fi + 1) + ". " + decodeURIComponent(previewFolders[fi].name);
+        }
+
+        if (!confirm("找到以下包含\"预览\"的文件夹：" + folderListStr + "\n\n是否合成MP4？")) return;
+
+        for (var fi = 0; fi < previewFolders.length; fi++) {
+            var folder = previewFolders[fi];
+
+            var batContent = '@echo off\r\n';
+            batContent += 'chcp 65001 >nul\r\n';
+            batContent += 'cd /d "%~dp0"\r\n';
+            batContent += 'echo ========== MP4 Synthesize Start ==========\r\n';
+            batContent += 'powershell -NoProfile -Command "';
+            batContent += '$count=1; ';
+            batContent += 'Get-ChildItem -Path . -Filter *.png -File | ';
+            batContent += 'ForEach-Object { Rename-Item -Path $_.FullName -NewName (\\\"{0:0000}.png\\\" -f $count) -ErrorAction Stop; $count++ }; ';
+            batContent += 'ffmpeg -y -r 24 -f image2 -i \\\"%%04d.png\\\" -vcodec libx264 -crf 20 -pix_fmt yuv420p \\\"$((Get-Item .).Name).mp4\\\"';
+            batContent += '"\r\n';
+            batContent += 'if errorlevel 1 (echo [FAIL]) else (echo [OK])\r\n';
+            batContent += 'echo.\r\n';
+            batContent += 'move /y "*.mp4" "' + outFs + '\\"\r\n';
+            batContent += 'echo [Clipboard] Copying MP4s...\r\n';
+            batContent += 'powershell -Command "Get-Item \'' + outFs + '\\*.mp4\' | Set-Clipboard"\r\n';
+            batContent += 'echo [WeChat] Opening...\r\n';
+            batContent += 'start "" "C:\\Program Files (x86)\\WXWork\\WXWork.exe"\r\n';
+            batContent += 'echo ========== Done ==========\r\n';
+            batContent += 'timeout /t 5 /nobreak\r\n';
+            batContent += '(goto) 2>nul & del "%~f0"\r\n';
+
+            var batFile = new File(folder.fsName + "/render.bat");
+            batFile.encoding = "UTF8";
+            if (batFile.open("w")) {
+                batFile.write(batContent);
+                batFile.close();
+                if (batFile.exists) {
+                    batFile.execute();
+                }
+            }
+        }
+
+        alert("正在合成 " + previewFolders.length + " 个MP4...\n处理完成后窗口将自动关闭");
     }
 
     // ================== 缓存预设文件列表 ==================
