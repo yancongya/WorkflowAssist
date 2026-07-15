@@ -2134,7 +2134,7 @@ function createMainUI(parentPanel) {
 
         try {
             var saveFile = new File(fileDir.fsName + "/" + saveName + ".aep");
-            app.project.saveAs(saveFile);
+            app.project.save(saveFile);
             alert("项目已保存到：\n" + saveFile.fsName);
         } catch(e) {
             alert("保存失败：" + e.toString());
