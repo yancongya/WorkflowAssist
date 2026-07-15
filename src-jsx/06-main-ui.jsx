@@ -693,6 +693,9 @@ function createMainUI(parentPanel) {
         funcRow2.layout.layout(true);
     }
 
+    var btnSaveProject = addIconButton2("保存", "saveProject", "自动保存未保存的项目到素材文件所在目录");
+    btnSaveProject.onClick = function() { autoSaveProject(); };
+
     var btnRenderMp4 = addIconButton2("渲染合成", "renderMp4", "将'预览'文件夹中的序列帧重命名并合成为MP4视频");
     btnRenderMp4.onClick = function() { renderPreviewToMp4(); };
     relayoutFuncButtons2();
@@ -1515,6 +1518,54 @@ function createMainUI(parentPanel) {
         };
 
         dialog.show();
+    }
+
+    // ================== 自动保存未保存的项目 ==================
+    function autoSaveProject() {
+        if (app.project.file) {
+            alert("项目已保存，无需操作。");
+            return;
+        }
+
+        var importedFile = null;
+        for (var i = 1; i <= app.project.items.length; i++) {
+            var item = app.project.items[i];
+            if (item instanceof FootageItem && item.file) {
+                importedFile = item.file;
+                break;
+            }
+        }
+
+        if (!importedFile) {
+            alert("未找到导入的文件，无法确定保存位置。");
+            return;
+        }
+
+        var fileDir = importedFile.parent;
+        var folderName = decodeURIComponent(fileDir.name);
+        var projectName = "";
+
+        var match = folderName.match(/^\d{8}\s+(.+)/);
+        if (match) {
+            projectName = match[1];
+        }
+
+        var result = prompt("请输入项目名称：", projectName);
+        if (result === null) return;
+
+        var saveName = result.trim();
+        if (!saveName) {
+            alert("项目名称不能为空！");
+            return;
+        }
+
+        try {
+            var saveFile = new File(fileDir.fsName + "/" + saveName + ".aep");
+            app.project.saveAs(saveFile);
+            alert("项目已保存到：\n" + saveFile.fsName);
+        } catch(e) {
+            alert("保存失败：" + e.toString());
+        }
     }
 
     // ================== 将预览序列帧合成为MP4 ==================
