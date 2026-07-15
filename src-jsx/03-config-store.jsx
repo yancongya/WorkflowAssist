@@ -39,3 +39,18 @@ function loadPreset(file) {
         return null;
     }
 }
+
+function savePreset(file, data) {
+    try {
+        file.encoding = "UTF-8";
+        if (file.open("w")) {
+            var content = JSON.stringify(data, null, 2);
+            file.write(content);
+            file.close();
+            return true;
+        }
+    } catch (e) {
+        logMessage("保存预设文件失败: " + file.fsName + " - " + e.message, LOG_LEVEL.ERROR, "CONFIG");
+    }
+    return false;
+}

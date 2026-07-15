@@ -129,6 +129,21 @@ function loadPreset(file) {
     }
 }
 
+function savePreset(file, data) {
+    try {
+        file.encoding = "UTF-8";
+        if (file.open("w")) {
+            var content = JSON.stringify(data, null, 2);
+            file.write(content);
+            file.close();
+            return true;
+        }
+    } catch (e) {
+        logMessage("保存预设文件失败: " + file.fsName + " - " + e.message, LOG_LEVEL.ERROR, "CONFIG");
+    }
+    return false;
+}
+
 // ===== END 03-config-store.jsx =====
 
 // ===== BEGIN 04-ae-utils.jsx =====
@@ -704,6 +719,7 @@ function createMainUI(parentPanel) {
     presetDropdown.onChange = function() {
         updateStepPreview();
         refreshOutputUI();
+        if (syncTargetInput) syncTargetInput.text = getSyncTargetPath();
     };
 
     // ================== Tab 按钮行（居中） ==================
@@ -719,6 +735,9 @@ function createMainUI(parentPanel) {
 
     var tabOutput = tabGroup.add("button", undefined, "输出");
     tabOutput.preferredSize.width = 80;
+
+    var tabSync = tabGroup.add("button", undefined, "同步");
+    tabSync.preferredSize.width = 80;
 
     // ================== 内容容器 ==================
     var tabContent = win.add("panel");
@@ -840,6 +859,53 @@ function createMainUI(parentPanel) {
         outputStepContainer.layout.layout(true);
     }
 
+    // --- 同步面板 ---
+    var syncGroup = tabContent.add("group");
+    syncGroup.orientation = "column";
+    syncGroup.alignChildren = ["fill", "fill"];
+    syncGroup.alignment = ["fill", "fill"];
+    syncGroup.spacing = 4;
+    syncGroup.margins = 6;
+    syncGroup.visible = false;
+
+    var syncPanel = syncGroup.add("panel");
+    syncPanel.orientation = "column";
+    syncPanel.alignChildren = ["fill", "top"];
+    syncPanel.alignment = ["fill", "fill"];
+    syncPanel.spacing = 3;
+    syncPanel.margins = 4;
+    syncPanel.text = "同步步骤";
+
+    var syncStepContainer = syncPanel.add("group");
+    syncStepContainer.orientation = "column";
+    syncStepContainer.alignChildren = ["fill", "top"];
+    syncStepContainer.alignment = ["fill", "top"];
+    syncStepContainer.spacing = 2;
+    syncStepContainer.margins = [0, 0, 0, 0];
+
+    var syncStepButtons = [];
+    var syncStepActiveStates = [];
+
+    var syncStepTipLine = syncPanel.add("statictext", undefined, "点击切换 | Ctrl+点击单步执行");
+    syncStepTipLine.alignment = ["center", "bottom"];
+    syncStepTipLine.margins = [0, 2, 0, 0];
+
+    var syncTargetRow = syncPanel.add("group");
+    syncTargetRow.orientation = "row";
+    syncTargetRow.alignment = ["fill", "top"];
+    syncTargetRow.alignChildren = ["left", "center"];
+    syncTargetRow.spacing = 4;
+    syncTargetRow.margins = [0, 4, 0, 0];
+
+    var syncTargetLabel = syncTargetRow.add("statictext", undefined, "目标路径:");
+    syncTargetLabel.alignment = ["left", "center"];
+
+    var syncTargetInput = syncTargetRow.add("edittext", undefined, "");
+    syncTargetInput.alignment = ["fill", "center"];
+    syncTargetInput.characters = 30;
+
+    var syncStatusText = syncPanel.add("statictext", undefined, "状态: 就绪");
+
     var currentTab = "organize";
     var tabHovered = null; // 跟踪哪个 tab 被 hover
 
@@ -847,6 +913,7 @@ function createMainUI(parentPanel) {
         currentTab = "organize";
         organizeGroup.visible = true;
         outputGroup.visible = false;
+        syncGroup.visible = false;
         tabContent.layout.layout(true);
     }
 
@@ -854,12 +921,37 @@ function createMainUI(parentPanel) {
         currentTab = "output";
         organizeGroup.visible = false;
         outputGroup.visible = true;
+        syncGroup.visible = false;
         refreshOutputUI();
         tabContent.layout.layout(true);
     }
 
+    function showSyncTab() {
+        currentTab = "sync";
+        organizeGroup.visible = false;
+        outputGroup.visible = false;
+        syncGroup.visible = true;
+        refreshSyncUI();
+        tabContent.layout.layout(true);
+    }
+
+    function executeAllSync() {
+        if (!app.project.file) { alert("请先保存项目文件！"); return; }
+        for (var i = 0; i < syncStepActiveStates.length; i++) {
+            if (syncStepActiveStates[i]) {
+                var ok = executeSyncStep(i);
+                if (!ok) {
+                    alert("同步步骤 " + (i + 1) + " 执行失败，终止后续步骤。");
+                    break;
+                }
+            }
+        }
+    }
+
     function executeCurrentTab() {
-        if (currentTab === "output") {
+        if (currentTab === "sync") {
+            executeAllSync();
+        } else if (currentTab === "output") {
             var baseName = stripKnownSuffixes(nameInput.text);
             if (!baseName) { alert("请输入基础名称！"); return; }
             if (!app.project.file) { alert("请先保存项目文件！"); return; }
@@ -924,6 +1016,14 @@ function createMainUI(parentPanel) {
                 tabOutput.text = "输出";
                 tabOutput.helpTip = "切换到输出标签 | Ctrl+单击: 执行输出";
             }
+        } else if (tabHovered === "sync") {
+            if (ctrlKey) {
+                tabSync.text = "执行";
+                tabSync.helpTip = "执行同步 (Ctrl)";
+            } else {
+                tabSync.text = "同步";
+                tabSync.helpTip = "切换到同步标签 | Ctrl+单击: 执行同步";
+            }
         }
     }
 
@@ -947,6 +1047,16 @@ function createMainUI(parentPanel) {
         tabOutput.helpTip = "切换到输出标签 | Ctrl+单击: 执行输出";
     });
 
+    tabSync.addEventListener("mouseover", function() {
+        tabHovered = "sync";
+        updateTabText();
+    });
+    tabSync.addEventListener("mouseout", function() {
+        tabHovered = null;
+        tabSync.text = "同步";
+        tabSync.helpTip = "切换到同步标签 | Ctrl+单击: 执行同步";
+    });
+
     // 键盘事件监听，实时更新 tab 文本
     win.addEventListener("keydown", function() {
         if (tabHovered) updateTabText();
@@ -967,6 +1077,14 @@ function createMainUI(parentPanel) {
             executeCurrentTab();
         } else {
             showOutputTab();
+        }
+    };
+
+    tabSync.onClick = function() {
+        if (ScriptUI.environment.keyboardState.ctrlKey) {
+            executeCurrentTab();
+        } else {
+            showSyncTab();
         }
     };
 
@@ -1089,9 +1207,6 @@ function createMainUI(parentPanel) {
 
     var btnSortOutput = addFuncButton("输出", "sortOutput", "整理输出文件夹文件并生成批处理");
     btnSortOutput.onClick = function() { sortOutputFiles(); };
-
-    var btnFolderSync = addFuncButton("同步", "folderSync", "复制源文件+输出到项目文件夹，并同步到共享目录");
-    btnFolderSync.onClick = function() { syncProjectFolder(); };
 
     // ================== 第二行功能按钮 ==================
     var funcRow2 = funcPanel.add("group");
@@ -2168,6 +2283,169 @@ function createMainUI(parentPanel) {
                 this.text = p2 + "Step " + (idx + 1) + ": " + this._stepName;
             }
         };
+    }
+
+    // ================== 同步步骤函数 ==================
+    var SYNC_STEP_NAMES = ["收集", "推送", "清理"];
+
+    function getSyncTargetPath() {
+        var presetFile = getSelectedPresetFile();
+        if (!presetFile) return "";
+        var data = loadPreset(presetFile);
+        if (data && data.sync && data.sync.targetPath) {
+            return data.sync.targetPath;
+        }
+        return "";
+    }
+
+    function refreshSyncUI() {
+        clearContainer(syncStepContainer);
+        syncStepButtons = [];
+        syncStepActiveStates = [];
+
+        syncTargetInput.text = getSyncTargetPath();
+
+        for (var i = 0; i < SYNC_STEP_NAMES.length; i++) {
+            syncStepActiveStates[i] = true;
+            var btn = syncStepContainer.add("button", undefined, "");
+            btn.alignment = ["fill", "top"];
+            btn.preferredSize.height = 24;
+
+            buildSyncStepButton(btn, i, true);
+            syncStepButtons.push(btn);
+        }
+
+        syncStatusText.text = "状态: 就绪";
+        syncStepContainer.layout.layout(true);
+    }
+
+    function buildSyncStepButton(btn, index, isActive) {
+        var prefix = isActive ? "\u2713 " : "\u25CB ";
+        btn.text = prefix + "Step " + (index + 1) + ": " + SYNC_STEP_NAMES[index];
+        btn.helpTip = "Step " + (index + 1) + ": " + SYNC_STEP_NAMES[index] + "\n\n单击: 切换启用/禁用 | Ctrl+单击: 立即执行此步骤";
+        btn._syncIndex = index;
+
+        btn.onClick = function() {
+            var ctrlKey = ScriptUI.environment.keyboardState.ctrlKey;
+            var idx = this._syncIndex;
+
+            if (ctrlKey) {
+                executeSyncStep(idx);
+            } else {
+                syncStepActiveStates[idx] = !syncStepActiveStates[idx];
+                var active = syncStepActiveStates[idx];
+                var p2 = active ? "\u2713 " : "\u25CB ";
+                this.text = p2 + "Step " + (idx + 1) + ": " + SYNC_STEP_NAMES[idx];
+            }
+        };
+    }
+
+    function executeSyncStep(index) {
+        if (!app.project.file) { alert("请先保存项目文件！"); return false; }
+
+        var projectFile = app.project.file;
+        var projectDir = projectFile.parent;
+        var projectName = decodeUrlString(projectFile.name.replace(/\.[^\.]+$/, ""));
+        var targetFolderName = projectName + "文件夹";
+        var targetFolder = new Folder(projectDir.fsName + "/" + targetFolderName);
+
+        if (index === 0) {
+            // Step 1: 收集 - 复制源文件和输出到项目文件夹
+            syncStatusText.text = "状态: 正在收集...";
+            var sourceFolder = new Folder(projectDir.fsName + "/源文件");
+            var outputFolder = new Folder(projectDir.fsName + "/输出");
+            var copied = [];
+
+            if (sourceFolder.exists) {
+                if (!targetFolder.exists) targetFolder.create();
+                copyFolder(sourceFolder, new Folder(targetFolder.fsName + "/源文件"));
+                copied.push("源文件");
+            }
+            if (outputFolder.exists) {
+                if (!targetFolder.exists) targetFolder.create();
+                copyFolder(outputFolder, new Folder(targetFolder.fsName + "/输出"));
+                copied.push("输出");
+            }
+
+            if (copied.length === 0) {
+                syncStatusText.text = "状态: 收集失败 - 未找到源文件或输出文件夹";
+                return false;
+            }
+            syncStatusText.text = "状态: 收集完成 - " + copied.join("、");
+            return true;
+        }
+
+        if (index === 1) {
+            // Step 2: 推送 - 复制项目文件夹到网络路径
+            var networkPath = syncTargetInput.text.trim();
+            if (!networkPath) { alert("目标路径为空！请先在预设中配置。"); return false; }
+
+            var presetFile = getSelectedPresetFile();
+            if (presetFile) {
+                var presetData = loadPreset(presetFile);
+                if (presetData) {
+                    if (!presetData.sync) presetData.sync = {};
+                    presetData.sync.targetPath = networkPath;
+                    savePreset(presetFile, presetData);
+                }
+            }
+
+            if (!targetFolder.exists) {
+                alert("项目文件夹不存在:\n" + targetFolder.fsName + "\n请先执行'收集'步骤。");
+                syncStatusText.text = "状态: 推送失败 - 项目文件夹不存在";
+                return false;
+            }
+
+            syncStatusText.text = "状态: 正在推送到网络...";
+            var networkDest = new Folder(networkPath + "/" + targetFolderName);
+
+            try {
+                copyFolder(targetFolder, networkDest);
+
+                var localCount = countFiles(targetFolder);
+                var remoteCount = countFiles(networkDest);
+
+                if (remoteCount < localCount) {
+                    alert("推送完成但验证失败：文件数量不匹配\n本地：" + localCount + "，远程：" + remoteCount + "\n请手动检查网络目录。");
+                    syncStatusText.text = "状态: 推送完成但验证失败";
+                } else {
+                    alert("推送完成并验证通过！\n目标：" + networkPath + "\\" + targetFolderName);
+                    syncStatusText.text = "状态: 推送完成";
+                }
+                return true;
+            } catch(e) {
+                alert("推送到网络共享目录失败：" + e.message + "\n请检查网络连接或权限。");
+                syncStatusText.text = "状态: 推送失败";
+                return false;
+            }
+        }
+
+        if (index === 2) {
+            // Step 3: 清理 - 只保留 targetFolder，其他全删（包括 .aep）
+            if (!targetFolder.exists) {
+                if (!confirm("项目文件夹 " + targetFolderName + " 不存在，是否创建？")) return false;
+                targetFolder.create();
+            }
+
+            var count = 0;
+            var items = projectDir.getFiles();
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                if (item.fsName === targetFolder.fsName) continue;
+                if (item instanceof Folder) {
+                    count += cleanFolder(item);
+                    item.remove();
+                } else {
+                    item.remove();
+                }
+                count++;
+            }
+
+            syncStatusText.text = "状态: 清理完成 - 删除了 " + count + " 项";
+            return true;
+        }
+
+        return false;
     }
 
     // ================== 初始化 ==================
