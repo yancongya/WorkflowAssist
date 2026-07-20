@@ -59,8 +59,12 @@ function createMainUI(parentPanel) {
     nameInput.minimumSize.width = 140;
     nameInput.helpTip = "输入基础名称，源合成将被重命名为此名称\n当前合成: " + currentCompName;
     nameInput.onChange = function() {
-        updateStepPreview();
-        refreshOutputUI();
+        try {
+            updateStepPreview();
+            refreshOutputUI();
+        } catch(e) {
+            logMessage("nameInput.onChange 出错: " + (e.message || e.toString()), LOG_LEVEL.ERROR, "UI");
+        }
     };
 
     function makeIconButton(parent, symbol, tip) {
@@ -82,7 +86,7 @@ function createMainUI(parentPanel) {
         if (!presetData || !presetData.steps) return name;
         for (var si = 0; si < presetData.steps.length; si++) {
             var sfx = presetData.steps[si].suffix;
-            if (name.length > sfx.length && name.lastIndexOf(sfx) === name.length - sfx.length) {
+            if (sfx && name.length > sfx.length && name.lastIndexOf(sfx) === name.length - sfx.length) {
                 return name.substring(0, name.length - sfx.length);
             }
         }
@@ -104,29 +108,44 @@ function createMainUI(parentPanel) {
     }
 
     btnRefresh.onClick = function() {
-        detectCurrentComp();
-        updateStepPreview();
-        refreshOutputUI();
+        try {
+            detectCurrentComp();
+            updateStepPreview();
+            refreshOutputUI();
+        } catch(e) {
+            logMessage("btnRefresh.onClick 出错: " + (e.message || e.toString()), LOG_LEVEL.ERROR, "UI");
+            alert("刷新出错: " + (e.message || e.toString()));
+        }
     };
 
     btnGetComp.onClick = function() {
-        var compName = getActiveCompName();
-        if (compName) {
-            nameInput.text = compName;
-            logMessage("已获取合成名称: " + compName, LOG_LEVEL.NORMAL, "UI");
-        } else {
-            alert("未找到当前活动合成！");
+        try {
+            var compName = getActiveCompName();
+            if (compName) {
+                nameInput.text = compName;
+                logMessage("已获取合成名称: " + compName, LOG_LEVEL.NORMAL, "UI");
+            } else {
+                alert("未找到当前活动合成！");
+            }
+        } catch(e) {
+            logMessage("btnGetComp.onClick 出错: " + (e.message || e.toString()), LOG_LEVEL.ERROR, "UI");
+            alert("获取合成名出错: " + (e.message || e.toString()));
         }
     };
 
     btnGetProject.onClick = function() {
-        if (app.project && app.project.file) {
-            var projFile = app.project.file.name.replace(/\.[^\.]+$/, "");
-            var projName = decodeUrlString(projFile);
-            nameInput.text = projName;
-            logMessage("已获取项目文件名: " + projName, LOG_LEVEL.NORMAL, "UI");
-        } else {
-            alert("当前项目尚未保存！");
+        try {
+            if (app.project && app.project.file) {
+                var projFile = app.project.file.name.replace(/\.[^\.]+$/, "");
+                var projName = decodeUrlString(projFile);
+                nameInput.text = projName;
+                logMessage("已获取项目文件名: " + projName, LOG_LEVEL.NORMAL, "UI");
+            } else {
+                alert("当前项目尚未保存！");
+            }
+        } catch(e) {
+            logMessage("btnGetProject.onClick 出错: " + (e.message || e.toString()), LOG_LEVEL.ERROR, "UI");
+            alert("获取项目名出错: " + (e.message || e.toString()));
         }
     };
 
@@ -145,9 +164,13 @@ function createMainUI(parentPanel) {
     presetDropdown.alignment = ["fill", "center"];
     presetDropdown.minimumSize.width = 120;
     presetDropdown.onChange = function() {
-        updateStepPreview();
-        refreshOutputUI();
-        if (syncTargetInput) syncTargetInput.text = getSyncTargetPath();
+        try {
+            updateStepPreview();
+            refreshOutputUI();
+            if (syncTargetInput) syncTargetInput.text = getSyncTargetPath();
+        } catch(e) {
+            logMessage("presetDropdown.onChange 出错: " + (e.message || e.toString()), LOG_LEVEL.ERROR, "UI");
+        }
     };
 
     // ================== Tab 按钮行（居中） ==================
@@ -275,8 +298,9 @@ function createMainUI(parentPanel) {
             status.margins = [0, 0, 4, 0];
             setTextColor(status, [0.5, 0.5, 0.5, 1]);
 
+            chkRender._chkImport = chkImport;
             chkRender.onClick = function() {
-                chkImport.enabled = this.value;
+                this._chkImport.enabled = this.value;
             };
 
             renderRows.push(row);
@@ -288,77 +312,83 @@ function createMainUI(parentPanel) {
     }
 
     // --- 同步面板 ---
-    var syncGroup = tabContent.add("group");
-    syncGroup.orientation = "column";
-    syncGroup.alignChildren = ["fill", "fill"];
-    syncGroup.alignment = ["fill", "fill"];
-    syncGroup.spacing = 4;
-    syncGroup.margins = 6;
-    syncGroup.visible = false;
+    var syncGroup, syncPanel, syncStepContainer, syncStepButtons, syncStepActiveStates;
+    var syncStepTipLine, syncTargetRow, syncTargetLabel, syncTargetInput, syncStatusText;
+    try {
+        syncGroup = tabContent.add("group");
+        syncGroup.orientation = "column";
+        syncGroup.alignChildren = ["fill", "fill"];
+        syncGroup.alignment = ["fill", "fill"];
+        syncGroup.spacing = 4;
+        syncGroup.margins = 6;
+        syncGroup.visible = false;
 
-    var syncPanel = syncGroup.add("panel");
-    syncPanel.orientation = "column";
-    syncPanel.alignChildren = ["fill", "top"];
-    syncPanel.alignment = ["fill", "fill"];
-    syncPanel.spacing = 3;
-    syncPanel.margins = 4;
-    syncPanel.text = "同步步骤";
+        syncPanel = syncGroup.add("panel");
+        syncPanel.orientation = "column";
+        syncPanel.alignChildren = ["fill", "top"];
+        syncPanel.alignment = ["fill", "fill"];
+        syncPanel.spacing = 3;
+        syncPanel.margins = 4;
+        syncPanel.text = "同步步骤";
 
-    var syncStepContainer = syncPanel.add("group");
-    syncStepContainer.orientation = "column";
-    syncStepContainer.alignChildren = ["fill", "top"];
-    syncStepContainer.alignment = ["fill", "top"];
-    syncStepContainer.spacing = 2;
-    syncStepContainer.margins = [0, 0, 0, 0];
+        syncStepContainer = syncPanel.add("group");
+        syncStepContainer.orientation = "column";
+        syncStepContainer.alignChildren = ["fill", "top"];
+        syncStepContainer.alignment = ["fill", "top"];
+        syncStepContainer.spacing = 2;
+        syncStepContainer.margins = [0, 0, 0, 0];
 
-    var syncStepButtons = [];
-    var syncStepActiveStates = [];
+        syncStepButtons = [];
+        syncStepActiveStates = [];
 
-    var syncStepTipLine = syncPanel.add("statictext", undefined, "点击切换 | Ctrl+点击单步执行");
-    syncStepTipLine.alignment = ["center", "bottom"];
-    syncStepTipLine.margins = [0, 2, 0, 0];
+        syncStepTipLine = syncPanel.add("statictext", undefined, "点击切换 | Ctrl+点击单步执行");
+        syncStepTipLine.alignment = ["center", "bottom"];
+        syncStepTipLine.margins = [0, 2, 0, 0];
 
-    var syncTargetRow = syncPanel.add("group");
-    syncTargetRow.orientation = "row";
-    syncTargetRow.alignment = ["fill", "top"];
-    syncTargetRow.alignChildren = ["left", "center"];
-    syncTargetRow.spacing = 4;
-    syncTargetRow.margins = [0, 4, 0, 0];
+        syncTargetRow = syncPanel.add("group");
+        syncTargetRow.orientation = "row";
+        syncTargetRow.alignment = ["fill", "top"];
+        syncTargetRow.alignChildren = ["left", "center"];
+        syncTargetRow.spacing = 4;
+        syncTargetRow.margins = [0, 4, 0, 0];
 
-    var syncTargetLabel = syncTargetRow.add("statictext", undefined, "目标路径:");
-    syncTargetLabel.alignment = ["left", "center"];
+        syncTargetLabel = syncTargetRow.add("statictext", undefined, "目标路径:");
+        syncTargetLabel.alignment = ["left", "center"];
 
-    var syncTargetInput = syncTargetRow.add("edittext", undefined, "");
-    syncTargetInput.alignment = ["fill", "center"];
-    syncTargetInput.characters = 30;
+        syncTargetInput = syncTargetRow.add("edittext", undefined, "");
+        syncTargetInput.alignment = ["fill", "center"];
+        syncTargetInput.characters = 30;
 
-    var syncStatusText = syncPanel.add("statictext", undefined, "状态: 就绪");
+        syncStatusText = syncPanel.add("statictext", undefined, "状态: 就绪");
+    } catch(e) {
+        alert("同步面板创建失败: " + (e.message || e.toString()) + "\n行号: " + e.line);
+    }
 
     var currentTab = "organize";
     var tabHovered = null; // 跟踪哪个 tab 被 hover
 
     function showOrganizeTab() {
         currentTab = "organize";
-        organizeGroup.visible = true;
-        outputGroup.visible = false;
-        syncGroup.visible = false;
+        if (organizeGroup) organizeGroup.visible = true;
+        if (outputGroup) outputGroup.visible = false;
+        if (syncGroup) syncGroup.visible = false;
         tabContent.layout.layout(true);
     }
 
     function showOutputTab() {
         currentTab = "output";
-        organizeGroup.visible = false;
-        outputGroup.visible = true;
-        syncGroup.visible = false;
+        if (organizeGroup) organizeGroup.visible = false;
+        if (outputGroup) outputGroup.visible = true;
+        if (syncGroup) syncGroup.visible = false;
         refreshOutputUI();
         tabContent.layout.layout(true);
     }
 
     function showSyncTab() {
         currentTab = "sync";
-        organizeGroup.visible = false;
-        outputGroup.visible = false;
-        syncGroup.visible = true;
+        if (organizeGroup) organizeGroup.visible = false;
+        if (outputGroup) outputGroup.visible = false;
+        if (syncGroup) syncGroup.visible = true;
         refreshSyncUI();
         tabContent.layout.layout(true);
     }
@@ -494,10 +524,14 @@ function createMainUI(parentPanel) {
     });
 
     tabOrganize.onClick = function() {
-        if (ScriptUI.environment.keyboardState.ctrlKey) {
-            executeCurrentTab();
-        } else {
-            showOrganizeTab();
+        try {
+            if (ScriptUI.environment.keyboardState.ctrlKey) {
+                executeCurrentTab();
+            } else {
+                showOrganizeTab();
+            }
+        } catch(e) {
+            alert("整理Tab出错: " + (e.message || e.toString()) + "\n行号: " + e.line);
         }
     };
     tabOutput.onClick = function() {
@@ -508,15 +542,19 @@ function createMainUI(parentPanel) {
                 showOutputTab();
             }
         } catch(e) {
-            alert("输出Tab出错: " + (e.message || e.toString()));
+            alert("输出Tab出错: " + (e.message || e.toString()) + "\n行号: " + e.line);
         }
     };
 
     tabSync.onClick = function() {
-        if (ScriptUI.environment.keyboardState.ctrlKey) {
-            executeCurrentTab();
-        } else {
-            showSyncTab();
+        try {
+            if (ScriptUI.environment.keyboardState.ctrlKey) {
+                executeCurrentTab();
+            } else {
+                showSyncTab();
+            }
+        } catch(e) {
+            alert("同步Tab出错: " + (e.message || e.toString()) + "\n行号: " + e.line);
         }
     };
 
@@ -589,34 +627,56 @@ function createMainUI(parentPanel) {
 
     var btnMask = addFuncButton("蒙版", "addMask", "单击: 创建蒙版 | Ctrl+单击: 设置轨道遮罩");
     btnMask.onClick = function() {
-        if (ScriptUI.environment.keyboardState.ctrlKey) {
-            toggleTrackMatte();
-        } else {
-            createMaskLayer();
+        try {
+            if (ScriptUI.environment.keyboardState.ctrlKey) {
+                toggleTrackMatte();
+            } else {
+                createMaskLayer();
+            }
+        } catch(e) {
+            alert("蒙版按钮出错: " + (e.message || e.toString()));
         }
     };
 
     var btnImportBg = addFuncButton("背景", "importBg", "从预设目录导入 bg.png 作为背景图层");
-    btnImportBg.onClick = function() { importBgImage(); };
+    btnImportBg.onClick = function() {
+        try { importBgImage(); } catch(e) { alert("背景按钮出错: " + (e.message || e.toString())); }
+    };
 
     var btnPag = addFuncButton("PAG", "pagExport", "独显选中图层 → 打标记 → 预合成为 animated → 生成高光图");
-    btnPag.onClick = function() { pagExport(); };
+    btnPag.onClick = function() {
+        try { pagExport(); } catch(e) { alert("PAG按钮出错: " + (e.message || e.toString())); }
+    };
 
-    var btnImportTemplate = addFuncButton("模板", "importTemplate", "导入高光图并替换模板末尾图层");
-    btnImportTemplate.onClick = function() { importTemplateAndReplace(); };
+    var btnImportTemplate = addFuncButton("模板", "importTemplate", "单击: 导入高光图并替换模板末尾图层 | Ctrl+单击: 渲染当前帧为高光图");
+    btnImportTemplate.onClick = function() {
+        try {
+            if (ScriptUI.environment.keyboardState.ctrlKey) {
+                renderHighlightFrame();
+            } else {
+                importTemplateAndReplace();
+            }
+        } catch(e) { alert("模板按钮出错: " + (e.message || e.toString())); }
+    };
 
     var btnOpenSVGA = addFuncButton("SVGA", "svgaPanel", "打开SVGAConverter面板");
     btnOpenSVGA.onClick = function() {
-        var cmdId = app.findMenuCommandId("SVGAConverter_AE");
-        if (cmdId !== 0) {
-            app.executeCommand(cmdId);
-        } else {
-            alert("未找到 SVGAConverter_AE 面板命令！\n请确认该扩展已安装。");
+        try {
+            var cmdId = app.findMenuCommandId("SVGAConverter_AE");
+            if (cmdId !== 0) {
+                app.executeCommand(cmdId);
+            } else {
+                alert("未找到 SVGAConverter_AE 面板命令！\n请确认该扩展已安装。");
+            }
+        } catch(e) {
+            alert("SVGA按钮出错: " + (e.message || e.toString()));
         }
     };
 
     var btnCopyBanner = addFuncButton("Banner", "copyBanner", "根据合成时长选择并复制PAG文件到输出文件夹");
-    btnCopyBanner.onClick = function() { copyBannerPag(); };
+    btnCopyBanner.onClick = function() {
+        try { copyBannerPag(); } catch(e) { alert("Banner按钮出错: " + (e.message || e.toString())); }
+    };
 
     var btnCompress = addFuncButton("压缩", "autoTiny", "打开 Auto_Tinify 图片压缩工具");
     btnCompress.onClick = function() {
@@ -638,7 +698,9 @@ function createMainUI(parentPanel) {
     };
 
     var btnSortOutput = addFuncButton("输出", "sortOutput", "整理输出文件夹文件并生成批处理");
-    btnSortOutput.onClick = function() { sortOutputFiles(); };
+    btnSortOutput.onClick = function() {
+        try { sortOutputFiles(); } catch(e) { alert("整理输出按钮出错: " + (e.message || e.toString())); }
+    };
 
     // ================== 第二行功能按钮 ==================
     var funcRow2 = funcPanel.add("group");
@@ -698,10 +760,14 @@ function createMainUI(parentPanel) {
     }
 
     var btnSaveProject = addIconButton2("保存", "saveProject", "自动保存未保存的项目到素材文件所在目录");
-    btnSaveProject.onClick = function() { autoSaveProject(); };
+    btnSaveProject.onClick = function() {
+        try { autoSaveProject(); } catch(e) { alert("保存按钮出错: " + (e.message || e.toString())); }
+    };
 
     var btnRenderMp4 = addIconButton2("渲染合成", "renderMp4", "将'预览'文件夹中的序列帧重命名并合成为MP4视频");
-    btnRenderMp4.onClick = function() { renderPreviewToMp4(); };
+    btnRenderMp4.onClick = function() {
+        try { renderPreviewToMp4(); } catch(e) { alert("渲染合成按钮出错: " + (e.message || e.toString())); }
+    };
     relayoutFuncButtons2();
 
     // ================== 内置功能函数 ==================
@@ -1044,6 +1110,67 @@ function createMainUI(parentPanel) {
         }
 
         app.endUndoGroup();
+    }
+
+    function renderHighlightFrame() {
+        var comp = app.project.activeItem;
+        if (!(comp instanceof CompItem)) {
+            alert("请先选择一个活动合成！");
+            return;
+        }
+
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+
+        var projectDir = app.project.file.parent.fsName;
+        var outputFolder = new Folder(projectDir + "/输出");
+        if (!outputFolder.exists) outputFolder.create();
+
+        var currentTimeStr = comp.time.toFixed(2);
+        var tempFolder = new Folder(Folder.temp.fsName + "/__highlight_" + String(Math.random()).substr(2, 6));
+        if (!tempFolder.exists) tempFolder.create();
+
+        try {
+            var rqItem = app.project.renderQueue.items.add(comp);
+            rqItem.timeSpanStart = comp.time;
+            rqItem.timeSpanDuration = 1.0 / comp.frameRate;
+
+            while (rqItem.outputModules.length > 1) {
+                rqItem.outputModule(rqItem.outputModules.length).remove();
+            }
+
+            var om = rqItem.outputModule(1);
+
+            ensureSequenceTemplate();
+            var templateOk = false;
+            var tplNames = ["序列帧", "PNG 序列", "PNG Sequence"];
+            for (var tn = 0; tn < tplNames.length; tn++) {
+                try { om.applyTemplate(tplNames[tn]); templateOk = true; break; } catch(e) {}
+            }
+            if (!templateOk) {
+                try { om.setSetting("Format", "8"); } catch(e) {}
+            }
+
+            om.file = new File(tempFolder.fsName + "/高光图_[#####].png");
+
+            app.project.renderQueue.render();
+
+            var renderedFile = findFirstFileInFolder(tempFolder);
+            if (renderedFile) {
+                var destFile = new File(outputFolder.fsName + "/高光图.png");
+                renderedFile.copy(destFile.fsName);
+                alert("高光图已保存:\n" + destFile.fsName + "\n\n当前帧位置: " + currentTimeStr + "秒");
+            } else {
+                alert("渲染完成，但未找到输出文件。\n请检查渲染队列。");
+            }
+        } catch(e) {
+            alert("渲染高光图失败: " + e.toString());
+        }
+
+        try { rqItem.remove(); } catch(e) {}
+        try { cleanFolder(tempFolder); tempFolder.remove(); } catch(e) {}
     }
 
     function importTemplateAndReplace() {
@@ -1741,29 +1868,33 @@ function createMainUI(parentPanel) {
         btn._stepName = s.name;
 
         btn.onClick = function() {
-            var ctrlKey = ScriptUI.environment.keyboardState.ctrlKey;
-            var idx = this._stepIndex;
+            try {
+                var ctrlKey = ScriptUI.environment.keyboardState.ctrlKey;
+                var idx = this._stepIndex;
 
-            if (ctrlKey) {
-                var sourceComp = getActiveComp();
-                if (!sourceComp) {
-                    alert("请先在 After Effects 中选择一个活动合成！");
-                    return;
-                }
-                var base = nameInput.text;
-                if (!base) {
-                    alert("请输入基础名称！");
-                    return;
-                }
-                var pFile = getSelectedPresetFile();
-                if (!pFile) return;
+                if (ctrlKey) {
+                    var sourceComp = getActiveComp();
+                    if (!sourceComp) {
+                        alert("请先在 After Effects 中选择一个活动合成！");
+                        return;
+                    }
+                    var base = nameInput.text;
+                    if (!base) {
+                        alert("请输入基础名称！");
+                        return;
+                    }
+                    var pFile = getSelectedPresetFile();
+                    if (!pFile) return;
 
-                executeSingleStep(sourceComp, base, pFile, idx);
-            } else {
-                stepActiveStates[idx] = !stepActiveStates[idx];
-                var active = stepActiveStates[idx];
-                var p2 = active ? "\u2713 " : "\u25CB ";
-                this.text = p2 + "Step " + (idx + 1) + ": " + this._stepName;
+                    executeSingleStep(sourceComp, base, pFile, idx);
+                } else {
+                    stepActiveStates[idx] = !stepActiveStates[idx];
+                    var active = stepActiveStates[idx];
+                    var p2 = active ? "\u2713 " : "\u25CB ";
+                    this.text = p2 + "Step " + (idx + 1) + ": " + this._stepName;
+                }
+            } catch(e) {
+                logMessage("步骤按钮出错: " + (e.message || e.toString()), LOG_LEVEL.ERROR, "UI");
             }
         };
     }
@@ -1809,16 +1940,20 @@ function createMainUI(parentPanel) {
         btn._syncIndex = index;
 
         btn.onClick = function() {
-            var ctrlKey = ScriptUI.environment.keyboardState.ctrlKey;
-            var idx = this._syncIndex;
+            try {
+                var ctrlKey = ScriptUI.environment.keyboardState.ctrlKey;
+                var idx = this._syncIndex;
 
-            if (ctrlKey) {
-                executeSyncStep(idx);
-            } else {
-                syncStepActiveStates[idx] = !syncStepActiveStates[idx];
-                var active = syncStepActiveStates[idx];
-                var p2 = active ? "\u2713 " : "\u25CB ";
-                this.text = p2 + "Step " + (idx + 1) + ": " + SYNC_STEP_NAMES[idx];
+                if (ctrlKey) {
+                    executeSyncStep(idx);
+                } else {
+                    syncStepActiveStates[idx] = !syncStepActiveStates[idx];
+                    var active = syncStepActiveStates[idx];
+                    var p2 = active ? "\u2713 " : "\u25CB ";
+                    this.text = p2 + "Step " + (idx + 1) + ": " + SYNC_STEP_NAMES[idx];
+                }
+            } catch(e) {
+                alert("同步步骤按钮出错: " + (e.message || e.toString()));
             }
         };
     }
@@ -1904,27 +2039,44 @@ function createMainUI(parentPanel) {
         }
 
         if (index === 2) {
-            // Step 3: 清理 - 只保留 targetFolder，其他全删（包括 .aep）
+            // Step 3: 清理 - 只保留 targetFolder，其他移入 _回收站/（非永久删除）
             if (!targetFolder.exists) {
                 if (!confirm("项目文件夹 " + targetFolderName + " 不存在，是否创建？")) return false;
                 targetFolder.create();
             }
+
+            var trashFolder = new Folder(projectDir.fsName + "/_回收站");
+            if (!trashFolder.exists) trashFolder.create();
+            var timeStr = String(new Date().getFullYear()) + "-" + String(new Date().getMonth() + 1) + "-" + String(new Date().getDate()) + "_" + String(new Date().getHours()) + String(new Date().getMinutes()) + String(new Date().getSeconds());
+            var trashBatch = new Folder(trashFolder.fsName + "/" + targetFolderName + "_" + timeStr);
+            if (!trashBatch.exists) trashBatch.create();
 
             var count = 0;
             var items = projectDir.getFiles();
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
                 if (item.fsName === targetFolder.fsName) continue;
-                if (item instanceof Folder) {
-                    count += cleanFolder(item);
-                    item.remove();
-                } else {
-                    item.remove();
+                if (item.fsName === trashFolder.fsName) continue;
+                try {
+                    item.rename(trashBatch.fsName + "/" + item.name);
+                    count++;
+                } catch(e) {
+                    // rename across drives may fail, fallback to copy+remove
+                    try {
+                        if (item instanceof Folder) {
+                            copyFolder(item, new Folder(trashBatch.fsName + "/" + item.name));
+                            cleanFolder(item);
+                            item.remove();
+                        } else {
+                            item.copy(trashBatch.fsName + "/" + item.name);
+                            item.remove();
+                        }
+                        count++;
+                    } catch(e2) {}
                 }
-                count++;
             }
 
-            syncStatusText.text = "状态: 清理完成 - 删除了 " + count + " 项";
+            syncStatusText.text = "状态: 清理完成 - 移除了 " + count + " 项到 _回收站";
             return true;
         }
 

@@ -172,6 +172,48 @@ Example scenarios (baseName = "全屏座驾a-独角兽"):
 - 预设源文件存在 `config/`，构建时自动同步到 `dist/WorkflowAssist/`
 - 不改动 `dist/WorkflowAssist.jsx` 本身
 
+### ScriptUI 事件回调必须加 try/catch
+**ScriptUI 静默吞异常。** 事件回调（`onClick` / `onChange`）中抛异常不会在 AE 控制台报错，用户只看到"点了没反应"。所有回调必须用 try/catch 包裹：
+
+```javascript
+btn.onClick = function() {
+    try {
+        // 实际逻辑
+    } catch(e) {
+        alert("按钮出错: " + (e.message || e.toString()));
+    }
+};
+```
+
+此规则适用于：Tab 按钮、功能按钮、步骤按钮、下拉框 onChange、输入框 onChange、键盘/鼠标事件。
+
+### 循环内创建回调避免闭包陷阱
+`for` 循环内用 `var` 定义控件后创建 `onClick`，闭包引用的永远是**最后一个**变量值。绕开方式：把依赖的控件挂到 `this` 上：
+
+```javascript
+// 错误：chkImport 永远是最后一个
+chkRender.onClick = function() { chkImport.enabled = this.value; };
+
+// 正确：用属性绕过闭包
+chkRender._chkImport = chkImport;
+chkRender.onClick = function() { this._chkImport.enabled = this.value; };
+```
+
+### stripKnownSuffixes 的 sfx 空值检查
+`stripKnownSuffixes()` 遍历预设步骤时，遇到没有 `suffix` 字段的步骤（只有 `rename`），`sfx` 为 `undefined`，访问 `sfx.length` 抛异常。必须加 `if (sfx && ...)` 守卫。
+
+### 新 stack 面板的 visible 守卫
+`tabContent` 是 `orientation: "stack"` 面板，新增子面板后，所有 Tab 切换函数中访问其他面板的 `.visible` 都要加 `if` 守卫，防止面板创建失败（如 stack 面板兼容性问题）导致切换 Tab 时崩溃：
+
+```javascript
+function showSomeTab() {
+    currentTab = "some";
+    if (otherPanel) otherPanel.visible = false;
+    if (targetPanel) targetPanel.visible = true;
+    tabContent.layout.layout(true);
+}
+```
+
 ### ScriptUI 实时键盘检测
 使用 `win.addEventListener("keydown"/"keyup")` 可实时检测键盘状态，配合 `mouseover/mouseout` 实现悬停时按键响应：
 
