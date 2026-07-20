@@ -1074,10 +1074,14 @@ function createMainUI(parentPanel) {
         }
     };
     tabOutput.onClick = function() {
-        if (ScriptUI.environment.keyboardState.ctrlKey) {
-            executeCurrentTab();
-        } else {
-            showOutputTab();
+        try {
+            if (ScriptUI.environment.keyboardState.ctrlKey) {
+                executeCurrentTab();
+            } else {
+                showOutputTab();
+            }
+        } catch(e) {
+            alert("输出Tab出错: " + (e.message || e.toString()));
         }
     };
 
