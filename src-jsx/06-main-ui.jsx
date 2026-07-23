@@ -1104,18 +1104,26 @@ function createMainUI(parentPanel) {
                 layerIndices.push(selectedLayers[i].index);
             }
             comp.layers.precompose(layerIndices, "animated", true);
-
-            newComp = app.project.items.addComp("高光图", 675, 1125, comp.pixelAspect, comp.duration, comp.frameRate);
-            var precompLayer = newComp.layers.add(comp);
-            var scaleFactor = (newComp.width / comp.width) * 100;
-            precompLayer.property("Scale").setValue([scaleFactor, scaleFactor]);
-            precompLayer.property("Position").setValue([newComp.width / 2, newComp.height / 2]);
-            newComp.openInViewer();
         } catch(e) {
             alert("PAG导出出错: " + e.toString());
         }
 
         app.endUndoGroup();
+
+        if (confirm("是否创建高光图合成？\n\n是 = 创建 675×1125 的高光图合成并打开预览\n否 = 仅完成预合成")) {
+            app.beginUndoGroup("PAG 高光图");
+            try {
+                var newComp = app.project.items.addComp("高光图", 675, 1125, comp.pixelAspect, comp.duration, comp.frameRate);
+                var precompLayer = newComp.layers.add(comp);
+                var scaleFactor = (newComp.width / comp.width) * 100;
+                precompLayer.property("Scale").setValue([scaleFactor, scaleFactor]);
+                precompLayer.property("Position").setValue([newComp.width / 2, newComp.height / 2]);
+                newComp.openInViewer();
+            } catch(e) {
+                alert("创建高光图合成出错: " + e.toString());
+            }
+            app.endUndoGroup();
+        }
     }
 
     function renderHighlightFrame() {
