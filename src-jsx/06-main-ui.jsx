@@ -1486,6 +1486,28 @@ function createMainUI(parentPanel) {
         return count;
     }
 
+    function getPngDimensions(filePath) {
+        try {
+            var f = new File(filePath);
+            if (!f.exists) return null;
+            f.open("r");
+            f.encoding = "BINARY";
+            var raw = f.read(24);
+            f.close();
+            if (raw.charCodeAt(0) !== 137 || raw.charCodeAt(1) !== 80 ||
+                raw.charCodeAt(2) !== 78 || raw.charCodeAt(3) !== 71) {
+                return null;
+            }
+            var w = (raw.charCodeAt(16) << 24) | (raw.charCodeAt(17) << 16) |
+                    (raw.charCodeAt(18) << 8) | raw.charCodeAt(19);
+            var h = (raw.charCodeAt(20) << 24) | (raw.charCodeAt(21) << 16) |
+                    (raw.charCodeAt(22) << 8) | raw.charCodeAt(23);
+            return [w, h];
+        } catch(e) {
+            return null;
+        }
+    }
+
     function sortOutputFiles() {
         if (!app.project.file) {
             alert("请先保存项目文件！");
@@ -1494,6 +1516,19 @@ function createMainUI(parentPanel) {
 
         var projectPath = app.project.file;
         var defaultPrefix = decodeUrlString(projectPath.name.replace(/\.[^\.]+$/, ''));
+
+        var presetFile = getSelectedPresetFile();
+        var presetData = presetFile ? loadPreset(presetFile) : null;
+        var sortConfigPath = presetData && presetData.sortConfig ? getPresetResourcePath(presetData.sortConfig) : null;
+        var sortConfig = null;
+        if (sortConfigPath) {
+            var scFile = new File(sortConfigPath);
+            if (scFile.exists) sortConfig = loadPreset(scFile);
+        }
+        if (!sortConfig) {
+            alert("当前预设（" + (presetDropdown.selection ? presetDropdown.selection.text : "未选择") + "）无需输出整理。");
+            return;
+        }
 
         var dialog = new Window("dialog", "输出文件整理");
         dialog.orientation = "column";
@@ -1507,117 +1542,213 @@ function createMainUI(parentPanel) {
         var logText = dialog.add("edittext", undefined, "", {multiline: true, scrolling: true});
         logText.preferredSize = [400, 200];
 
+        // 显示当前配置信息
+        var presetName = presetDropdown.selection ? presetDropdown.selection.text : "未知";
+        var infoLines = [];
+        infoLines.push("预设: " + presetName);
+        if (sortConfig.description) infoLines.push("说明: " + sortConfig.description);
+        infoLines.push("");
+        infoLines.push("需要文件: " + sortConfig.required.length + " 项");
+        for (var ri = 0; ri < sortConfig.required.length; ri++) {
+            var r = sortConfig.required[ri];
+            infoLines.push("  " + (ri+1) + ". " + (r.label || r.name || r.regex || "尺寸 " + r.size));
+        }
+        infoLines.push("重命名规则: " + sortConfig.rename.length + " 条");
+        for (var rr = 0; rr < sortConfig.rename.length; rr++) {
+            var rn = sortConfig.rename[rr];
+            infoLines.push("  " + (rr+1) + ". " + (rn.match || rn.regex || "") + " → " + rn.to);
+        }
+        if (sortConfig.zip) {
+            infoLines.push("打包: " + sortConfig.zip.files.join(", ") + " → " + sortConfig.zip.name);
+        }
+        if (sortConfig.clipboard && sortConfig.clipboard.length > 0) {
+            infoLines.push("复制到剪贴板: " + sortConfig.clipboard.join(", "));
+        }
+        infoLines.push("");
+
+        logText.text = infoLines.join("\n");
+
         var buttonGroup = dialog.add("group");
         var confirmButton = buttonGroup.add("button", undefined, "确认");
         var cancelButton = buttonGroup.add("button", undefined, "取消");
 
         confirmButton.onClick = function() {
-            var output_name = prefixInput.text.trim();
-            if (!output_name) {
-                alert("请输入前缀名称！");
-                return;
-            }
-            var projectFolder = projectPath.parent;
-            var outputFolder = new Folder(projectFolder.fullName + "/输出");
+            try {
+                var output_name = prefixInput.text.trim();
+                if (!output_name) {
+                    alert("请输入前缀名称！");
+                    return;
+                }
+                // Windows 文件名非法字符: \ / : * ? " < > |
+                var safeName = output_name.replace(/[\\\/:*?"<>|]/g, "-");
+                if (safeName !== output_name) {
+                    logText.text += "前缀含非法字符，已替换为: " + safeName + "\n";
+                    output_name = safeName;
+                }
+                var projectFolder = projectPath.parent;
+                var outputFolder = new Folder(projectFolder.fullName + "/输出");
 
-            if (!outputFolder.exists) {
-                logText.text += "错误：未找到'输出'文件夹\n";
-                return;
-            }
+                if (!outputFolder.exists) {
+                    logText.text += "错误：未找到'输出'文件夹\n";
+                    return;
+                }
 
-            var files = outputFolder.getFiles();
-            var hasAnimPag = false;
-            var hasBannerPag = false;
-            var hasPng = false;
-            var hasSvga = false;
-            var hasAnimBmpPag = false;
+                var files = outputFolder.getFiles();
 
-            for (var si = 0; si < files.length; si++) {
-                var sf = files[si];
-                var sName = decodeUrlString(sf.name);
-                if (sName === "animated.pag") hasAnimPag = true;
-                if (sName === "animated_bmp.pag") hasAnimBmpPag = true;
-                if (sName === "banner.pag") hasBannerPag = true;
-                var sExt = sName.substring(sName.lastIndexOf(".") + 1).toLowerCase();
-                if (sExt === "png") hasPng = true;
-                if (sExt === "svga") hasSvga = true;
-            }
-
-            var missing = [];
-            if (!hasAnimPag && !hasAnimBmpPag) missing.push("animated.pag / animated_bmp.pag");
-            if (!hasBannerPag) missing.push("banner.pag");
-            if (!hasPng) missing.push("PNG 图片（高光图）");
-            if (!hasSvga) missing.push("SVGA 文件");
-            if (missing.length > 0) {
-                alert("输出文件夹缺少以下文件：\n- " + missing.join("\n- ") + "\n\n请先执行其他步骤生成所需文件。");
-                return;
-            }
-
-            logText.text += "\n========== 开始处理文件 ==========\n";
-
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
-                var fileName = decodeUrlString(file.name);
-                var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-
-                if (fileName === "animated_bmp.pag") {
-                    var newFile = new File(file.parent.fsName + "/animated.pag");
-                    if (file.rename(newFile)) {
-                        logText.text += "重命名成功: animated_bmp.pag -> animated.pag\n";
-                    } else {
-                        logText.text += "重命名失败: animated_bmp.pag\n";
+                // --- Check required files ---
+                var missing = [];
+                for (var ri = 0; ri < sortConfig.required.length; ri++) {
+                    var req = sortConfig.required[ri];
+                    var found = false;
+                    for (var si = 0; si < files.length; si++) {
+                        var sName = decodeUrlString(files[si].name);
+                        var matched = false;
+                        if (req.name && sName === req.name) matched = true;
+                        if (!matched && req.regex) {
+                            var re = new RegExp(req.regex, "i");
+                            if (re.test(sName)) matched = true;
+                        }
+                        if (!matched && req.fallback && sName === req.fallback) matched = true;
+                        if (matched && req.size) {
+                            var dims = getPngDimensions(files[si].fsName);
+                            if (!dims || dims[0] !== req.size[0] || dims[1] !== req.size[1]) {
+                                matched = false;
+                                continue;
+                            }
+                        }
+                        if (matched) { found = true; break; }
                     }
-                } else if (fileExt === "png") {
-                    var newFileName = output_name + "高光图.png";
-                    if (file.rename(newFileName)) {
-                        logText.text += "重命名成功: " + fileName + " -> " + newFileName + "\n";
+                    // 尺寸兜底：名字没匹配上但有 size 要求的，试试按尺寸找
+                    if (!found && req.size) {
+                        for (var si = 0; si < files.length; si++) {
+                            var dims = getPngDimensions(files[si].fsName);
+                            if (dims && dims[0] === req.size[0] && dims[1] === req.size[1]) {
+                                found = true;
+                                break;
+                            }
+                        }
                     }
-                } else if (fileExt === "svga") {
-                    var newFileName = output_name + ".svga";
-                    if (file.rename(newFileName)) {
-                        logText.text += "重命名成功: " + fileName + " -> " + newFileName + "\n";
+                    if (!found) {
+                        missing.push(req.label || req.name || req.regex);
                     }
                 }
-            }
+                if (missing.length > 0) {
+                    alert("输出文件夹缺少以下文件：\n- " + missing.join("\n- ") + "\n\n请先执行其他步骤生成所需文件。");
+                    return;
+                }
 
-            var batContent = '@echo off\r\n';
-            batContent += 'chcp 65001\r\n';
-            batContent += 'cd /d "%~dp0"\r\n';
-            batContent += 'powershell -NoProfile -Command "& {';
-            batContent += 'Compress-Archive -Path \'animated.pag\',\'banner.pag\' ';
-            batContent += '-DestinationPath \'' + output_name + 'PAG.zip\' -Force}"\r\n';
-            batContent += 'del "animated.pag" "banner.pag"\r\n';
-            batContent += 'timeout /t 1 /nobreak >nul\r\n';
-            batContent += 'powershell -Command "Get-Item \'' + output_name + '.svga\',\'' + output_name + 'PAG.zip\',\'' + output_name + '高光图.png\' | Set-Clipboard"\r\n';
-            batContent += 'echo 文件已复制到剪贴板\r\n';
-            batContent += '(goto) 2>nul & del "%~f0"\r\n';
-
-            var batFile = new File(outputFolder.fsName + "/compress.bat");
-            batFile.encoding = "UTF8";
-            if (batFile.open("w")) {
-                batFile.write(batContent);
-                batFile.close();
-
-                if (batFile.exists) {
-                    logText.text += "批处理文件创建成功并已自动运行: " + batFile.fsName + "\n";
-                    logText.text += "运行中：打包PAG文件 -> 删除源文件 -> 复制成品到剪贴板\n";
-                    batFile.execute();
-
-                    var wxBatContent = '@echo off\r\n';
-                    wxBatContent += 'timeout /t 6 /nobreak >nul\r\n';
-                    wxBatContent += 'start "" "C:\\Program Files (x86)\\WXWork\\WXWork.exe"\r\n';
-                    wxBatContent += '(goto) 2>nul & del "%~f0"\r\n';
-
-                    var wxBatFile = new File(outputFolder.fsName + "/start_wxwork.bat");
-                    wxBatFile.encoding = "UTF8";
-                    if (wxBatFile.open("w")) {
-                        wxBatFile.write(wxBatContent);
-                        wxBatFile.close();
-                        if (wxBatFile.exists) {
-                            wxBatFile.execute();
+                // --- Rename files ---
+                logText.text += "\n========== 开始处理文件 ==========\n";
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    var fileName = decodeUrlString(file.name);
+                    for (var rr = 0; rr < sortConfig.rename.length; rr++) {
+                        var rule = sortConfig.rename[rr];
+                        var matches = false;
+                        if (rule.match && fileName === rule.match) matches = true;
+                        if (!matches && rule.regex) {
+                            var re2 = new RegExp(rule.regex, "i");
+                            if (re2.test(fileName)) matches = true;
+                        }
+                        // 尺寸兜底：名字没匹配上但有 size 的，按 PNG 尺寸匹配
+                        if (!matches && rule.size) {
+                            var dims2 = getPngDimensions(file.fsName);
+                            if (dims2 && dims2[0] === rule.size[0] && dims2[1] === rule.size[1]) {
+                                matches = true;
+                            }
+                        }
+                        if (matches) {
+                            var newName = String(rule.to).replace("{prefix}", output_name);
+                            var newFile = new File(file.parent.fsName + "/" + newName);
+                            if (newFile.exists) {
+                                logText.text += "已存在: " + newName + "\n";
+                            } else if (file.rename(newFile)) {
+                                logText.text += "重命名成功: " + fileName + " -> " + newName + "\n";
+                            } else {
+                                logText.text += "重命名失败: " + fileName + "\n";
+                            }
+                            break;
                         }
                     }
                 }
+
+                // --- Generate bat ---
+                var zipFiles = [];
+                for (var zf = 0; zf < sortConfig.zip.files.length; zf++) {
+                    zipFiles.push("'" + sortConfig.zip.files[zf] + "'");
+                }
+                var zipName = String(sortConfig.zip.name).replace("{prefix}", output_name);
+
+                var clipItems = [];
+                for (var ci = 0; ci < sortConfig.clipboard.length; ci++) {
+                    clipItems.push("'" + String(sortConfig.clipboard[ci]).replace("{prefix}", output_name) + "'");
+                }
+
+                var hasZipSources = true;
+                var delFiles = [];
+                for (var df = 0; df < sortConfig.zip.files.length; df++) {
+                    var zipSrc = new File(outputFolder.fsName + "/" + sortConfig.zip.files[df]);
+                    if (!zipSrc.exists) { hasZipSources = false; break; }
+                    delFiles.push('"' + sortConfig.zip.files[df] + '"');
+                }
+
+                if (hasZipSources) {
+                    // JS 侧先删旧 zip，避免 bat 内 -Force 出错丢 zip
+                    var oldZip = new File(outputFolder.fsName + "/" + zipName);
+                    if (oldZip.exists) oldZip.remove();
+
+                    var batContent = '@echo off\r\n';
+                    batContent += 'chcp 65001\r\n';
+                    batContent += 'cd /d "%~dp0"\r\n';
+                    batContent += 'powershell -NoProfile -Command "& {';
+                    batContent += 'Compress-Archive -Path ' + zipFiles.join(',') + ' ';
+                    batContent += '-DestinationPath \'' + zipName + '\'}"\r\n';
+                    batContent += 'if %errorlevel%==0 del ' + delFiles.join(' ') + '\r\n';
+                    batContent += 'timeout /t 1 /nobreak >nul\r\n';
+                    batContent += 'powershell -Command "Get-Item ' + clipItems.join(',') + ' | Set-Clipboard"\r\n';
+                    batContent += 'echo 文件已复制到剪贴板\r\n';
+                    batContent += '(goto) 2>nul & del "%~f0"\r\n';
+
+                    var batFile = new File(outputFolder.fsName + "/compress.bat");
+                    batFile.encoding = "UTF8";
+                    if (batFile.open("w")) { batFile.write(batContent); batFile.close(); }
+                    if (batFile.exists) {
+                        logText.text += "打包并复制到剪贴板\n";
+                        batFile.execute();
+                    }
+                } else {
+                    var clipBatContent = '@echo off\r\n';
+                    clipBatContent += 'chcp 65001\r\n';
+                    clipBatContent += 'cd /d "%~dp0"\r\n';
+                    clipBatContent += 'powershell -Command "Get-Item ' + clipItems.join(',') + ' | Set-Clipboard"\r\n';
+                    clipBatContent += 'echo 文件已复制到剪贴板\r\n';
+                    clipBatContent += '(goto) 2>nul & del "%~f0"\r\n';
+
+                    var clipBatFile = new File(outputFolder.fsName + "/compress.bat");
+                    clipBatFile.encoding = "UTF8";
+                    if (clipBatFile.open("w")) { clipBatFile.write(clipBatContent); clipBatFile.close(); }
+                    if (clipBatFile.exists) {
+                        logText.text += "成品已复制到剪贴板（无需打包）\n";
+                        clipBatFile.execute();
+                    }
+                }
+
+                var wxBatContent = '@echo off\r\n';
+                wxBatContent += 'timeout /t 6 /nobreak >nul\r\n';
+                wxBatContent += 'start "" "C:\\Program Files (x86)\\WXWork\\WXWork.exe"\r\n';
+                wxBatContent += '(goto) 2>nul & del "%~f0"\r\n';
+
+                var wxBatFile = new File(outputFolder.fsName + "/start_wxwork.bat");
+                wxBatFile.encoding = "UTF8";
+                if (wxBatFile.open("w")) {
+                    wxBatFile.write(wxBatContent);
+                    wxBatFile.close();
+                    if (wxBatFile.exists) {
+                        wxBatFile.execute();
+                    }
+                }
+            } catch(e) {
+                alert("整理输出出错: " + (e.message || e.toString()));
             }
         };
 

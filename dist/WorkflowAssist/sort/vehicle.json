@@ -1,0 +1,23 @@
+{
+  "description": "海外座驾输出整理：按文件名或 PNG 尺寸识别气泡图(90×90)和封面图(314×196)，重命名后打包 animated.pag+banner.pag 为 {prefix}PAG.zip",
+  "required": [
+    { "name": "animated.pag", "fallback": "animated_bmp.pag" },
+    { "name": "banner.pag" },
+    { "regex": "气泡\\.png$", "label": "气泡.png（90×90）", "size": [90, 90] },
+    { "regex": "封面图\\.png$", "label": "驾封面图.png（314×196）", "size": [314, 196] }
+  ],
+  "rename": [
+    { "match": "animated_bmp.pag", "to": "animated.pag" },
+    { "regex": "气泡\\.png$", "to": "{prefix}气泡.png", "size": [90, 90] },
+    { "regex": "封面图\\.png$", "to": "{prefix}驾封面图.png", "size": [314, 196] }
+  ],
+  "zip": {
+    "files": ["animated.pag", "banner.pag"],
+    "name": "{prefix}PAG.zip"
+  },
+  "clipboard": [
+    "{prefix}PAG.zip",
+    "{prefix}气泡.png",
+    "{prefix}驾封面图.png"
+  ]
+}

@@ -9,14 +9,17 @@ WorkflowAssist/
 │   01-constants.jsx      常量（版本/标题/日志级别）
 │   01a-icons.jsx         图标 PNG 二进制数据（自动生成）
 │   02-logger.jsx         日志模块
-│   03-config-store.jsx   JSON 配置读写 + 预设扫描
+│   03-config-store.jsx   JSON 配置读写 + 预设扫描（跳过 sort/ 子目录）
 │   04-ae-utils.jsx       AE 工具函数（合成/图层/嵌套）
 │   05-workflow-engine.jsx 工作流执行引擎（核心逻辑）
 │   05a-render-engine.jsx 渲染引擎（序列帧渲染+导入）
-│   06-main-ui.jsx        主 ScriptUI 界面
+│   06-main-ui.jsx        主 ScriptUI 界面（含 sortOutputFiles()）
 │   07-bootstrap.jsx      入口 + NOUI 生成触发
 ├── icons/                # SVG 图标源文件（构建时转为 PNG 编码）
-├── config/               # 预设 JSON 源文件（开发用）
+├── config/               # 预设 JSON 源文件 + 资源文件（开发用）
+│   ├── sort/             # 输出整理规则 JSON（不被 scanPresetFiles 扫描为预设）
+│   │   ├── gift.json
+│   │   └── vehicle.json
 ├── scripts/
 │   build-jsx.ps1         构建脚本（拼接 JSX + 复制预设）
 │   convert-icons.js      图标转换脚本（SVG → PNG → ExtendScript 二进制编码）
@@ -149,12 +152,102 @@ Example scenarios (baseName = "全屏座驾a-独角兽"):
 ### Existing Preset Examples
 
 ```jsonc
-// 礼物.json — 使用 rename + custom 时长
-{ "name": "动画", "rename": "动画", "duration": "custom", "scaleMode": "fit_width" }
+// 礼物.json — 使用 rename + custom 时长 + sortConfig
+{ "name": "动画", "rename": "动画", "duration": "custom", "scaleMode": "fit_width", "sortConfig": "sort/gift.json" }
 
-// 头像框.json — 使用 suffix + 固定时长 + 错层
+// 头像框.json — 使用 suffix + 固定时长 + 错层（无 sortConfig，不支持输出整理）
 { "name": "预览", "suffix": "_预览", "duration": 6, "scaleMode": "custom", "scalePercent": 150, "stagger": {"enabled": true, "count": 2} }
 ```
+
+### sortConfig 预设字段
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `sortConfig` | string | 可选。指向 `config/sort/xxx.json` 的相对路径。有此字段的预设才支持输出整理按钮。 |
+
+---
+
+## Sort Config JSON 规范（`config/sort/*.json`）
+
+输出整理规则的外部化配置文件，存放在 `config/sort/` 子目录（不会被 `scanPresetFiles()` 扫描为工作流预设）。
+
+### 顶层字段
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `description` | string | no | 人类可读的配置说明，弹窗时显示在日志区 |
+| `required` | array | yes | 所需文件列表，全部存在才能执行整理 |
+| `rename` | array | yes | 重命名规则列表 |
+| `zip` | object | no | 打包配置（PAG 文件打包为 zip） |
+| `clipboard` | array | no | 完成后复制到剪贴板的文件列表（支持 `{prefix}` 模板） |
+
+### required 条目字段
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | 精确文件名匹配 |
+| `regex` | string | 正则匹配文件名 |
+| `fallback` | string | 备选文件名（如 `animated_bmp.pag` 作为 `animated.pag` 的 fallback） |
+| `label` | string | 缺失时显示的人类可读名称（优先于 name/regex） |
+| `size` | [number, number] | 可选。PNG 尺寸校验 `[宽, 高]`。同时作为**尺寸兜底匹配**——名字没对上但尺寸对的 PNG 也算匹配 |
+
+### rename 条目字段
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `match` | string | 精确文件名匹配 |
+| `regex` | string | 正则匹配文件名 |
+| `to` | string | 目标文件名，支持 `{prefix}` 模板变量 |
+| `size` | [number, number] | 可选。PNG 尺寸兜底——名字没匹配上但尺寸对上的也执行重命名 |
+
+### 匹配优先级
+
+1. `match` 精确匹配
+2. `regex` 正则匹配
+3. `fallback` 备选匹配（仅 required）
+4. `size` 尺寸兜底（PNG 文件，读取文件头 24 字节获取宽高）
+
+### Naming
+
+```javascript
+newName = String(rule.to).replace("{prefix}", output_name);
+```
+
+### 配置示例
+
+```json
+// config/sort/vehicle.json
+{
+  "description": "海外座驾输出整理：按文件名或 PNG 尺寸识别气泡图(90×90)和封面图(314×196)",
+  "required": [
+    { "name": "animated.pag", "fallback": "animated_bmp.pag" },
+    { "name": "banner.pag" },
+    { "regex": "气泡\\.png$", "label": "气泡.png（90×90）", "size": [90, 90] },
+    { "regex": "封面图\\.png$", "label": "驾封面图.png（314×196）", "size": [314, 196] }
+  ],
+  "rename": [
+    { "match": "animated_bmp.pag", "to": "animated.pag" },
+    { "regex": "气泡\\.png$", "to": "{prefix}气泡.png", "size": [90, 90] },
+    { "regex": "封面图\\.png$", "to": "{prefix}驾封面图.png", "size": [314, 196] }
+  ],
+  "zip": {
+    "files": ["animated.pag", "banner.pag"],
+    "name": "{prefix}PAG.zip"
+  },
+  "clipboard": [
+    "{prefix}PAG.zip",
+    "{prefix}气泡.png",
+    "{prefix}驾封面图.png"
+  ]
+}
+```
+
+### 添加新项目类型
+
+1. 创建 `config/新项目.json`（预设）
+2. 创建 `config/sort/新项目.json`（输出整理规则）
+3. 在预设 JSON 中加 `"sortConfig": "sort/新项目.json"`
+4. 构建即可，**无需改 JSX 代码**
 
 ## Core Conventions
 
@@ -302,3 +395,42 @@ content += 'powershell -NoProfile -Command "...$(Get-Item .).Name...\r\n';
 不需要 `encoding = "UTF8"`，不需要 `chcp 65001`。
 
 **进阶：如果 bat 必须包含中文（如路径含中文），则必须用 `encoding = "UTF8"` + `chcp 65001` 组合**。原因：Windows "Beta: Use Unicode UTF-8 for worldwide language support" 设置开启后，系统 ANSI 编码变为 UTF-8 而 OEM 编码维持原值（如 GBK），两方不一致导致乱码。显式设定 UTF-8 读写和 chcp 65001 可确保两端统一。参考 `sortOutputFiles` 和 `renderPreviewToMp4` 的最终实现。
+
+### sortOutputFiles 压缩安全约定
+```javascript
+// 1. JS 侧先删旧 zip，避免 bat 内 -Force 出错丢 zip
+var oldZip = new File(outputFolder.fsName + "/" + zipName);
+if (oldZip.exists) oldZip.remove();
+
+// 2. bat 内 Compress-Archive 不用 -Force（旧 zip 已删）
+"Compress-Archive -Path ... -DestinationPath 'xxx.zip'"
+
+// 3. del 用 if %errorlevel%==0 链式，压缩失败不删源文件
+'if %errorlevel%==0 del "animated.pag" "banner.pag"'
+```
+
+### 用户输入文件名净化
+用户输入的 prefix（如 `1/4`）可能含 Windows 非法字符（`\ / : * ? " < > |`），必须在 `sortOutputFiles()` 的 `confirmButton.onClick` 入口处替换：
+```javascript
+var safeName = output_name.replace(/[\\\/:*?"<>|]/g, "-");
+```
+替换后写入日志告知用户，再赋值回 `output_name`。
+
+### PNG 尺寸获取（`getPngDimensions`）
+读 PNG 文件头 24 字节获取宽高，用于 required 和 rename 的 `size` 兜底匹配：
+```javascript
+function getPngDimensions(filePath) {
+    var f = new File(filePath);
+    if (!f.exists) return null;
+    f.open("r");
+    f.encoding = "BINARY";
+    var raw = f.read(24);
+    f.close();
+    // PNG signature + IHDR chunk: bytes 16-23 = width(4) + height(4)
+    var w = (raw.charCodeAt(16) << 24) | (raw.charCodeAt(17) << 16) |
+            (raw.charCodeAt(18) << 8) | raw.charCodeAt(19);
+    var h = (raw.charCodeAt(20) << 24) | (raw.charCodeAt(21) << 16) |
+            (raw.charCodeAt(22) << 8) | raw.charCodeAt(23);
+    return [w, h];
+}
+```

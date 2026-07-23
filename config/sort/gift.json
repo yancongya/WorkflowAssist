@@ -1,0 +1,23 @@
+{
+  "description": "礼物输出整理：重命名 PAG/PNG/SVGA 文件，打包 animated.pag+banner.pag 为 {prefix}PAG.zip，复制成品到剪贴板",
+  "required": [
+    { "name": "animated.pag", "fallback": "animated_bmp.pag" },
+    { "name": "banner.pag" },
+    { "regex": "\\.png$", "label": "PNG 图片（高光图）" },
+    { "regex": "\\.svga$", "label": "SVGA 文件" }
+  ],
+  "rename": [
+    { "match": "animated_bmp.pag", "to": "animated.pag" },
+    { "regex": "\\.png$", "to": "{prefix}高光图.png" },
+    { "regex": "\\.svga$", "to": "{prefix}.svga" }
+  ],
+  "zip": {
+    "files": ["animated.pag", "banner.pag"],
+    "name": "{prefix}PAG.zip"
+  },
+  "clipboard": [
+    "{prefix}.svga",
+    "{prefix}PAG.zip",
+    "{prefix}高光图.png"
+  ]
+}
