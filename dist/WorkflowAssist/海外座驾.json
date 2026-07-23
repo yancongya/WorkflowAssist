@@ -1,0 +1,27 @@
+{
+  "name": "海外座驾",
+  "description": "海外座驾工作流 - 先创建动画层再创建预览层",
+  "sync": {
+    "targetPath": "\\\\172.19.241.43\\互娱中台设计-文件共享\\海外座驾"
+  },
+  "steps": [
+    {
+      "name": "动画",
+      "rename": "动画",
+      "width": 750,
+      "height": 1334,
+      "frameRate": 24,
+      "duration": "custom",
+      "scaleMode": "fit_width"
+    },
+    {
+      "name": "预览",
+      "width": 750,
+      "height": 1334,
+      "frameRate": 24,
+      "duration": "custom",
+      "suffix": "_预览",
+      "scaleMode": "fit_width"
+    }
+  ]
+}

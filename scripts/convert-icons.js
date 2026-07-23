@@ -4,7 +4,7 @@ const path = require('path');
 
 const ICONS_DIR = path.resolve(__dirname, '..', 'icons');
 const OUTPUT_FILE = path.resolve(__dirname, '..', 'src-jsx', '01a-icons.jsx');
-const ICON_SIZE = 25;
+const ICON_SIZE = 18;
 
 function kebabToCamel(str) {
     return str.replace(/[-_ ](\w)/g, function(_, c) { return c.toUpperCase(); })

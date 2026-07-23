@@ -75,9 +75,12 @@ function createMainUI(parentPanel) {
         return btn;
     }
 
-    var btnRefresh = makeIconButton(nameGroup, "↻", "重新获取当前活动合成");
-    var btnGetComp = makeIconButton(nameGroup, "◎", "取合成名 → 填入输入框");
-    var btnGetProject = makeIconButton(nameGroup, "▣", "取项目名 → 填入输入框");
+    var btnRefresh = nameGroup.add("iconbutton", undefined, ICON_DATA.refresh, {style: "toolbutton"});
+    btnRefresh.helpTip = "重新获取当前活动合成";
+    btnRefresh.preferredSize = [22, 22];
+    var btnGetProject = nameGroup.add("iconbutton", undefined, ICON_DATA.getProject, {style: "toolbutton"});
+    btnGetProject.helpTip = "取项目名 → 填入输入框";
+    btnGetProject.preferredSize = [22, 22];
 
     function stripKnownSuffixes(name) {
         var presetFile = getSelectedPresetFile();
@@ -112,26 +115,14 @@ function createMainUI(parentPanel) {
             detectCurrentComp();
             updateStepPreview();
             refreshOutputUI();
+            tabContent.layout.layout(true);
         } catch(e) {
             logMessage("btnRefresh.onClick 出错: " + (e.message || e.toString()), LOG_LEVEL.ERROR, "UI");
             alert("刷新出错: " + (e.message || e.toString()));
         }
     };
 
-    btnGetComp.onClick = function() {
-        try {
-            var compName = getActiveCompName();
-            if (compName) {
-                nameInput.text = compName;
-                logMessage("已获取合成名称: " + compName, LOG_LEVEL.NORMAL, "UI");
-            } else {
-                alert("未找到当前活动合成！");
-            }
-        } catch(e) {
-            logMessage("btnGetComp.onClick 出错: " + (e.message || e.toString()), LOG_LEVEL.ERROR, "UI");
-            alert("获取合成名出错: " + (e.message || e.toString()));
-        }
-    };
+
 
     btnGetProject.onClick = function() {
         try {
@@ -584,10 +575,10 @@ function createMainUI(parentPanel) {
                 group.alignChildren = ["center", "center"];
                 group.spacing = 0;
                 group.helpTip = tip || "";
-                group.preferredSize = [40, 42];
+                group.preferredSize = [32, 36];
 
                 var icon = group.add("iconbutton", undefined, ICON_DATA[iconKey], {style: "toolbutton"});
-                icon.preferredSize = [26, 26];
+                icon.preferredSize = [20, 20];
                 icon.helpTip = tip || "";
 
                 var lbl = group.add("statictext", undefined, label);
@@ -601,7 +592,7 @@ function createMainUI(parentPanel) {
         }
         var btn = funcRow.add("button", undefined, label);
         btn.helpTip = tip || "";
-        btn.preferredSize.height = 26;
+        btn.preferredSize.height = 22;
         funcButtons.push(btn);
         return btn;
     }
@@ -611,13 +602,13 @@ function createMainUI(parentPanel) {
         var pw = funcPanel.preferredSize.width;
         var totalWidth = pw - 12;
         var spacing = funcRow.spacing * (funcButtons.length - 1);
-        var unitWidth = Math.max(36, (totalWidth - spacing) / funcButtons.length);
+        var unitWidth = Math.max(32, (totalWidth - spacing) / funcButtons.length);
         for (var fi = 0; fi < funcButtons.length; fi++) {
             var item = funcButtons[fi];
             if (item.type === "group") {
                 item.preferredSize.width = unitWidth;
             } else if (item.type === "iconbutton" || item.type === "image") {
-                item.preferredSize = [26, 26];
+                item.preferredSize = [20, 20];
             } else {
                 item.preferredSize.width = Math.max(60, unitWidth);
             }
@@ -720,10 +711,10 @@ function createMainUI(parentPanel) {
                 group.alignChildren = ["center", "center"];
                 group.spacing = 0;
                 group.helpTip = tip || "";
-                group.preferredSize = [40, 42];
+                group.preferredSize = [32, 36];
 
                 var icon = group.add("iconbutton", undefined, ICON_DATA[iconKey], {style: "toolbutton"});
-                icon.preferredSize = [26, 26];
+                icon.preferredSize = [20, 20];
                 icon.helpTip = tip || "";
 
                 var lbl = group.add("statictext", undefined, label);
@@ -745,13 +736,13 @@ function createMainUI(parentPanel) {
         var pw = funcPanel.preferredSize.width;
         var totalWidth = pw - 12;
         var spacing = funcRow2.spacing * (funcButtons2.length - 1);
-        var unitWidth = Math.max(36, (totalWidth - spacing) / funcButtons2.length);
+        var unitWidth = Math.max(32, (totalWidth - spacing) / funcButtons2.length);
         for (var fi = 0; fi < funcButtons2.length; fi++) {
             var item = funcButtons2[fi];
             if (item.type === "group") {
                 item.preferredSize.width = unitWidth;
             } else if (item.type === "iconbutton" || item.type === "image") {
-                item.preferredSize = [26, 26];
+                item.preferredSize = [20, 20];
             } else {
                 item.preferredSize.width = Math.max(60, unitWidth);
             }
