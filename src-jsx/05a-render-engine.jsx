@@ -56,7 +56,14 @@ function renderCompToSequence(comp, projectDir, settings) {
 
     try {
         var outDir = new Folder(projectDir + "/" + comp.name);
-        if (!outDir.exists) outDir.create();
+        if (outDir.exists) {
+            var oldFiles = outDir.getFiles("*");
+            for (var f = 0; f < oldFiles.length; f++) {
+                try { oldFiles[f].remove(); } catch(e) {}
+            }
+        } else {
+            outDir.create();
+        }
 
         var rqItem = app.project.renderQueue.items.add(comp);
         var om = rqItem.outputModule(1);

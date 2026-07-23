@@ -62,6 +62,7 @@ function createMainUI(parentPanel) {
         try {
             updateStepPreview();
             refreshOutputUI();
+            tabContent.layout.layout(true);
         } catch(e) {
             logMessage("nameInput.onChange 出错: " + (e.message || e.toString()), LOG_LEVEL.ERROR, "UI");
         }
@@ -159,6 +160,7 @@ function createMainUI(parentPanel) {
             updateStepPreview();
             refreshOutputUI();
             if (syncTargetInput) syncTargetInput.text = getSyncTargetPath();
+            tabContent.layout.layout(true);
         } catch(e) {
             logMessage("presetDropdown.onChange 出错: " + (e.message || e.toString()), LOG_LEVEL.ERROR, "UI");
         }
@@ -275,6 +277,7 @@ function createMainUI(parentPanel) {
             var chkRender = row.add("checkbox", undefined, "渲染");
             chkRender.value = rc.enabled;
             chkRender.preferredSize.width = 50;
+            chkRender._stepIdx = i;
 
             var label = row.add("statictext", undefined, "Step " + (i + 1) + ": " + s.name);
             label.preferredSize.width = 100;
@@ -282,6 +285,7 @@ function createMainUI(parentPanel) {
             var chkImport = row.add("checkbox", undefined, "导入");
             chkImport.value = rc.importBack;
             chkImport.preferredSize.width = 65;
+            chkImport._stepIdx = i;
 
             var status = row.add("statictext", undefined, "待渲染");
             status.alignment = ["right", "center"];
@@ -292,6 +296,10 @@ function createMainUI(parentPanel) {
             chkRender._chkImport = chkImport;
             chkRender.onClick = function() {
                 this._chkImport.enabled = this.value;
+                saveCurrentRenderState(this._stepIdx);
+            };
+            chkImport.onClick = function() {
+                saveCurrentRenderState(this._stepIdx);
             };
 
             renderRows.push(row);
@@ -300,6 +308,17 @@ function createMainUI(parentPanel) {
             renderStatusTexts.push(status);
         }
         outputStepContainer.layout.layout(true);
+    }
+
+    function saveCurrentRenderState(stepIdx) {
+        var pf = getSelectedPresetFile();
+        if (!pf) return;
+        var pd = loadPreset(pf);
+        if (!pd || !pd.steps || !pd.steps[stepIdx]) return;
+        if (!pd.steps[stepIdx].render) pd.steps[stepIdx].render = {};
+        pd.steps[stepIdx].render.enabled = renderActiveStates[stepIdx].value;
+        pd.steps[stepIdx].render.importBack = importActiveStates[stepIdx].value;
+        savePreset(pf, pd);
     }
 
     // --- 同步面板 ---
