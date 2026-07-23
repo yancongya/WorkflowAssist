@@ -993,79 +993,148 @@ function createMainUI(parentPanel) {
             return;
         }
 
-        // Check for existing "bg" layer
-        var existingBg = null;
-        for (var i = 1; i <= currentComp.layers.length; i++) {
-            if (currentComp.layer(i).name === "bg") {
-                existingBg = currentComp.layer(i);
+        // 1. 找预览合成
+        var previewComps = [];
+        for (var i = 1; i <= app.project.items.length; i++) {
+            var item = app.project.items[i];
+            if (item instanceof CompItem) {
+                var cName = decodeUrlString(item.name);
+                if (/_预览$/.test(cName)) {
+                    previewComps.push(item);
+                }
+            }
+        }
+
+        // 2. 确定目标合成
+        var targetComp = null;
+        if (previewComps.length === 0) {
+            targetComp = currentComp;
+        } else if (previewComps.length === 1) {
+            var pc = previewComps[0];
+            var usePreview = confirm("找到预览合成 \"" + decodeUrlString(pc.name) + "\"，是否将背景导入到该合成？\n\n是 = 导入到预览合成\n否 = 导入到当前合成", true, "选择目标合成");
+            if (usePreview) {
+                targetComp = pc;
+            } else {
+                targetComp = currentComp;
+            }
+        } else {
+            var listDialog = new Window("dialog", "选择目标合成");
+            listDialog.orientation = "column";
+            listDialog.alignChildren = "left";
+            listDialog.add("statictext", undefined, "找到多个预览合成，请选择背景导入目标：");
+
+            var listBox = listDialog.add("listbox", undefined, []);
+            listBox.preferredSize.width = 300;
+            listBox.preferredSize.height = 120;
+
+            for (var pi = 0; pi < previewComps.length; pi++) {
+                listBox.add("item", decodeUrlString(previewComps[pi].name));
+            }
+            listBox.add("item", "--- 导入到当前合成");
+            listBox.selection = 0;
+
+            var btnGroup = listDialog.add("group");
+            btnGroup.alignment = "right";
+            var okBtn = btnGroup.add("button", undefined, "确定");
+            var cancelBtn = btnGroup.add("button", undefined, "取消");
+
+            var chosenIdx = null;
+            okBtn.onClick = function() {
+                chosenIdx = listBox.selection ? listBox.selection.index : null;
+                listDialog.close();
+            };
+            cancelBtn.onClick = function() { listDialog.close(); };
+
+            listDialog.show();
+            if (chosenIdx === null) return;
+
+            if (chosenIdx < previewComps.length) {
+                targetComp = previewComps[chosenIdx];
+            } else {
+                targetComp = currentComp;
+            }
+        }
+
+        // 3. 询问是否清理其他合成
+        var shouldCleanup = confirm("是否同时清理其他合成中名为 \"bg\" 的图层？\n\n注意：此操作不可撤销（跨合成 undo 不完整）", false, "清理背景图层");
+
+        // 4. 找目标合成中所有 bg 图层（含 bg.png）
+        var hasBgLayer = false;
+        for (var i = 1; i <= targetComp.layers.length; i++) {
+            var l = targetComp.layer(i);
+            if (l && (l.name === "bg" || l.name === "bg.png")) {
+                hasBgLayer = true;
                 break;
             }
         }
 
-        if (existingBg) {
-            var useExisting = confirm("找到图层 'bg'，是否使用它作为背景？\n\n是 = 使用该图层（移到底层）\n否 = 重新导入 bg.png", false, "背景图层");
-            if (useExisting) {
-                app.beginUndoGroup("Use existing bg layer");
-                try {
-                    existingBg.moveToEnd();
-                    var compWidth = currentComp.width;
-                    var layerSrc = existingBg.source;
-                    if (layerSrc) {
-                        var imgWidth = layerSrc.width;
-                        var scaleFactor = (compWidth / imgWidth) * 100;
-                        var newHeight = (layerSrc.height * scaleFactor) / 100;
-                        existingBg.transform.scale.setValue([scaleFactor, (newHeight / layerSrc.height) * 100]);
-                    }
-                } catch(e) {
-                    alert("设置背景出错: " + e.toString());
-                }
-                app.endUndoGroup();
-                return;
-            }
+        // 5. 已有背景图层 → 提醒后停止
+        if (hasBgLayer) {
+            alert("目标合成 \"" + decodeUrlString(targetComp.name) + "\" 已有背景图层，请手动删除后重试。");
+            return;
         }
 
+        // 6. 重新导入：文件准备（undo 外部）
         if (!app.project.file) {
             alert("请先保存项目文件！");
             return;
         }
 
         var projectDir = app.project.file.parent.fsName;
-        var targetFile = new File(projectDir + "/bg.png");
+        var bgFile = new File(projectDir + "/bg.png");
 
-        if (!targetFile.exists) {
+        if (!bgFile.exists) {
             var sourceFile = new File(getPresetResourcePath("bg.png"));
             if (!sourceFile.exists) {
                 alert("找不到 bg.png 文件！\n请将 bg.png 放置在预设目录:\n" + configFolder.fsName);
                 return;
             }
-            sourceFile.copy(targetFile.fsName);
-            if (!targetFile.exists) {
+            if (!sourceFile.copy(bgFile.fsName)) {
                 alert("复制 bg.png 到项目目录失败！");
                 return;
             }
         }
 
+        // 7. 导入 + 清理（一个 undo group）
         app.beginUndoGroup("Import bg.png");
         try {
-            var importOptions = new ImportOptions(targetFile);
+            var importOptions = new ImportOptions(bgFile);
             var importedFile = app.project.importFile(importOptions);
 
-            var bgLayer = currentComp.layers.add(importedFile);
+            var bgLayer = targetComp.layers.add(importedFile);
             bgLayer.name = "bg";
 
-            var compWidth = currentComp.width;
-            var imgWidth = bgLayer.source.width;
-            var imgHeight = bgLayer.source.height;
+            var compW = targetComp.width;
+            var imgW = bgLayer.source.width;
+            var imgH = bgLayer.source.height;
 
-            var scaleFactor = (compWidth / imgWidth) * 100;
-            var newHeight = (imgHeight * scaleFactor) / 100;
-            bgLayer.transform.scale.setValue([scaleFactor, (newHeight / imgHeight) * 100]);
-
+            var sf = (compW / imgW) * 100;
+            bgLayer.transform.scale.setValue([sf, sf]);
             bgLayer.moveToEnd();
+
+            if (shouldCleanup) cleanupBgFromOtherComps(targetComp);
         } catch (e) {
             alert("导入背景出错: " + e.toString());
         }
         app.endUndoGroup();
+    }
+
+    function cleanupBgFromOtherComps(keepComp) {
+        try {
+            for (var ci = 1; ci <= app.project.items.length; ci++) {
+                var item = app.project.items[ci];
+                if (item instanceof CompItem && item !== keepComp) {
+                    for (var li = item.layers.length; li >= 1; li--) {
+                        var l = item.layer(li);
+                        if (l && (l.name === "bg" || l.name === "bg.png")) {
+                            l.remove();
+                        }
+                    }
+                }
+            }
+        } catch(e) {
+            alert("清理其他合成背景图层出错: " + e.toString());
+        }
     }
 
     function pagExport() {
