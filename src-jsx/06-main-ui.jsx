@@ -1083,7 +1083,6 @@ function createMainUI(parentPanel) {
         app.beginUndoGroup("PAG Export");
 
         try {
-            // Solo selected layers
             for (var i = 1; i <= comp.layers.length; i++) {
                 comp.layers[i].enabled = false;
             }
@@ -1091,7 +1090,6 @@ function createMainUI(parentPanel) {
                 selectedLayers[i].enabled = true;
             }
 
-            // Add markers with shader code
             var shaderCode = "#version 100\nprecision mediump float;\nvarying highp vec2 vertexColor;\nuniform float uWidth;\nuniform float uHeight;\nuniform sampler2D inputImageTexture;\nvoid main() {\nvec2 uv = vertexColor;\nvec4 color = texture2D(inputImageTexture, uv);\nfloat sharpness = 0.3;\nfloat xOffset = 1./uWidth;\nfloat yOffset = 1./uHeight;\nvec4 neighbors[4];\nneighbors[0]=texture2D(inputImageTexture,uv+vec2(-xOffset,-yOffset));\nneighbors[1]=texture2D(inputImageTexture,uv+vec2(xOffset,yOffset));\nneighbors[2]=texture2D(inputImageTexture,uv+vec2(xOffset,-yOffset));\nneighbors[3]=texture2D(inputImageTexture,uv+vec2(-xOffset,yOffset));\nvec4 sharpenedColor=color*(sharpness*4.+1.);\nsharpenedColor-=neighbors[0]*sharpness;\nsharpenedColor-=neighbors[1]*sharpness;\nsharpenedColor-=neighbors[2]*sharpness;\nsharpenedColor-=neighbors[3]*sharpness;\ngl_FragColor=sharpenedColor;\n}";
             for (var i = 0; i < selectedLayers.length; i++) {
                 try {
@@ -1101,15 +1099,13 @@ function createMainUI(parentPanel) {
                 } catch(e) {}
             }
 
-            // Pre-compose selected layers into "animated"
             var layerIndices = [];
             for (var i = 0; i < selectedLayers.length; i++) {
                 layerIndices.push(selectedLayers[i].index);
             }
             comp.layers.precompose(layerIndices, "animated", true);
 
-            // Generate highlight composition
-            var newComp = app.project.items.addComp("高光图", 675, 1125, comp.pixelAspect, comp.duration, comp.frameRate);
+            newComp = app.project.items.addComp("高光图", 675, 1125, comp.pixelAspect, comp.duration, comp.frameRate);
             var precompLayer = newComp.layers.add(comp);
             var scaleFactor = (newComp.width / comp.width) * 100;
             precompLayer.property("Scale").setValue([scaleFactor, scaleFactor]);
@@ -1136,51 +1132,14 @@ function createMainUI(parentPanel) {
 
         var projectDir = app.project.file.parent.fsName;
         var outputFolder = new Folder(projectDir + "/输出");
-        if (!outputFolder.exists) outputFolder.create();
-
         var currentTimeStr = comp.time.toFixed(2);
-        var tempFolder = new Folder(Folder.temp.fsName + "/__highlight_" + String(Math.random()).substr(2, 6));
-        if (!tempFolder.exists) tempFolder.create();
 
-        try {
-            var rqItem = app.project.renderQueue.items.add(comp);
-            rqItem.timeSpanStart = comp.time;
-            rqItem.timeSpanDuration = 1.0 / comp.frameRate;
-
-            while (rqItem.outputModules.length > 1) {
-                rqItem.outputModule(rqItem.outputModules.length).remove();
-            }
-
-            var om = rqItem.outputModule(1);
-
-            ensureSequenceTemplate();
-            var templateOk = false;
-            var tplNames = ["序列帧", "PNG 序列", "PNG Sequence"];
-            for (var tn = 0; tn < tplNames.length; tn++) {
-                try { om.applyTemplate(tplNames[tn]); templateOk = true; break; } catch(e) {}
-            }
-            if (!templateOk) {
-                try { om.setSetting("Format", "8"); } catch(e) {}
-            }
-
-            om.file = new File(tempFolder.fsName + "/高光图_[#####].png");
-
-            app.project.renderQueue.render();
-
-            var renderedFile = findFirstFileInFolder(tempFolder);
-            if (renderedFile) {
-                var destFile = new File(outputFolder.fsName + "/高光图.png");
-                renderedFile.copy(destFile.fsName);
-                alert("高光图已保存:\n" + destFile.fsName + "\n\n当前帧位置: " + currentTimeStr + "秒");
-            } else {
-                alert("渲染完成，但未找到输出文件。\n请检查渲染队列。");
-            }
-        } catch(e) {
-            alert("渲染高光图失败: " + e.toString());
+        var destFile = renderSingleFrame(comp, outputFolder, "高光图", comp.time);
+        if (destFile) {
+            alert("高光图已保存:\n" + destFile.fsName + "\n\n当前帧位置: " + currentTimeStr + "秒");
+        } else {
+            alert("渲染高光图失败！\n请检查渲染队列。");
         }
-
-        try { rqItem.remove(); } catch(e) {}
-        try { cleanFolder(tempFolder); tempFolder.remove(); } catch(e) {}
     }
 
     function importTemplateAndReplace() {

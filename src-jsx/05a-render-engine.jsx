@@ -156,3 +156,70 @@ function importSequenceToComp(comp, outDir) {
     logMessage("渲染结果已导入: " + comp.name + " (" + targetFrameRate + "fps)", LOG_LEVEL.NORMAL, "RENDER");
     return footage;
 }
+
+function cleanFolder(folder) {
+    var count = 0;
+    var files = folder.getFiles();
+    for (var fi = 0; fi < files.length; fi++) {
+        if (files[fi] instanceof Folder) {
+            count += cleanFolder(files[fi]);
+            files[fi].remove();
+        } else {
+            files[fi].remove();
+        }
+        count++;
+    }
+    return count;
+}
+
+function renderSingleFrame(comp, outputFolder, fileName, time) {
+    if (time === undefined) time = comp.time;
+    if (fileName === undefined) fileName = "高光图";
+
+    var tempFolder = new Folder(Folder.temp.fsName + "/__singleframe_" + String(Math.random()).substr(2, 6));
+    if (!tempFolder.exists) tempFolder.create();
+
+    var rqItem = null;
+    var result = null;
+
+    try {
+        rqItem = app.project.renderQueue.items.add(comp);
+        rqItem.timeSpanStart = time;
+        rqItem.timeSpanDuration = 1.0 / comp.frameRate;
+
+        while (rqItem.outputModules.length > 1) {
+            rqItem.outputModule(rqItem.outputModules.length).remove();
+        }
+
+        var om = rqItem.outputModule(1);
+
+        ensureSequenceTemplate();
+        var templateOk = false;
+        var tplNames = ["序列帧", "PNG 序列", "PNG Sequence"];
+        for (var tn = 0; tn < tplNames.length; tn++) {
+            try { om.applyTemplate(tplNames[tn]); templateOk = true; break; } catch(e) {}
+        }
+        if (!templateOk) {
+            try { om.setSetting("Format", "8"); } catch(e) {}
+        }
+
+        om.file = new File(tempFolder.fsName + "/" + fileName + "_[#####].png");
+
+        app.project.renderQueue.render();
+
+        var renderedFile = findFirstFileInFolder(tempFolder);
+        if (renderedFile) {
+            if (!outputFolder.exists) outputFolder.create();
+            var destFile = new File(outputFolder.fsName + "/" + fileName + ".png");
+            renderedFile.copy(destFile.fsName);
+            result = destFile;
+        }
+    } catch(e) {
+        logMessage("renderSingleFrame 出错: " + (e.message || e.toString()), LOG_LEVEL.ERROR, "RENDER");
+    }
+
+    if (rqItem) { try { rqItem.remove(); } catch(e) {} }
+    try { cleanFolder(tempFolder); tempFolder.remove(); } catch(e) {}
+
+    return result;
+}

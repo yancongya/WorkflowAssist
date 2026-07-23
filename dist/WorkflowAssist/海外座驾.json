@@ -12,11 +12,7 @@
       "height": 1334,
       "frameRate": 24,
       "duration": "custom",
-      "scaleMode": "fit_width",
-      "render": {
-        "enabled": true,
-        "importBack": true
-      }
+      "scaleMode": "fit_width"
     },
     {
       "name": "预览",
@@ -25,11 +21,7 @@
       "frameRate": 24,
       "duration": "custom",
       "suffix": "_预览",
-      "scaleMode": "fit_width",
-      "render": {
-        "enabled": true,
-        "importBack": false
-      }
+      "scaleMode": "fit_width"
     }
   ]
 }
