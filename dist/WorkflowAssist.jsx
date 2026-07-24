@@ -1427,6 +1427,11 @@ function createMainUI(parentPanel) {
     btnRenderMp4.onClick = function() {
         try { renderPreviewToMp4(); } catch(e) { alert("渲染合成按钮出错: " + (e.message || e.toString())); }
     };
+
+    var btnRename = addIconButton2("重命名", "saveProject", "重命名当前项目文件（另存为新文件，自动删除旧文件）");
+    btnRename.onClick = function() {
+        try { renameProject(); } catch(e) { alert("重命名按钮出错: " + (e.message || e.toString())); }
+    };
     relayoutFuncButtons2();
 
     // ================== 内置功能函数 ==================
@@ -2523,6 +2528,70 @@ function createMainUI(parentPanel) {
         } catch(e) {
             alert("保存失败：" + e.toString());
         }
+    }
+
+    function renameProject() {
+        if (!app.project.file) {
+            alert("请先保存项目！");
+            return;
+        }
+
+        var oldFile = app.project.file;
+        var oldName = decodeUrlString(oldFile.name);
+        var parentDir = oldFile.parent;
+
+        var dlg = new Window("dialog", "重命名项目");
+        dlg.orientation = "column";
+        dlg.alignChildren = "left";
+        dlg.add("statictext", undefined, "新项目名（不含扩展名）:");
+        var input = dlg.add("edittext", undefined, oldName.replace(/\.[^\.]+$/, ""));
+        input.characters = 30;
+
+        var btnGrp = dlg.add("group");
+        btnGrp.alignment = "right";
+        var okBtn = btnGrp.add("button", undefined, "确定");
+        var cancelBtn = btnGrp.add("button", undefined, "取消");
+
+        okBtn.onClick = function() {
+            var newName = input.text.trim();
+            if (!newName) { alert("名称不能为空！"); return; }
+
+            var safeName = newName.replace(/[\\\/:*?"<>|]/g, "-");
+            var newFile = new File(parentDir.fsName + "/" + safeName + ".aep");
+
+            if (newFile.exists) {
+                alert("目标文件已存在：\n" + newFile.fsName);
+                return;
+            }
+
+            try {
+                // 先保存当前状态
+                app.project.save();
+
+                // 另存为新文件（等效改名）
+                app.project.save(newFile);
+
+                // 尝试删除旧文件
+                if (oldFile.exists) {
+                    try {
+                        oldFile.remove();
+                    } catch(e) {
+                        alert("重命名成功！\n\n新文件：" + safeName + ".aep\n\n注意：无法自动删除旧文件，请手动删除：\n" + oldFile.fsName);
+                        dlg.close();
+                        return;
+                    }
+                }
+
+                alert("重命名成功！\n新文件：" + safeName + ".aep");
+            } catch(e) {
+                alert("重命名失败：" + e.toString());
+            }
+
+            dlg.close();
+        };
+        cancelBtn.onClick = function() { dlg.close(); };
+
+        dlg.show();
     }
 
     // ================== 将预览序列帧合成为MP4 ==================

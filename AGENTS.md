@@ -355,6 +355,21 @@ btn.onClick = function() {
 - 控件优先级：`iconbutton`（有按钮背景+hover）→ `image`（纯图标）→ `button`（文字 fallback）
 - 外部脚本调用使用 `EXT_SCRIPTS` 配置模式，路径定义在 `01-constants.jsx`
 
+### 重命名项目文件用 save(newFile) + remove(oldFile)
+AE 没有原生"重命名项目"API。`File.rename()` 在 AE 打开项目时不更新 `app.project.file`，后续 Ctrl+S 会写到不存在的旧路径。
+
+**正确做法**：用 `app.project.save(newFile)` 另存为新文件（这会自动更新 `app.project.file`），然后 `oldFile.remove()` 删除旧文件。两步都在 try/catch 内：
+
+```javascript
+app.project.save();           // 先保存当前状态
+app.project.save(newFile);    // 另存为新文件（app.project.file 自动更新）
+if (oldFile.exists) {
+    oldFile.remove();         // 删除旧文件（失败则提示手动删除）
+}
+```
+
+参考实现：`06-main-ui.jsx` 的 `renameProject()` 函数。
+
 ### 资源文件约定
 `config/` 目录不仅存放 JSON 预设，也存放资源文件（如图片）。通过 `getPresetResourcePath(filename)`（`03-config-store.jsx`）解析运行时路径：
 
