@@ -34,6 +34,60 @@ if (Test-Path -LiteralPath $iconsScript) {
   }
 }
 
+# Validate sort configs
+$sortDir = Join-Path $root "config\sort"
+$hasErrors = $false
+if (Test-Path -LiteralPath $sortDir) {
+  Get-ChildItem -LiteralPath $sortDir -Filter "*.json" | ForEach-Object {
+    try {
+      $config = Get-Content -LiteralPath $_.FullName -Raw -Encoding UTF8 | ConvertFrom-Json
+      $errors = @()
+      if ($config.required) {
+        foreach ($req in $config.required) {
+          if (-not $req.name -and -not $req.regex -and -not $req.size) {
+            $errors += "  required 项缺少 name/regex/size 标识"
+          }
+          if ($req.count -and -not $req.regex) {
+            $errors += "  required 项有 count 但无 regex"
+          }
+          if ($req.size -and ($req.size.Count -ne 2 -or $req.size[0] -notmatch '^\d+$' -or $req.size[1] -notmatch '^\d+$')) {
+            $errors += "  required 项 size 应为 [宽, 高]"
+          }
+        }
+      }
+      if ($config.rename) {
+        foreach ($rn in $config.rename) {
+          if (-not $rn.to) {
+            $errors += "  rename 项缺少 to"
+          }
+          if (-not $rn.match -and -not $rn.regex -and -not $rn.size) {
+            $errors += "  rename 项缺少 match/regex/size 标识"
+          }
+          if ($rn.size -and ($rn.size.Count -ne 2 -or $rn.size[0] -notmatch '^\d+$' -or $rn.size[1] -notmatch '^\d+$')) {
+            $errors += "  rename 项 size 应为 [宽, 高]"
+          }
+        }
+      }
+      if ($config.zip -and -not $config.zip.name) {
+        $errors += "  zip 缺少 name"
+      }
+      if ($errors.Count -gt 0) {
+        $hasErrors = $true
+        Write-Host "  WARN $($_.Name)" -ForegroundColor Yellow
+        $errors | ForEach-Object { Write-Host "    $_" -ForegroundColor Yellow }
+      } else {
+        Write-Host "  OK sort/$($_.Name)"
+      }
+    } catch {
+      $hasErrors = $true
+      Write-Host "  ERROR $($_.Name): $_" -ForegroundColor Red
+    }
+  }
+}
+if ($hasErrors) {
+  Write-Host "Sort config validation complete with warnings." -ForegroundColor Yellow
+}
+
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 $builder = New-Object System.Text.StringBuilder
 

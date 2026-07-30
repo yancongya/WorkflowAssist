@@ -23,9 +23,14 @@ function createMainUI(parentPanel) {
     win.onResizing = win.onResize = function() {
         try { this.layout.resize(); } catch(e) {}
         try { relayoutFuncButtons(); } catch(e) {}
+        try { relayoutFuncButtons2(); } catch(e) {}
     };
 
     win.parentPanel = parentPanel;
+
+    // 全局键盘状态跟踪（解决 ScriptUI.environment.keyboardState 在 onClick 中不可靠的问题）
+    var _ctrlKey = false;
+    var _shiftKey = false;
 
     function setTextColor(ctrl, color) {
         try {
@@ -109,6 +114,14 @@ function createMainUI(parentPanel) {
             currentCompName = "（无活动合成）";
             nameInput.helpTip = "输入基础名称，源合成将被重命名为此名称\n当前合成: " + currentCompName;
         }
+        updateTabEnabledState();
+    }
+
+    function updateTabEnabledState() {
+        var hasComp = getActiveComp() !== null;
+        tabOrganize.enabled = hasComp;
+        tabOutput.enabled = hasComp;
+        tabSync.enabled = hasComp;
     }
 
     btnRefresh.onClick = function() {
@@ -525,11 +538,15 @@ function createMainUI(parentPanel) {
         tabSync.helpTip = "切换到同步标签 | Ctrl+单击: 执行同步";
     });
 
-    // 键盘事件监听，实时更新 tab 文本
-    win.addEventListener("keydown", function() {
+    // 键盘事件监听，实时更新 tab 文本和键盘状态
+    win.addEventListener("keydown", function(evt) {
+        _ctrlKey = evt.ctrlKey;
+        _shiftKey = evt.shiftKey;
         if (tabHovered) updateTabText();
     });
-    win.addEventListener("keyup", function() {
+    win.addEventListener("keyup", function(evt) {
+        _ctrlKey = evt.ctrlKey;
+        _shiftKey = evt.shiftKey;
         if (tabHovered) updateTabText();
     });
 
@@ -618,8 +635,8 @@ function createMainUI(parentPanel) {
 
     function relayoutFuncButtons() {
         if (funcButtons.length === 0) return;
-        var pw = funcPanel.preferredSize.width;
-        var totalWidth = pw - 12;
+        var pw = (funcPanel.size && funcPanel.size.width) || funcPanel.preferredSize.width;
+        var totalWidth = pw - funcRow.margins[0] - funcRow.margins[1];
         var spacing = funcRow.spacing * (funcButtons.length - 1);
         var unitWidth = Math.max(32, (totalWidth - spacing) / funcButtons.length);
         for (var fi = 0; fi < funcButtons.length; fi++) {
@@ -658,14 +675,10 @@ function createMainUI(parentPanel) {
         try { pagExport(); } catch(e) { alert("PAG按钮出错: " + (e.message || e.toString())); }
     };
 
-    var btnImportTemplate = addFuncButton("模板", "importTemplate", "单击: 导入高光图并替换模板末尾图层 | Ctrl+单击: 渲染当前帧为高光图");
+    var btnImportTemplate = addFuncButton("模板", "importTemplate", "导入高光图并替换模板末尾图层");
     btnImportTemplate.onClick = function() {
         try {
-            if (ScriptUI.environment.keyboardState.ctrlKey) {
-                renderHighlightFrame();
-            } else {
-                importTemplateAndReplace();
-            }
+            importTemplateAndReplace();
         } catch(e) { alert("模板按钮出错: " + (e.message || e.toString())); }
     };
 
@@ -752,8 +765,8 @@ function createMainUI(parentPanel) {
 
     function relayoutFuncButtons2() {
         if (funcButtons2.length === 0) return;
-        var pw = funcPanel.preferredSize.width;
-        var totalWidth = pw - 12;
+        var pw = (funcPanel.size && funcPanel.size.width) || funcPanel.preferredSize.width;
+        var totalWidth = pw - funcRow2.margins[0] - funcRow2.margins[1];
         var spacing = funcRow2.spacing * (funcButtons2.length - 1);
         var unitWidth = Math.max(32, (totalWidth - spacing) / funcButtons2.length);
         for (var fi = 0; fi < funcButtons2.length; fi++) {
@@ -779,10 +792,69 @@ function createMainUI(parentPanel) {
         try { renderPreviewToMp4(); } catch(e) { alert("渲染合成按钮出错: " + (e.message || e.toString())); }
     };
 
-    var btnRename = addIconButton2("重命名", "saveProject", "重命名当前项目文件（另存为新文件，自动删除旧文件）");
+    var btnRename = addIconButton2("重命名", "rename", "重命名当前项目 | Ctrl+单击: 重新加载文件");
     btnRename.onClick = function() {
-        try { renameProject(); } catch(e) { alert("重命名按钮出错: " + (e.message || e.toString())); }
+        try {
+            if (ScriptUI.environment.keyboardState.ctrlKey) {
+                reloadCurrentProject();
+            } else {
+                renameProject();
+            }
+        } catch(e) { alert("重命名按钮出错: " + (e.message || e.toString())); }
     };
+
+    var btnLoopAnim = addIconButton2("循环", "loopAnim", "复制图层+偏移1s+透明度渐隐，制作无缝循环动画");
+    btnLoopAnim.onClick = function() {
+        try {
+            var comp = app.project.activeItem;
+            if (!comp || !(comp instanceof CompItem)) {
+                alert("请先选中一个合成！");
+                return;
+            }
+
+            if (comp.width !== 750 || comp.height !== 1624) {
+                if (!confirm("当前合成尺寸不是礼物墙标准尺寸（750×1624），是否继续？", false, "尺寸提醒")) {
+                    return;
+                }
+            }
+
+            var layers = comp.selectedLayers;
+            if (layers.length !== 1) {
+                alert("请选中一个图层！");
+                return;
+            }
+            var layer = layers[0];
+            var layerDuration = layer.outPoint - layer.inPoint;
+            var suggestedDuration = Math.max(0.5, layerDuration - 1);
+
+            var result = prompt("请输入循环时长（秒）:", suggestedDuration.toFixed(1));
+            if (!result) return;
+            var loopDuration = parseFloat(result);
+            if (isNaN(loopDuration) || loopDuration <= 0) {
+                alert("无效的时长！");
+                return;
+            }
+
+            app.beginUndoGroup("循环动画设置");
+            try {
+                setupLoopAnimation(comp, layer, loopDuration);
+            } catch(e) {
+                alert("循环动画设置出错: " + (e.message || e.toString()));
+            }
+            app.endUndoGroup();
+
+        } catch(e) {
+            alert("循环按钮出错: " + (e.message || e.toString()));
+        }
+    };
+
+    var btnFrameExport = addIconButton2("帧导出", "frameExport", "自动检测标记并导出: 高光图/首帧/展示帧");
+    btnFrameExport.onClick = function() {
+        try {
+            autoExportFrames(app.project.activeItem);
+        } catch(e) { alert("帧导出按钮出错: " + (e.message || e.toString())); }
+    };
+
     relayoutFuncButtons2();
 
     // ================== 内置功能函数 ==================
@@ -1200,30 +1272,6 @@ function createMainUI(parentPanel) {
         }
     }
 
-    function renderHighlightFrame() {
-        var comp = app.project.activeItem;
-        if (!(comp instanceof CompItem)) {
-            alert("请先选择一个活动合成！");
-            return;
-        }
-
-        if (!app.project.file) {
-            alert("请先保存项目文件！");
-            return;
-        }
-
-        var projectDir = app.project.file.parent.fsName;
-        var outputFolder = new Folder(projectDir + "/输出");
-        var currentTimeStr = comp.time.toFixed(2);
-
-        var destFile = renderSingleFrame(comp, outputFolder, "高光图", comp.time);
-        if (destFile) {
-            alert("高光图已保存:\n" + destFile.fsName + "\n\n当前帧位置: " + currentTimeStr + "秒");
-        } else {
-            alert("渲染高光图失败！\n请检查渲染队列。");
-        }
-    }
-
     function importTemplateAndReplace() {
         if (!app.project.file) {
             alert("请先保存项目文件！");
@@ -1582,6 +1630,52 @@ function createMainUI(parentPanel) {
         }
     }
 
+    function getMp4Dimensions(filePath) {
+        try {
+            var f = new File(filePath);
+            if (!f.exists) return null;
+            f.open("r");
+            f.encoding = "BINARY";
+            f.seek(0, 2);
+            var fileLen = f.tell;
+            if (fileLen < 100) { f.close(); return null; }
+            var raw = "";
+            var readSize = Math.min(fileLen, 262144);
+            f.seek(0, 0);
+            raw = f.read(readSize);
+            if (raw.indexOf("tkhd") < 0 && fileLen > 262144) {
+                f.seek(fileLen - 262144, 0);
+                raw = f.read(262144);
+            }
+            f.close();
+            var searchPos = 0;
+            while (true) {
+                var pos = raw.indexOf("tkhd", searchPos);
+                if (pos < 0) return null;
+                if (pos + 100 > raw.length) return null;
+                var ver = raw.charCodeAt(pos + 4);
+                var wOff, hOff;
+                if (ver === 0) { wOff = 80; hOff = 84; }
+                else if (ver === 1) { wOff = 92; hOff = 96; }
+                else { searchPos = pos + 1; continue; }
+                var w = ((raw.charCodeAt(pos + wOff) << 24) | (raw.charCodeAt(pos + wOff + 1) << 16) |
+                         (raw.charCodeAt(pos + wOff + 2) << 8) | raw.charCodeAt(pos + wOff + 3)) >> 16;
+                var h = ((raw.charCodeAt(pos + hOff) << 24) | (raw.charCodeAt(pos + hOff + 1) << 16) |
+                         (raw.charCodeAt(pos + hOff + 2) << 8) | raw.charCodeAt(pos + hOff + 3)) >> 16;
+            if (w > 0 && h > 0) return [w, h];
+            searchPos = pos + 1;
+        }
+    } catch(e) {
+        return null;
+    }
+}
+
+    function getFileDimensions(filePath) {
+        var dims = getPngDimensions(filePath);
+        if (dims) return dims;
+        return getMp4Dimensions(filePath);
+    }
+
     function sortOutputFiles() {
         if (!app.project.file) {
             alert("请先保存项目文件！");
@@ -1602,6 +1696,51 @@ function createMainUI(parentPanel) {
         if (!sortConfig) {
             alert("当前预设（" + (presetDropdown.selection ? presetDropdown.selection.text : "未选择") + "）无需输出整理。");
             return;
+        }
+
+        function isExcluded(name, excludeName, excludeRegex) {
+            if (excludeName) {
+                if (typeof excludeName === "string") { if (name === excludeName) return true; }
+                else {
+                    for (var ei = 0; ei < excludeName.length; ei++) {
+                        if (name === excludeName[ei]) return true;
+                    }
+                }
+            }
+            if (excludeRegex) {
+                var re = new RegExp(excludeRegex, "i");
+                if (re.test(name)) return true;
+            }
+            return false;
+        }
+
+        function fmtExclude(excludeName) {
+            if (!excludeName) return "";
+            if (typeof excludeName === "string") return excludeName;
+            return excludeName.join(", ");
+        }
+
+        function matchRenameRule(rule, fileName, filePath) {
+            var matched = false;
+            if (rule.match && fileName === rule.match) matched = true;
+            if (!matched && rule.regex) {
+                if (!isExcluded(fileName, rule.excludeName, rule.excludeRegex)) {
+                    var re = new RegExp(rule.regex, "i");
+                    if (re.test(fileName)) matched = true;
+                }
+            }
+            if (rule.size) {
+                var dims = getFileDimensions(filePath);
+                var sizeMatch = dims && dims[0] === rule.size[0] && dims[1] === rule.size[1];
+                if (matched) {
+                    if (!sizeMatch) matched = false;
+                } else {
+                    if (sizeMatch && !isExcluded(fileName, rule.excludeName, rule.excludeRegex)) {
+                        matched = true;
+                    }
+                }
+            }
+            return matched;
         }
 
         var dialog = new Window("dialog", "输出文件整理");
@@ -1625,12 +1764,17 @@ function createMainUI(parentPanel) {
         infoLines.push("需要文件: " + sortConfig.required.length + " 项");
         for (var ri = 0; ri < sortConfig.required.length; ri++) {
             var r = sortConfig.required[ri];
-            infoLines.push("  " + (ri+1) + ". " + (r.label || r.name || r.regex || "尺寸 " + r.size));
+            var label = r.label || r.name || r.regex || "尺寸 " + r.size;
+            if (r.count) label += " x" + r.count;
+            if (r.excludeName) label += " (排除: " + fmtExclude(r.excludeName) + ")";
+            infoLines.push("  " + (ri+1) + ". " + label);
         }
         infoLines.push("重命名规则: " + sortConfig.rename.length + " 条");
         for (var rr = 0; rr < sortConfig.rename.length; rr++) {
             var rn = sortConfig.rename[rr];
-            infoLines.push("  " + (rr+1) + ". " + (rn.match || rn.regex || "") + " → " + rn.to);
+            var rnLabel = rn.match || rn.regex || "";
+            if (rn.excludeName) rnLabel += " (排除: " + fmtExclude(rn.excludeName) + ")";
+            infoLines.push("  " + (rr+1) + ". " + rnLabel + " → " + rn.to);
         }
         if (sortConfig.zip) {
             infoLines.push("打包: " + sortConfig.zip.files.join(", ") + " → " + sortConfig.zip.name);
@@ -1643,6 +1787,7 @@ function createMainUI(parentPanel) {
         logText.text = infoLines.join("\n");
 
         var buttonGroup = dialog.add("group");
+        var checkButton = buttonGroup.add("button", undefined, "检查");
         var confirmButton = buttonGroup.add("button", undefined, "确认");
         var cancelButton = buttonGroup.add("button", undefined, "取消");
 
@@ -1660,7 +1805,16 @@ function createMainUI(parentPanel) {
                     output_name = safeName;
                 }
                 var projectFolder = projectPath.parent;
-                var outputFolder = new Folder(projectFolder.fullName + "/输出");
+                var outputFolder;
+
+                if (sortConfig.subfolder) {
+                    var subDir = findGiftWallFolder(projectFolder.fsName);
+                    if (!subDir) return;
+                    outputFolder = subDir;
+                    logText.text += "使用子文件夹: " + decodeUrlString(subDir.name) + "\n";
+                } else {
+                    outputFolder = new Folder(projectFolder.fullName + "/输出");
+                }
 
                 if (!outputFolder.exists) {
                     logText.text += "错误：未找到'输出'文件夹\n";
@@ -1674,36 +1828,50 @@ function createMainUI(parentPanel) {
                 for (var ri = 0; ri < sortConfig.required.length; ri++) {
                     var req = sortConfig.required[ri];
                     var found = false;
-                    for (var si = 0; si < files.length; si++) {
-                        var sName = decodeUrlString(files[si].name);
-                        var matched = false;
-                        if (req.name && sName === req.name) matched = true;
-                        if (!matched && req.regex) {
-                            var re = new RegExp(req.regex, "i");
-                            if (re.test(sName)) matched = true;
-                        }
-                        if (!matched && req.fallback && sName === req.fallback) matched = true;
-                        if (matched && req.size) {
-                            var dims = getPngDimensions(files[si].fsName);
-                            if (!dims || dims[0] !== req.size[0] || dims[1] !== req.size[1]) {
-                                matched = false;
-                                continue;
-                            }
-                        }
-                        if (matched) { found = true; break; }
-                    }
-                    // 尺寸兜底：名字没匹配上但有 size 要求的，试试按尺寸找
-                    if (!found && req.size) {
+                    if (req.count && req.regex) {
+                        var matchCount = 0;
                         for (var si = 0; si < files.length; si++) {
-                            var dims = getPngDimensions(files[si].fsName);
-                            if (dims && dims[0] === req.size[0] && dims[1] === req.size[1]) {
-                                found = true;
-                                break;
+                            var sName2 = decodeUrlString(files[si].name);
+                            if (isExcluded(sName2, req.excludeName, req.excludeRegex)) continue;
+                            var re = new RegExp(req.regex, "i");
+                            if (re.test(sName2)) matchCount++;
+                        }
+                        found = (matchCount >= req.count);
+                    } else {
+                        for (var si = 0; si < files.length; si++) {
+                            var sName = decodeUrlString(files[si].name);
+                            var matched = false;
+                            if (req.name && sName === req.name) matched = true;
+                            if (!matched && req.regex) {
+                                if (!isExcluded(sName, req.excludeName, req.excludeRegex)) {
+                                    var re = new RegExp(req.regex, "i");
+                                    if (re.test(sName)) matched = true;
+                                }
+                            }
+                            if (!matched && req.fallback && sName === req.fallback) matched = true;
+                            if (matched && req.size) {
+                                var dims = getPngDimensions(files[si].fsName);
+                                if (!dims || dims[0] !== req.size[0] || dims[1] !== req.size[1]) {
+                                    matched = false;
+                                    continue;
+                                }
+                            }
+                            if (matched) { found = true; break; }
+                        }
+                        if (!found && req.size) {
+                            for (var si = 0; si < files.length; si++) {
+                                var dims = getPngDimensions(files[si].fsName);
+                                if (dims && dims[0] === req.size[0] && dims[1] === req.size[1]) {
+                                    found = true;
+                                    break;
+                                }
                             }
                         }
                     }
                     if (!found) {
-                        missing.push(req.label || req.name || req.regex);
+                        var label = req.label || req.name || req.regex;
+                        if (req.count) label = "MP4 文件（需要 " + req.count + " 个）";
+                        missing.push(label);
                     }
                 }
                 if (missing.length > 0) {
@@ -1713,25 +1881,45 @@ function createMainUI(parentPanel) {
 
                 // --- Rename files ---
                 logText.text += "\n========== 开始处理文件 ==========\n";
+                var processedNames = {};
+
+                // 先处理带 order 的规则（按文件名排序后取第 N 个匹配）
+                for (var rr = 0; rr < sortConfig.rename.length; rr++) {
+                    var rule = sortConfig.rename[rr];
+                    if (rule.order === undefined) continue;
+                    var matches = [];
+                    for (var i = 0; i < files.length; i++) {
+                        var fName = decodeUrlString(files[i].name);
+                        if (processedNames[fName]) continue;
+                        if (matchRenameRule(rule, fName, files[i].fsName)) matches.push({idx: i, name: fName});
+                    }
+                    matches.sort(function(a, b) { return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0); });
+                    if (matches.length > 0) {
+                        var takeIdx = Math.min(rule.order, matches.length - 1);
+                        var m = matches[takeIdx];
+                        var newName = String(rule.to).replace("{prefix}", output_name);
+                        var newFile = new File(files[m.idx].parent.fsName + "/" + newName);
+                        if (newFile.exists) {
+                            logText.text += "已存在: " + newName + "\n";
+                        } else if (files[m.idx].rename(newFile)) {
+                            logText.text += "重命名成功: " + m.name + " -> " + newName + "\n";
+                        } else {
+                            logText.text += "重命名失败: " + m.name + "\n";
+                        }
+                        processedNames[m.name] = true;
+                        processedNames[newName] = true;
+                    }
+                }
+
+                // 再处理不带 order 的标准规则（每个文件匹配第一条规则）
                 for (var i = 0; i < files.length; i++) {
                     var file = files[i];
                     var fileName = decodeUrlString(file.name);
+                    if (processedNames[fileName]) continue;
                     for (var rr = 0; rr < sortConfig.rename.length; rr++) {
                         var rule = sortConfig.rename[rr];
-                        var matches = false;
-                        if (rule.match && fileName === rule.match) matches = true;
-                        if (!matches && rule.regex) {
-                            var re2 = new RegExp(rule.regex, "i");
-                            if (re2.test(fileName)) matches = true;
-                        }
-                        // 尺寸兜底：名字没匹配上但有 size 的，按 PNG 尺寸匹配
-                        if (!matches && rule.size) {
-                            var dims2 = getPngDimensions(file.fsName);
-                            if (dims2 && dims2[0] === rule.size[0] && dims2[1] === rule.size[1]) {
-                                matches = true;
-                            }
-                        }
-                        if (matches) {
+                        if (rule.order !== undefined) continue;
+                        if (matchRenameRule(rule, fileName, file.fsName)) {
                             var newName = String(rule.to).replace("{prefix}", output_name);
                             var newFile = new File(file.parent.fsName + "/" + newName);
                             if (newFile.exists) {
@@ -1741,6 +1929,8 @@ function createMainUI(parentPanel) {
                             } else {
                                 logText.text += "重命名失败: " + fileName + "\n";
                             }
+                            processedNames[fileName] = true;
+                            processedNames[newName] = true;
                             break;
                         }
                     }
@@ -1749,7 +1939,8 @@ function createMainUI(parentPanel) {
                 // --- Generate bat ---
                 var zipFiles = [];
                 for (var zf = 0; zf < sortConfig.zip.files.length; zf++) {
-                    zipFiles.push("'" + sortConfig.zip.files[zf] + "'");
+                    var zipSrcName = String(sortConfig.zip.files[zf]).replace("{prefix}", output_name);
+                    zipFiles.push("'" + zipSrcName + "'");
                 }
                 var zipName = String(sortConfig.zip.name).replace("{prefix}", output_name);
 
@@ -1761,9 +1952,10 @@ function createMainUI(parentPanel) {
                 var hasZipSources = true;
                 var delFiles = [];
                 for (var df = 0; df < sortConfig.zip.files.length; df++) {
-                    var zipSrc = new File(outputFolder.fsName + "/" + sortConfig.zip.files[df]);
+                    var zipSrcName = String(sortConfig.zip.files[df]).replace("{prefix}", output_name);
+                    var zipSrc = new File(outputFolder.fsName + "/" + zipSrcName);
                     if (!zipSrc.exists) { hasZipSources = false; break; }
-                    delFiles.push('"' + sortConfig.zip.files[df] + '"');
+                    delFiles.push('"' + zipSrcName + '"');
                 }
 
                 if (hasZipSources) {
@@ -1777,7 +1969,9 @@ function createMainUI(parentPanel) {
                     batContent += 'powershell -NoProfile -Command "& {';
                     batContent += 'Compress-Archive -Path ' + zipFiles.join(',') + ' ';
                     batContent += '-DestinationPath \'' + zipName + '\'}"\r\n';
-                    batContent += 'if %errorlevel%==0 del ' + delFiles.join(' ') + '\r\n';
+                    if (!sortConfig.zip.keepOriginals) {
+                        batContent += 'if %errorlevel%==0 del ' + delFiles.join(' ') + '\r\n';
+                    }
                     batContent += 'timeout /t 1 /nobreak >nul\r\n';
                     batContent += 'powershell -Command "Get-Item ' + clipItems.join(',') + ' | Set-Clipboard"\r\n';
                     batContent += 'echo 文件已复制到剪贴板\r\n';
@@ -1823,6 +2017,152 @@ function createMainUI(parentPanel) {
                 }
             } catch(e) {
                 alert("整理输出出错: " + (e.message || e.toString()));
+            }
+        };
+
+        checkButton.onClick = function() {
+            try {
+                var output_name = prefixInput.text.trim();
+                if (!output_name) { alert("请输入前缀名称！"); return; }
+                var safeName = output_name.replace(/[\\\/:*?"<>|]/g, "-");
+                if (safeName !== output_name) {
+                    logText.text += "前缀含非法字符，已替换为: " + safeName + "\n";
+                    output_name = safeName;
+                }
+                var projectFolder = projectPath.parent;
+                var outputFolder;
+                if (sortConfig.subfolder) {
+                    var subDir = findGiftWallFolder(projectFolder.fsName);
+                    if (!subDir) return;
+                    outputFolder = subDir;
+                    logText.text += "使用子文件夹: " + decodeUrlString(subDir.name) + "\n";
+                } else {
+                    outputFolder = new Folder(projectFolder.fsName + "/输出");
+                }
+                if (!outputFolder.exists) { logText.text += "错误：未找到输出文件夹\n"; return; }
+
+                var files = outputFolder.getFiles();
+                logText.text += "\n========== 检查开始 ==========\n";
+                logText.text += "文件夹内文件 (" + files.length + " 个):\n";
+                for (var fi = 0; fi < files.length; fi++) {
+                    var fname = decodeUrlString(files[fi].name);
+                    var fsize = files[fi].length || 0;
+                    var info = "  " + fname;
+                    if (/\.png$/i.test(fname)) {
+                        var dims = getPngDimensions(files[fi].fsName);
+                        if (dims) info += " (" + dims[0] + "\u00D7" + dims[1] + ")";
+                    } else if (/\.mp4$/i.test(fname)) {
+                        var dims = getMp4Dimensions(files[fi].fsName);
+                        if (dims) info += " (" + dims[0] + "\u00D7" + dims[1] + ")";
+                    }
+                    if (fsize > 0) info += " [" + (fsize > 1048576 ? (fsize/1048576).toFixed(1)+"MB" : (fsize/1024).toFixed(1)+"KB") + "]";
+                    logText.text += info + "\n";
+                }
+
+                logText.text += "\n--- 文件存在检查 ---\n";
+                var allFound = true;
+                for (var ri = 0; ri < sortConfig.required.length; ri++) {
+                    var req = sortConfig.required[ri];
+                    var found = false;
+                    if (req.count && req.regex) {
+                        var matchCount = 0;
+                        for (var si = 0; si < files.length; si++) {
+                            var sName = decodeUrlString(files[si].name);
+                            if (isExcluded(sName, req.excludeName, req.excludeRegex)) continue;
+                            var re = new RegExp(req.regex, "i");
+                            if (re.test(sName)) matchCount++;
+                        }
+                        found = (matchCount >= req.count);
+                        var lb = req.label || req.regex;
+                        logText.text += "  " + (found ? "\u2713" : "\u2717") + " " + lb + " (需要 " + req.count + " 个, 找到 " + matchCount + " 个)" + (req.excludeName ? ", 排除: " + fmtExclude(req.excludeName) : "") + "\n";
+                    } else {
+                        for (var si = 0; si < files.length; si++) {
+                            var sName = decodeUrlString(files[si].name);
+                            var matched = false;
+                            if (req.name && sName === req.name) matched = true;
+                            if (!matched && req.regex) {
+                                if (!isExcluded(sName, req.excludeName, req.excludeRegex)) {
+                                    var re = new RegExp(req.regex, "i");
+                                    if (re.test(sName)) matched = true;
+                                }
+                            }
+                            if (!matched && req.fallback && sName === req.fallback) matched = true;
+                            if (matched && req.size) {
+                                var dims = getPngDimensions(files[si].fsName);
+                                if (!dims || dims[0] !== req.size[0] || dims[1] !== req.size[1]) matched = false;
+                            }
+                            if (matched) { found = true; break; }
+                        }
+                        if (!found && req.size) {
+                            for (var si = 0; si < files.length; si++) {
+                                var dims = getPngDimensions(files[si].fsName);
+                                if (dims && dims[0] === req.size[0] && dims[1] === req.size[1]) { found = true; break; }
+                            }
+                        }
+                        var lb = req.label || req.name || req.regex || "尺寸 " + req.size;
+                        logText.text += "  " + (found ? "\u2713" : "\u2717") + " " + lb + (req.excludeName ? " (排除: " + fmtExclude(req.excludeName) + ")" : "") + "\n";
+                    }
+                    if (!found) allFound = false;
+                }
+
+                logText.text += "\n--- 重命名预览 ---\n";
+                var processedNames = {};
+                for (var rr = 0; rr < sortConfig.rename.length; rr++) {
+                    var rule = sortConfig.rename[rr];
+                    var newName = String(rule.to).replace("{prefix}", output_name);
+                    var matches = [];
+                    for (var i = 0; i < files.length; i++) {
+                        var fName = decodeUrlString(files[i].name);
+                        if (processedNames[fName]) continue;
+                        if (isExcluded(fName, rule.excludeName, rule.excludeRegex)) continue;
+                        if (matchRenameRule(rule, fName, files[i].fsName)) matches.push(fName);
+                    }
+                    if (rule.order !== undefined) {
+                        matches.sort(function(a, b) { return a < b ? -1 : (a > b ? 1 : 0); });
+                        if (matches.length > 0) {
+                            var takeIdx = Math.min(rule.order, matches.length - 1);
+                            logText.text += "  " + matches[takeIdx] + " \u2192 " + newName + " (order:" + rule.order + ")\n";
+                            processedNames[matches[takeIdx]] = true;
+                        } else {
+                            logText.text += "  [无匹配] \u2192 " + newName + " (order:" + rule.order + ", 共 0 个候选)\n";
+                        }
+                    } else {
+                        if (matches.length > 0) {
+                            logText.text += "  " + matches[0] + " \u2192 " + newName + "\n";
+                            processedNames[matches[0]] = true;
+                        } else {
+                            logText.text += "  [无匹配] \u2192 " + newName + "\n";
+                        }
+                    }
+                }
+
+                logText.text += "\n--- 打包计划 ---\n";
+                if (sortConfig.zip) {
+                    var zipName = String(sortConfig.zip.name).replace("{prefix}", output_name);
+                    logText.text += "  ZIP: " + zipName + "\n";
+                    for (var zf = 0; zf < sortConfig.zip.files.length; zf++) {
+                        var zfName = String(sortConfig.zip.files[zf]).replace("{prefix}", output_name);
+                        var zfFile = new File(outputFolder.fsName + "/" + zfName);
+                        logText.text += "    " + (zfFile.exists ? "\u2713" : "\u2717") + " " + zfName + "\n";
+                    }
+                    logText.text += "  打包后" + (sortConfig.zip.keepOriginals ? "保留源文件（不删除）" : "删除源文件") + "\n";
+                } else {
+                    logText.text += "  （无打包配置）\n";
+                }
+
+                logText.text += "\n--- 复制到剪贴板 ---\n";
+                if (sortConfig.clipboard && sortConfig.clipboard.length > 0) {
+                    for (var ci = 0; ci < sortConfig.clipboard.length; ci++) {
+                        logText.text += "  " + String(sortConfig.clipboard[ci]).replace("{prefix}", output_name) + "\n";
+                    }
+                } else {
+                    logText.text += "  （无剪贴板配置）\n";
+                }
+
+                logText.text += "========== 检查完成 ==========\n";
+                logText.text += (allFound ? "结论: 所有必需文件已就绪，可执行整理" : "结论: 缺失必需文件，请先补充后再执行整理") + "\n";
+            } catch(e) {
+                logText.text += "检查出错: " + (e.message || e.toString()) + "\n";
             }
         };
 
@@ -1878,6 +2218,20 @@ function createMainUI(parentPanel) {
             alert("项目已保存到：\n" + saveFile.fsName);
         } catch(e) {
             alert("保存失败：" + e.toString());
+        }
+    }
+
+    function reloadCurrentProject() {
+        if (!app.project.file) {
+            alert("项目未保存，无法重新加载。");
+            return;
+        }
+
+        try {
+            app.project.save();
+            app.open(app.project.file);
+        } catch(e) {
+            alert("重新加载失败：" + e.toString());
         }
     }
 
@@ -2085,6 +2439,8 @@ function createMainUI(parentPanel) {
         tip += "时长: ";
         if (typeof s.duration === "string" && s.duration === "custom") {
             tip += "自定义（运行前弹窗输入）\n";
+        } else if (typeof s.duration === "string" && s.duration === "source") {
+            tip += "与源合成相同\n";
         } else {
             tip += s.duration + "s\n";
         }
@@ -2094,15 +2450,18 @@ function createMainUI(parentPanel) {
         } else if (s.scaleMode === "custom") {
             tip += s.scalePercent + "% 缩放";
         }
-        if (s.stagger && s.stagger.enabled) {
-            tip += "\n错层: " + s.stagger.count + "层, 偏移=";
-            if (index > 0) {
-                tip += s.duration + "s";
-            } else {
-                tip += "?s";
-            }
+    if (s.stagger && s.stagger.enabled) {
+        tip += "\n错层: " + s.stagger.count + "层, 偏移=";
+        if (index > 0) {
+            tip += s.duration + "s";
+        } else {
+            tip += "?s";
         }
-        tip += "\n\n单击: 切换启用/禁用 | Ctrl+单击: 立即执行此步骤";
+    }
+    if (s.trimEnd && s.loopCount > 1) {
+        tip += "\n循环: 裁减尾端" + s.trimEnd + "s, 循环" + s.loopCount + "次, 首尾相接";
+    }
+    tip += "\n\n单击: 切换启用/禁用 | Ctrl+单击: 立即执行此步骤";
         return tip;
     }
 
@@ -2331,9 +2690,11 @@ function createMainUI(parentPanel) {
 
     // ================== 初始化 ==================
     detectCurrentComp();
+    updateTabEnabledState();
     refreshPresetList();
     funcPanel.preferredSize.width = win.preferredSize.width - 12;
     relayoutFuncButtons();
+    relayoutFuncButtons2();
 
     return win;
 }

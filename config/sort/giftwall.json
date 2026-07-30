@@ -1,0 +1,21 @@
+{
+  "description": "礼物墙输出整理：检查 PNG 和 MP4，按排序重命名主效果和 alpha，排除预览视频，打包后不删除源文件",
+  "subfolder": "礼物墙",
+  "required": [
+    { "name": "首帧.png" },
+    { "name": "展示帧.png" },
+    { "regex": "\\.mp4$", "excludeRegex": "预览", "count": 2, "label": "MP4 文件（主效果 + alpha）" }
+  ],
+  "rename": [
+    { "regex": "\\.mp4$", "excludeRegex": "预览", "size": [750, 1624], "to": "gift_wall_effect.mp4" },
+    { "regex": "\\.mp4$", "excludeRegex": "预览", "to": "gift_wall_effect_alpha.mp4" }
+  ],
+  "zip": {
+    "files": ["首帧.png", "展示帧.png", "gift_wall_effect.mp4", "gift_wall_effect_alpha.mp4"],
+    "name": "{prefix}礼物墙输出.zip",
+    "keepOriginals": true
+  },
+  "clipboard": [
+    "{prefix}礼物墙输出.zip"
+  ]
+}

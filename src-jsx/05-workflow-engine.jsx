@@ -77,7 +77,8 @@ function runSteps(sourceComp, baseName, steps, activeStates) {
         logMessage("执行步骤 " + (j + 1) + ": " + outputName, LOG_LEVEL.NORMAL, "ENGINE");
 
         var durationVal = s.duration;
-        if (typeof durationVal === "string" && durationVal === "custom") {
+        var durStr = String(durationVal);
+        if (durStr === "custom") {
             if (_customDuration === null) {
                 var result = prompt("请输入步骤 \"" + s.name + "\" 的时长（秒）:", "5");
                 if (result === null || result === "") return null;
@@ -89,6 +90,22 @@ function runSteps(sourceComp, baseName, steps, activeStates) {
                 _customDuration = num;
             }
             durationVal = _customDuration;
+        } else if (durStr === "source") {
+            durationVal = currentComp.duration;
+            logMessage("步骤" + (j + 1) + " duration=source, 解析为: " + durationVal + " (currentComp=" + currentComp.name + ")", LOG_LEVEL.NORMAL, "ENGINE");
+        }
+
+        var trimEnd = Number(s.trimEnd) || 0;
+        var loopCount = Number(s.loopCount) || 1;
+        if (trimEnd > 0 && loopCount > 1) {
+            durationVal = (durationVal - trimEnd) * loopCount;
+            logMessage("步骤" + (j + 1) + " trimEnd=" + trimEnd + " loopCount=" + loopCount + " 计算后duration=" + durationVal, LOG_LEVEL.NORMAL, "ENGINE");
+        }
+
+        if (typeof durationVal !== "number" || isNaN(durationVal) || durationVal <= 0) {
+            logMessage("步骤" + (j + 1) + " duration无效: " + durationVal + " (类型=" + typeof durationVal + ")", LOG_LEVEL.ERROR, "ENGINE");
+            alert("步骤" + (j + 1) + " 时长计算异常:\n原始配置: " + durStr + "\n解析值: " + durationVal + "\n类型: " + typeof durationVal + "\n源合成时长: " + currentComp.duration + "s");
+            return null;
         }
 
         var newComp = createComp(outputName, s.width, s.height, s.frameRate, durationVal);
@@ -101,6 +118,17 @@ function runSteps(sourceComp, baseName, steps, activeStates) {
                 var dup = firstLayer.duplicate();
                 dup.startTime = k * staggerOffset;
                 logMessage("  错层 " + (k + 1) + ": startTime=" + dup.startTime + "s (偏移=" + staggerOffset + "s)", LOG_LEVEL.NORMAL, "ENGINE");
+            }
+        }
+
+        if (trimEnd > 0 && loopCount > 1) {
+            var srcDuration = currentComp.duration;
+            var trimmedDur = srcDuration - trimEnd;
+            var firstLayer = newComp.layer(1);
+            firstLayer.outPoint = trimmedDur;
+            for (var k = 1; k < loopCount; k++) {
+                var dup = firstLayer.duplicate();
+                dup.startTime = k * trimmedDur;
             }
         }
 
@@ -157,7 +185,8 @@ function executeSingleStep(sourceComp, baseName, presetFile, stepIndex) {
         logMessage("执行步骤 " + stepIndex + ": " + outputName, LOG_LEVEL.NORMAL, "ENGINE");
 
         var durationVal = s.duration;
-        if (typeof durationVal === "string" && durationVal === "custom") {
+        var durStr = String(durationVal);
+        if (durStr === "custom") {
             var result = prompt("请输入步骤 \"" + s.name + "\" 的时长（秒）:", "5");
             if (result === null || result === "") {
                 app.endUndoGroup();
@@ -170,6 +199,22 @@ function executeSingleStep(sourceComp, baseName, presetFile, stepIndex) {
                 return false;
             }
             durationVal = num;
+        } else if (durStr === "source") {
+            durationVal = stepSource.duration;
+            logMessage("单步" + stepIndex + " duration=source, 解析为: " + durationVal + " (stepSource=" + stepSource.name + ")", LOG_LEVEL.NORMAL, "ENGINE");
+        }
+
+        var trimEnd = Number(s.trimEnd) || 0;
+        var loopCount = Number(s.loopCount) || 1;
+        if (trimEnd > 0 && loopCount > 1) {
+            durationVal = (durationVal - trimEnd) * loopCount;
+        }
+
+        if (typeof durationVal !== "number" || isNaN(durationVal) || durationVal <= 0) {
+            logMessage("单步" + stepIndex + " duration无效: " + durationVal + " (类型=" + typeof durationVal + ")", LOG_LEVEL.ERROR, "ENGINE");
+            alert("单步" + stepIndex + " 时长计算异常:\n原始配置: " + durStr + "\n解析值: " + durationVal + "\n类型: " + typeof durationVal + "\n源合成时长: " + stepSource.duration + "s");
+            app.endUndoGroup();
+            return false;
         }
 
         var newComp = createComp(outputName, s.width, s.height, s.frameRate, durationVal);
@@ -181,6 +226,17 @@ function executeSingleStep(sourceComp, baseName, presetFile, stepIndex) {
             for (var k = 1; k < s.stagger.count; k++) {
                 var dup = firstLayer.duplicate();
                 dup.startTime = k * staggerOffset;
+            }
+        }
+
+        if (trimEnd > 0 && loopCount > 1) {
+            var srcDuration = stepSource.duration;
+            var trimmedDur = srcDuration - trimEnd;
+            var firstLayer = newComp.layer(1);
+            firstLayer.outPoint = trimmedDur;
+            for (var k = 1; k < loopCount; k++) {
+                var dup = firstLayer.duplicate();
+                dup.startTime = k * trimmedDur;
             }
         }
 

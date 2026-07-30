@@ -123,47 +123,30 @@ node -e "const fs=require('fs'); new Function(fs.readFileSync('dist/WorkflowAssi
 | `width` | number | yes | 合成宽度 |
 | `height` | number | yes | 合成高度 |
 | `frameRate` | number | yes | 帧率 |
-| `duration` | number / `"custom"` | yes | 时长（秒）。`"custom"` 表示运行前弹窗输入 |
+| `duration` | number / `"custom"` / `"source"` | yes | 时长（秒）。`"custom"` 弹窗输入，`"source"` 使用源合成时长 |
 | `scaleMode` | string | yes | `"fit_width"` 自适应宽度 / `"custom"` 自定义百分比 |
 | `scalePercent` | number | no | 自定义缩放百分比（`scaleMode: "custom"` 时必填） |
 | `stagger` | object | no | 错层配置 `{ enabled, count }` |
 | `render` | object | no | 渲染配置 `{ enabled, importBack }` |
-
-### Naming Priority
-
-```javascript
-function resolveOutputName(baseName, step) {
-    if (step.rename) {
-        return String(step.rename).replace("{baseName}", baseName);
-    }
-    return baseName + (step.suffix || "");
-}
-```
-
-Example scenarios (baseName = "全屏座驾a-独角兽"):
-
-| rename | suffix | Result |
-|--------|--------|--------|
-| `"动画"` | — | `"动画"` |
-| `"{baseName}_成品"` | — | `"全屏座驾a-独角兽_成品"` |
-| — | `"_预览"` | `"全屏座驾a-独角兽_预览"` |
-| — | `""` | `"全屏座驾a-独角兽"` |
-
-### Existing Preset Examples
-
-```jsonc
-// 礼物.json — 使用 rename + custom 时长 + sortConfig
-{ "name": "动画", "rename": "动画", "duration": "custom", "scaleMode": "fit_width", "sortConfig": "sort/gift.json" }
-
-// 头像框.json — 使用 suffix + 固定时长 + 错层（无 sortConfig，不支持输出整理）
-{ "name": "预览", "suffix": "_预览", "duration": 6, "scaleMode": "custom", "scalePercent": 150, "stagger": {"enabled": true, "count": 2} }
-```
+| `trimEnd` | number | no | 裁剪末尾帧数（礼物墙预览用，删掉最后 1 帧避免循环闪烁） |
+| `loopCount` | number | no | 合成循环次数（礼物墙预览用） |
 
 ### sortConfig 预设字段
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `sortConfig` | string | 可选。指向 `config/sort/xxx.json` 的相对路径。有此字段的预设才支持输出整理按钮。 |
+| `sync` | object | 可选。远程同步配置 `{ targetPath }`。把源文件和输出推送到网络共享文件夹。 |
+
+### sync 字段说明
+
+```json
+{ "targetPath": "\\\\172.19.241.43\\互娱中台设计-文件共享\\A礼物" }
+```
+- 在项目目录旁创建 `{项目名}文件夹/`，复制 `源文件/` 和 `输出/` 进去
+- 再整体推到网络路径
+- 勋章/头像框/挂件/礼物 等需要团队共享的项目使用
+- 礼物墙**不**使用 sync（协作流程不同）
 
 ---
 
@@ -180,6 +163,7 @@ Example scenarios (baseName = "全屏座驾a-独角兽"):
 | `rename` | array | yes | 重命名规则列表 |
 | `zip` | object | no | 打包配置（PAG 文件打包为 zip） |
 | `clipboard` | array | no | 完成后复制到剪贴板的文件列表（支持 `{prefix}` 模板） |
+| `subfolder` | string | no | 在 `输出/` 下进一步定位子文件夹（如 `"礼物墙"`）。配合 `findGiftWallFolder()` 使用 |
 
 ### required 条目字段
 
@@ -190,6 +174,9 @@ Example scenarios (baseName = "全屏座驾a-独角兽"):
 | `fallback` | string | 备选文件名（如 `animated_bmp.pag` 作为 `animated.pag` 的 fallback） |
 | `label` | string | 缺失时显示的人类可读名称（优先于 name/regex） |
 | `size` | [number, number] | 可选。PNG 尺寸校验 `[宽, 高]`。同时作为**尺寸兜底匹配**——名字没对上但尺寸对的 PNG 也算匹配 |
+| `count` | number | 可选。需要匹配的数量（配合 `regex` 使用，如 `count: 2` 要求至少 2 个文件匹配 regex） |
+| `excludeName` | string / string[] | 可选。精确排除文件名（单字符串或数组） |
+| `excludeRegex` | string | 可选。正则排除文件名（如 `"预览"` 排除所有带"预览"的文件） |
 
 ### rename 条目字段
 
@@ -198,7 +185,18 @@ Example scenarios (baseName = "全屏座驾a-独角兽"):
 | `match` | string | 精确文件名匹配 |
 | `regex` | string | 正则匹配文件名 |
 | `to` | string | 目标文件名，支持 `{prefix}` 模板变量 |
-| `size` | [number, number] | 可选。PNG 尺寸兜底——名字没匹配上但尺寸对上的也执行重命名 |
+| `size` | [number, number] | 可选。尺寸匹配：与 `regex` 同时存在时做 **AND 过滤**（regex 匹配后再用 size 缩小范围）；单独存在时做尺寸兜底 |
+| `order` | number | 可选。排序后取第 N 个（0-indexed）。配合 `regex` 使用，候选按文件名排序后取 `Math.min(order, candidates.length-1)` |
+| `excludeName` | string / string[] | 可选。精确排除文件名（单字符串或数组） |
+| `excludeRegex` | string | 可选。正则排除文件名 |
+
+### zip 字段
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `files` | string[] | yes | 要打包的文件列表（支持 `{prefix}` 模板） |
+| `name` | string | yes | ZIP 文件名（支持 `{prefix}` 模板） |
+| `keepOriginals` | boolean | no | `true` 时打包后不删除源文件（默认删除） |
 
 ### 匹配优先级
 
@@ -449,3 +447,134 @@ function getPngDimensions(filePath) {
     return [w, h];
 }
 ```
+
+### MP4 尺寸获取（`getMp4Dimensions`）
+读 MP4 文件搜索 `tkhd` atom 获取宽高，用于 sortConfig 的 `size` 匹配：
+
+关键坑：
+- **`f.open("r")` 而不是 `"e"`** —— `"e"` 在 Windows 上二进制读取可能不可靠。用 `"r"` + `encoding = "BINARY"`（和 `getPngDimensions` 一致）。
+- **从文件头开始读** —— AE 导出的 MP4 默认没有 fast-start（moov box 在文件开头），所以先读开头 256KB。只有开头没找到才从末尾读。
+- **循环找 `tkhd` 跳过音轨** —— 音轨的 `tkhd` 宽高为 0，要找到第一个非零宽高的 track。
+
+参考实现：`06-main-ui.jsx` 的 `getMp4Dimensions()` 和 `getFileDimensions()`。
+
+### sortConfig rename 的 `size` 字段语义（重要）
+rename 规则的匹配按 `match → regex → size` 顺序尝试，原本的设计是 OR 语义（前面没匹配上才试 size）：
+
+```javascript
+// 旧的 OR 语义
+var matched = false;
+if (rule.match && fName === rule.match) matched = true;
+if (!matched && rule.regex) { /* regex + exclude */ }
+if (!matched && rule.size) { /* match by size */ }  // size 作为备选
+```
+
+giftwall 需要的是 **AND 语义**（regex 匹配后再用 size 缩小范围），所以改为：
+
+```javascript
+// 现在的 AND + standalone 混合语义
+var matched = false;
+if (rule.match && fName === rule.match) matched = true;
+if (!matched && rule.regex) { /* regex + exclude */ }
+if (rule.size) {
+    var sizeMatch = dims[0] === rule.size[0] && dims[1] === rule.size[1];
+    if (matched) {
+        if (!sizeMatch) matched = false;       // AND 过滤
+    } else {
+        if (sizeMatch && !isExcluded(...)) matched = true;  // standalone
+    }
+}
+```
+
+**注意**：所有 rename 匹配逻辑已提取为共享函数 `matchRenameRule()`（`06-main-ui.jsx`），三处调用点（check preview、execution order 路径、execution 非 order 路径）统一使用。如需修改匹配逻辑，只改此函数一处即可。
+
+### processedNames 必须记新旧名
+`sortOutputFiles()` 中，rename 后 `File.name` 在 ExtendScript 中会更新为新文件名。如果 `processedNames` 只记旧名，后续规则扫描到同一个 File 对象时拿到的是新名，`processedNames[新名]` 不存在，导致一个文件被多次重命名。
+
+**修复**：rename 后同时标记新旧名。
+
+```javascript
+processedNames[oldName] = true;
+processedNames[newName] = true;  // 防止 File.name 更新后被重复处理
+```
+
+### sortOutputFiles 的 rename 匹配逻辑集中维护
+`matchRenameRule(rule, fileName, filePath)` 是唯一处理 rename 规则匹配的函数，三处调用点统一调用：
+
+| 调用点 | 位置 | 用途 |
+|--------|------|------|
+| 执行 order 路径 | 遍历文件收集候选 | `if (matchRenameRule(...)) matches.push(...)` |
+| 执行非 order 路径 | 遍历规则匹配文件 | `if (matchRenameRule(...)) { rename... }` |
+| 检查按钮预览 | 预览重命名结果 | `if (matchRenameRule(...)) matches.push(...)` |
+
+**原则**：任何时候新增 rename 匹配条件（如按类型、按采集日期等），只改 `matchRenameRule()` 一处，三处自动生效。
+
+### sortConfig 构建时校验
+`scripts/build-jsx.ps1` 现在包含 sort JSON 的自动校验：
+- required/rename 项的必填字段
+- `size` 格式校验（必须是 `[宽, 高]`）
+- `count` 与 `regex` 的依赖检查
+- zip 配置完整性
+
+新增 sort JSON 后，运行构建脚本会自动校验，WARN 不会中断构建但会提示。
+
+---
+
+## sortConfig 功能开发工作流（礼物墙经验总结）
+
+新增 sortConfig 字段或修改匹配逻辑时，按以下流程避免反复返工：
+
+### 第一步：明确语义
+
+新增字段前，先确定：
+- **OR 还是 AND？** — `size` 最初是 regex 匹配失败的"备选"（OR），giftwall 需要的是"regex 匹配后再过滤"（AND）。两者互斥，不能混用
+- **与已有字段的组合关系** — `size+regex` 同时出现时是什么语义？`excludeRegex+size` 同时出现时谁优先？
+- **写入 AGENTS.md 再编码** — 先更新 Sort Config JSON 规范章节，再改代码。避免"边写边想"导致的反复
+
+### 第二步：代码实现
+
+**集中逻辑，三处调用**：
+
+```
+matchRenameRule() ← 执行 order 路径
+                  ← 执行非 order 路径
+                  ← 检查预览（check button）
+```
+
+- 所有 rename 匹配逻辑写在 `matchRenameRule()` 一个函数里
+- 三处调用点只调用此函数，不独立实现匹配
+- 如果调用点逻辑各不相同（如检查预览有 `isExcluded` 预过滤），先在函数内统一处理，再考虑调用点的差异
+
+### 第三步：构建并验证
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/build-jsx.ps1
+node -e "const fs=require('fs'); new Function(fs.readFileSync('dist/WorkflowAssist.jsx','utf8')); console.log('syntax ok')"
+```
+
+构建时自动：
+- sort JSON 格式校验（required/rename 字段完整性、size 格式、count+regex 依赖）
+- 图标转换
+- 预设同步
+
+### 第四步：检查预览 vs 实际执行
+
+**"检查"按钮和"执行"按钮不是两套逻辑，而是同一套逻辑的两个入口。**
+
+- 检查预览没报错 + 结果显示正确 → 执行应该同样正确
+- 如果执行结果与预览不一致，说明预览和执行走了不同代码路径 → **这是 bug，不是预期行为**
+- 现在 `matchRenameRule()` 统一后，预览和执行不再可能不同步
+
+### 第五步：踩坑 checklist
+
+新增 sortConfig 功能时逐一核对：
+
+- [ ] `matchRenameRule()` 中实现了新逻辑，三处调用点自动生效
+- [ ] `if (rule.size)` 而不是 `if (!matched && rule.size)`（否则 size 过滤在 regex 匹配后不执行）
+- [ ] size 作为 standalone 匹配时也检查 `isExcluded`（预览视频和主效果同分辨率时容易误匹配）
+- [ ] rename 后 `processedNames` 同时标记旧名和新名（`File.name` 在 rename 后自动更新）
+- [ ] MP4 尺寸读取用 `f.open("r")`，先读文件头再读尾
+- [ ] ZIP 源文件是 rename 后的名字（不是原文件名）
+- [ ] sort JSON 修改后跑一次 `build-jsx.ps1` 校验
+- [ ] 构建成功后重新加载 AE 脚本测试（不要用旧的 dist 文件）
+

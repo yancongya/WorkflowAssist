@@ -34,13 +34,17 @@ WorkflowAssist.jsx
 var ICON_DATA = {
   addMask: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\x04IDATx\u009C\u00E5\u00D3\u00BD.\x04\x01\x14\u0086\u00E1\u0089FK'Q\u00C8\"\x11Q(H\u00B6\u00D8Z\u00A8TKg\x0B\u0085K\u00B0q\x07\u00DC\x00Q\u00B8\x07\u00AD\u0088;P*(VB\u00BB\u00CD\u00F6\u008AGN\x1CL6\u0093\u00D9A\u00E9KN\u00E6\u00CC\u00CC7\u00EF\u00CC\u00F9\u0099\u00C2\u00EF\u00F4X\u008C\u00EB\u00FF\u0081.\u00B1\u0088\x03\u00BC\u00E1\x06\u00CB\u00D8\u00C2\x08\u00AF\x18`\x03{\u0091W\u0081\u00AE\u00F2x\u0092/\u00EA&,\u00AEO\u00A1\u008Dg\u009Cb\x01\u009B\u0091W\u0081V\x022\x01\u00D6*U4\u008D\u00D9*P/\r\u00B5\u00B0\u00E2\x1Bt\x18\u00A6*P\u0098\u00BB\x13`\u00E7%P+\u00FAT\x05\u00BAk\x00{h\x02Z\u00CD\u00CF\u00AF\u0083\u00B5\u009B\u0094\u00B6\u0093\r\u00AD\u00855i\u00F6(G\\\x07\u00EB\u0097@_\u00E3\x1F\u008CE,\u00DB\x0B\u0096\x12v\u0081't\u00F2\u00C1>nK\u00A0\u008F\u0085\x1CW\u00AC?\u00CE\u008A\u00BF\nk\u0098\u00FF\u0081\x7F\x17\u00F7U7\u00F6qTZ\u00CC\u00ED\u0088\u00CC{X\u00C7Lz\u00E6\u00BE\u00A6V\x01\u008A\u00D2B\u00C3<\u00BF\u008E\u00C8|\u0088\u00E3\u00FC\u008DB\u009DO\u00D0;\x16Dhz=i+\u00B7\x00\x00\x00\x00IEND\u00AEB`\u0082",
   autoTiny: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0E\u00C4\x00\x00\x0E\u00C4\x01\u0095+\x0E\x1B\x00\x00\x03VIDATx\u009C]TmHSa\x14~\u009BcE?\"]\x7Fr%h\x11B\x0B\u00A6#3\u009C\t\u00F5\u00C7B\u00C2\u00D2]w\u0097wh\u00DAB\x166\u008Ae\u008A\x1F A-\u00C8\x7F\x11\u00F4A2\u00A2}P\u00FAC\u00B0\x0F!\u00E8_(IF\u0086\u00FE\u00B06\"-b\u00CE\u008F\u00C4m\u00F7\u00E3\u0089\u00F7\u00F5\u00DE\u009Bu\u00E0\u00DC{\u00EE\u00E1\u009C\u00E7=\u00E7<\u00E7\u00BD\u0084\x10b \u0084\x10\u0093\u00C9Tl\u00B3\u00D9\u00DEr\x1C\u00F7\u00CD\u00E9t\u00C6\u009DN.\u00C1q\\\\\u00D5D}}}\u009C\u00E7\u00F9/\x0E\u0087\u00E3\u00A7q\u00E7\u00CEn\u009AC\x081\x12B\u00B60\x0B\x003\u00ECv\u00FBH\"\u0091\x00\x00IQ\x14\u00FC/\u0092$\u00B1\u00F7\u00F0\u00F0\u00B0r\u00D4h\u0082\u00C5b\u00E9\u00DA\x04\u00A6\u008B\u00D1\u00E5r}\u00D4rdYVDQ\u00A4h\nUI\u0092\u0094l6\u00CB\u00ECP,&?\u00D9\u00BDG\u00BAYT\x04\u0092k\u00EEP\u00F3\r:Pss\u00F3\u00C7x<\u008E\u00CE\u00CEN\u00B9\u00A5\u00A5\x05\u00AD\u00AD\u00AD\u00F0z\u00BD\x08\u0087\u00C3\u0090e\x19\u00A2(nT\u00F4\u00F2%\u00AEl\u00DD\u00AE\u00ACY\u00ADR\u00C0\u00BC\x0B\x06\u00D3\u00B6\u00ABz9UUU\u00C6\u00E2\u00E2\u00E2\x0F\x1E\u008F\x07\u00A3\u00A3\u00A3r2\u0099\u00C4\u00EA\u00EA*\u00E6\u00E6\u00E6\x10\x08\x04\u00D0\u00DE\u00DE\u00AE\x03eD\x11\u00D7\u00FD~\\\u00B0\u00D9\u0094k\u008Ec\u00F2\u00C1}\u00FB`)(8\u00AEa\x1D\u00A8\u00A9\u00A9YZ[[\u00A3\u00B1\n\u009D\x11UZ\t\u0095`0\u0088\u009E\u009En}V\u00B4\u00C7\u00E4\u00FA:\u00FB|\x1A\x0E\u00C3`0\u00B8\x18Jaa\u00E1\u00E3\u0099\u0099\x195Nb %%\u00A5\x18\x18\x18`\u00C9\u00A2(A\x10<\u00F8\u00FA\u00F5\u008B\u00FA-j\u00C3\u0097\"\u0091\x08\x08!\u00F5\x14\u00C7\u00D2\u00D6\u00D6\u0096\u00A4^u\u00A0L\u00E8\u009C\u00C6\u00C6\u00C6099\u0089F\u00D7\x19\x1C\u00AF*\u00C7\u0083G\u0083zU\u0099L\u0086\u0099t\u0086\u0084\x10'\x05\u00AA\t\u0085B\u00D4)\u00D3\x00\u00DA\x0E\u00ADH\x127\u00E8\u00BE\x19\x1C\u00C0m\u00D7\x0E<\x0F\x14\u00E1\u00FC\u0099r<y6\u008A\u00D4\u00EF\u00CC\u00FF\x15q$77\u00B7cbb\u00829\x17\x16\x16\u00A0\u00CE\u0089\u00C9\u00D4\u00A7Y\\\u00AC+\u00C5R\u00E4(\u00DE\u00DF9\u0082\u009F\u00F7m\x08\u009E\u00DB\u008B+\u00EE\n\x04ot\u00FF\x0Bd\u00B7\u00DB\u00EFNOO3\u00E7\u00D0\u00D0\x10|>\x1F(kT^\u00BC~\u0083\u00F2\x03&D/\x17\u00E0sp?\u0096\x1F\u00DA\u0080\u00E7\u0087\x11\u00F1\u00E5\u00E1\u00F4\u00C9c,'\x1AU\u0081\u00CA\u00CA\u00CA\u00EE\u00CD\u00CE\u00CE2'}\u00C4b1\u00A5\u00A9\u00A9\u0089Q^Y\u00E9@c\u00D3\x05\u00DC{\x14B\u00FB%/\u00DA\u0084\u0093\u00F0yN\u00E1\u00D6\u00ED \u00E6\x7F\u00FCRg\u00A4\x02\u00E5\u00E7\u00E7\u00F7LMM\u00E9\u008Ci\u00C3\u00A4;\u00E4v\u00BB\u00B1\u00B2\u00B2\u00A26\u00AA`=+#-n\u00AC\u0084\u00BAW\x7F[#\u0084\u00F0###:\u0090\u00B6x\u0094\u00AD\u00AE\u00AE.f\u00A7\u00D3i\u00CA\u0084\x0E\u00B8)N\u008AF\u00A3:k\u0087z{{YT6\u009B\u00D5\u0097p||\x1C}}}z\u0085\x0CB]\u00D4M\u00BE\x7F\u00E8'\x15\x15\x15\u00EF\u0096\u0097\u0097\x19\x16\u00BD\u00A04g~~^\u00F1z\u00BD\n\u00BD\u00C0\u00DA\u00C5\u00A5\u00B6\u00A6\u00EA\u00CE\u0089\u00B4\u00B5\u009C\u009C\u009C:\u00ED\u008A\u009C\x10\x04!\u00AD\u00B2E\u0093\u00D8\u00A9\u00FD\u00FD\u00FD\x18\x1C\u00DCXB\u00ADRM\u00D4\x03\u00E0\u00F7\u00FB3\u0084\x10\u00EB\u00E6_@\u00B9\u00D5j}\u00C5q\r\u00BFx\u009EO\t\u0082\u00B0x\u00B6\u00AE.e6\u009B\x17kkkS<\u00EFN5440\u00E58n\u00D1\u00EDv/UWW\x7F\u00CF\u00CB\u00CBk\u00A6\u00D9\x7F\x00r\u009AaL\u00D4\u00F8\u00A6\x7F\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  check: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x013IDATx\u009C\u0095\u0094=N\u00C3@\x14\u0084\u00BF\u008Ap\x01H\x15j0\x15\u0084\x0B\x04A\u00C5\u00CFM\x10!\u00F49A\u00A4\\\u0084;$\u0081\x0B\u00F0\u00D3\x00\u00E9\x10NJ\u00A8h\u0083\x06\u008D\u00D1\u00C6\u00AC7f\u00A4gy\u00DF\u00EE\u009B}?cC\x1AM\u00A0m\u00D3\u00FB\u00BF\u00B0\x0E\u00F4\u0080'`Q\u00B2G\u00A0\x0B4V\u0091\u00EC\x02S\x07\u008D\x1Dtj\u00EB\u00DA\u00A7\u00BDW K\u0091|\x02\u00EF@'q\u00D9!\u0090\u00FBl\x16+gj\u0092V\u008D\u00F2[&{)\u0097y\u00E5\u0094S\u0099\u0094q\u00E4\u0098\u00CB\u00D0\u00A9\u00C6\u008EX\u008DM`#X\u00DF\x02\x0F\u00C5\u00A2if53\u0085m`\x0E\u00DC\x04\u00BE\u009Ecu\x01\x07^\u009C\x04\x07.\u0080~\u0084d\u00EE\u00F7\x02g\u008E\u0095\u00CE~\x1E\x0B\u008F\u00B8@\u00DF\u00BE!\u00B0SA\"\u009C\u00FB\u00DC^\u00AA\u00B4\u00A1\u00FD_\x15$ai\u00BF}\u0093b'\u0091\u0083\x03\u00E0\u00AD\u0082D\u00B8\x03\u00EEc\u00E3\u0097\u00D8\u00EA\u00E286\u00FE\u0086e\u009F\u00D7\x14\u00E4\x160\x03\u009Ec\u00DF]f\u00D9\u00E7\x16[*\u0093\x19\u00F0\u00E1AD!2\u00C9^)Klj\u00A6F,\u00BBvO\u00B4\u00A7L*I\u00C225A)\u00B6\u00FC\x1BQc\u00D5\u0093\u00B5\x1A\u00E5/Ac\u00DD\u00B7\u0085\u009F\u00C6\x1F|\x03\u00DD\u00AET?\u0092\x0Cl>\x00\x00\x00\x00IEND\u00AEB`\u0082",
   copyBanner: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\u00BFIDATx\u009C\u00D5\u0092\u00CFk\x13Q\x10\u00C7\u00BF\u0082z(\u00FE\x01\u00C5\x7F\u00A0(\x15i/R\x0BA1\u0081z\u0088\u00A0E\x0F=y\u00E9],=\u00F4\u0087(Z\u00C1\u009C\u0082\x10\u00C4\u00B4\u009Bm\u008D\u00A1$i\u0083\x18\u00DF\u00DBM\u00836\x10OB\x10\x04!\x04\x0C\u00A5\u00A7\n^zH\u00F6\u00EDn0#\x1B\u00B2\u00A1\u009B\u0097\x1F\u00E8\u00CD\u0081/<\u00E6\u00CD|\u00DE\u00CC\u00BC\x01\x06\x18\x11\u009D*\u00C6\u0097\x1F\x1Ff\u00C6\x03\u00F8W+D\"\u00E7\u00F2\u00B1\u00F0\u009E\u00AE\u00AC\u00D3'5\u00F4\u00FB[\u00E2\u00EE\u00FD\u0081\t\u00BA\u00A2\u008C}~\u00B3\u00FA1\u00AF\u0086\x13\u00BA\x12\u008D\u00BA\u00CA\u00A9\u00AF\u00AA\x0EDok/\x16i\u00EE\u00AB/\u00DE\u009F\u008C\u00D17^\u00AF\x7F\u0089?\u00D8o\u0081\u00F2\u008Ar\u00FE{\u00F2N\u00A1\u0092\u00F2\u00FF,'\u0083\u00A5\x1F\u00A9k\u00F5\u0096\u00D2\u00BEFu\u00C7G\x1E\u00A5}\r\u00F7\u00BE\u0092\u009A\u00A9T\u00927\u00CB\x07\u00BB\u00D3\u00C7\u009D\u00AA\x0C\u0086\u00AB\u00B5,&\u009D\u00B3\u00E0 \u008F\u00DE\u0081\u00CCL\u0097\u008F\u0083\u00EA\x1C\u00B3&\u00C3\x05\u00A1\u00E1\u0086\u00A7E\u00C7\u00D9\x0Bd\u00AE\u0081\u00ACG\u00FDA\u00D2\u00AC\u00BAA\u00E6s\u0090\u00B5\x02\u00B2o\u0083\u00EC[ s\x05d>\x05\t6\x04Tg\u00B8Bi\u009C\u00ED\u00BC\u009A\x00Ys \u00FBz[\u00F7@b\u00CB[\u0091\u0091\u00C5\u0094\x04\x12\x1C\u00CF,\u008EK\u009E\u00B6\u0096@\u00B6\x1Fd\x07@\u00D6C\u00B95\u0083cS\x02\x19\x0C\u00B1\u009A\u0086\t\x0Fh\x11$\u00DE\u0082\u00C46\u00C8Z\u0090A\u0082\u00E1\u00AB\\\x11C\u00C8\u00FA\u0080\u00CB\u00D2\u00AF\u00F1\u00DEjW\u0094\u0093g\u00E4~\u00E7\u00DF\u0080\x18V\u00FF\x03\x10\u0095p\u00A6\u00D7B\u008A\x01 7\u00A7\u00A7\t\u0086\u00A4\u00C1\u00D0\u00E8\x070\x18\u009A\u0082\u00A3hj\u00B8\u00D8\x17\u00E2Z\u008DaTp<\x11\x1C\u00BFN@\u008E\x0C\u008E\u0097\u00CE\u00AE\r\x05H\u00EDf1\"8\u00E6M\rA*\u00E0\u00F4\u00A0\u00E0?)\u00CD\x16\u0094`\u00D0>\x1F\x00\x00\x00\x00IEND\u00AEB`\u0082",
   folderSync: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x00\u00D0IDATx\u009C\u00DD\u00931\n\u00C2@\x10E\u00A3\u0095\u00A7\x10,\u0084\x1CG!\u00C7\x10\u00C4*VI\u009A\u00E5\u00FF%(\u00D6\x16\x01\u00CF\u00E3\x1Dl-\u008Du\u008A\u0095\u0081)\u00E2\x18\u00D0(Xd\u00E0\u00C12a_>\u00BB\u00B3Q4\u00EC\n!\u008CH\x1EH\u00DEI\u00866\x00.\u00CE\u00B9\u00F8#\x11\u0080\u00A5n<\u00D1\x14\u0080\u00AB@r\x0B m\u00B1&9\u00B5\u00A2LD\u0092\u00CC\u00FE\u00C49\x17K*\u009BT\u00D3\u00DE\u009Ed\x00\n\u00F9\u00D0\u00E78\u00CA\u00B2\u009C\u00A9l\u00F3\u0093HJEE\u00F4W\x11\u0080J\u00F8Z\u0094\u00E7\u00F9\u0084\u00E4\n\u00C0Y\u0090\u00B5\u00F4z\u008B\u00BC\u00F7s\u0092M\u00EB\u0096\x1A\u00E9\u00BD\x13u^?\u00C9DeBb\x12\u008FU\u0094\u00BD\x0C\u00A4\u009EGj8*\u00B6_\u00C9\x1E\u00EF\u00FD\u00C2>\u0091=\u00C9\u00BAk\u00F0\u00D8M\r`\u00D75\u00C4\x03\u00AB\x07\u00D3^\r[\u00DA\u00B90\u00FA\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  frameExport: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x00\u00B0IDATx\u009C\u00C5\u00D2!\u008B\x02A\x18\x06\u00E0\u00C5`\u00B4\u0098E\x11\u009Bb3\x184\n\x17\u0094\u00EBv\u00ABb\u00B5\u00FB3\u00EE\u008A\u00CD\u009F \u008B\u0098\u00BDf\u00B0\x08&\u0083p\u00D5\u00FC\u0088\u00B0A\u00C42\u00BB{\u00DC\x0Bo\u0098\t\x0F\u00F3\u00F1M\x14\u00FDe\u00D0F\x0B[,PL\u00834qA\x1D\x1D\u00AC\u00B1J\x03\r\u00D0}:\x17qE9\x14\u00FA\u00C6\u00F8\u00E5\u00EE\u0084j(4\u00C4\x01\x15\x140\u00C3>\x08y\u00C2\u00A6\u00F8\u00C5\r1j\u00A9\u00A0\x04\u00EB=\u00B6\x16e\r\u00FA8\u00E3'\u00E9W\x16(\u00CE\u00EBE\u00BB\u00E4?\u00BD\u00B6\x14\n\u009D\u00B0y\u00D3\u00F9\u00BF\u008C\u00F6\u0081#&IGyA\u009Fi\u00A1\u00DCFk`\u0099\x19\n\u00CD\x1D]\u00C5\u00F7\u00E0\u00AB^\x07\u00EF\x00\x00\x00\x00IEND\u00AEB`\u0082",
   getProject: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x011IDATx\u009C\u00CD\u0093\u00CDJ\u00C3@\x10\u00C7\u00D7\u00B6\u00EA\u00C9&3\u00AD\u00E0Q\u00BDx\u00F0\x0B\x15<\x14\u00BC\u00F9N\x1E\u00F3\x08R\u00D3\u009D \u00BEA\u00DE\u00C0S\u00BC\n\u0082\x08\u00D563\r\u00A1\x15/\u0082\x1E\u00F4\x01V\x16\x11\u00C4\u008D1R\x10\u00FF\u00F0?\x0C\x0B\u00BF\u009DO\u00A5\u00FE\u00AF\u0082\u00A4\u00E1\u009D\x0CW<JWK\x1D\r\u0096Ul\u00EA\u00C5\u0090.\u00CF#\u00C95\u0090\u00DC#IVf y@\u0092\x0Be\u00CC\u008C\u00C3i\u0087\u00B2\x0BZ\u0086\x1F\u00B1w\u009C\u00FB\x1E\u008D\u00A1\u00C8\u00CD\u00B3>\u00A2\u0096'\u00A0\u00D1\u0086\x03\u00C2(\u00DDG\u00E2\x1B\x15\u0098\x1A\u0090\u009C\x03\u00C9+\x12?\u0097\x19\u00B4\u00BC\u0080\u00E6\u00C4\u00B6\u00C4\x01\u00D9\x1E \u00C9\u00E3Bx\u00D7\u00FA.#\u00EFsf\u00C4\x13\u00E8\u00C9\u00BA\x03j\u00D1`\rI\u00CCo\u00EC\x11\u00EF\x14\u0083\u00B4\u00E4U\x07\rZn+\u0083@K\x07)=\u00FC\u00EA\u00C5^\u00BET\x19\u0084]n\u00DAi\x16\u00AF\x01\x1F9 \x1B\u0080f\u009E\u00BA4\x15\u00F7\u00E7@\u00CB\u00A5\u009D\u00D8t \u00AB\u00C0\u00D4|J\x0F\u00EC\u00E6\u00AA\u008A\x02b\u00810\u00DBt_bS\x7F\u00CF\u008C'?\u009D\nj\x1E\u00DB\u00B3\u00B2\u00D5\x14\x7F\x13$\r_g[m\x1A\u00ED\u0095\u00D9\u008F\u00D2muz5[5\u00FB\u00BF\u00D7\x1BuVD\u00FF>\u00AD\u0098\u00EB\x00\x00\x00\x00IEND\u00AEB`\u0082",
   importBg: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\u00A3IDATx\u009C\u00AD\u00D4\u00BFK\u00C3@\x14\x07\u00F0\u00C3_[\u00DB\u00BB\u008A\u009B \u00E2\x0F\u009C\\\x04\x07Q\u008AM\x04up\u00AB\u0083\u00AD\u00D2\x1F\u00B9\u00C3U\u00FF\x01']:\u0089 XE\u00A5\"\u00CD{\u00838[\\\x1D\u00FC\u0081\u009D\x14G\x07\x07\u00C5I\x11\u00D1VO\u00D2\u00C4\u00D2h\x12\u00AB8|!\u00E4\u008EO\u00DE\u00BDw\u0084\x10B\u00EA\u00FE)\u00A4\u00F6\u00CD\x0B\u0091&\u0096\u00D3\u00E6\u0099\u00CE\x0F\u00A9\u00CE\u0081e\u00E3\x03\x7F\u0082(\u0088u\u0086BV\x02\u00BCX\u0085\u00D5\u0086\u00F8V\u00A6\u009B\x19\u0088w\x1B\u0084B\x1A\u0095\u00FD\x08\x053\u00D1\u00D6\u00CFg\u00FF\u00F6L\u00C7W\u00A4\x0C\u0081\u0096\u00F7\u0084\x029-NQ<\u00FB6\u00E3]\u00E5w\x11ROQ\\|\u0085\x02\u00C0\u00E7\\\u00A1\u00E0r\u00D4OQ\u00DC\u00947\u00EB|\u00AF\u00D2\u00A3\u00EDTo\x05\x03\u00F1Nu\u009E1\x06\u00E0\n1\u009D/\u00DA\u00BE\u00AA\u008B\u00E1\u00EAu\x7F6\u00D5\x19X\u009Db\u009E\u00E3\u00A7\x1B\u00C96\n\u00E2\u00C9~\x04^ \u00A2\u00AF\u00F1W\u00F7\u0088\u0082@\u00A7\u00A6\u00B2\u009C&\u008C\u00F5\x12\u0084g%\u00AAGk\u00DF\u00E1\u00AA#\u00ED&\x06\u009DF\u00CC\u00CC;s\u009B\u00CED\u00DA%\u00A8\u00F7\x12Ui\u0080\u00CEP(\u00D4@Q\x1C;\"h\u00E6\x00&\u00CE\x0C\u00C4\u008Crw\u00BD:X\u00DD'k\u00DC\u00C0\u0093^H?&\u00E4+\u008EX\u0088\u00997]I\u00DB \u00DB\u00B8]\u0092\u00C7\t\x1BbU\u00F5\u00F2\u00B0\x15\u00EA\u00A9@\x0C\u00B4%/d\x12c\x0E\u0088U\x15\u00A8\u00FBe(\u0090\u008D\u00B5\x1B7\u00D8\riA.\u00AFp\u00CC\x152R\u00CC\u00A9\n\u00A1;\u00DA\x10\x03~\u00C2P\u009C:\u00A5\x1BR\u0085\x02\u008E?^\u00C2\u00E8\u00D3g\u00AEp\u00EC\u00B1\u0088\u00CA\u00B9D\u00E5\u00D4H\t\u00C2\u00B1\u00DF\u00FD\u008F<\u00F2\x01j-w\u00CBT2\x08\u00ED\x00\x00\x00\x00IEND\u00AEB`\u0082",
   importTemplate: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01|IDATx\u009C\u00AD\u0091\u00B1K\u00C3P\x10\u0087;:\x14\u00D4A\x14\x07qpr\u00EA*8tp\u00E8$Mk\u00F7\"m\u0086B\u0093\u00DCe\t8\u00BC\x08Ni'\x0BNMR\u008AS\u0096\u00F0^\u00BB9$)\u00FE\x01\"\u00B8)\"\u0088\u00E0(\u00B8W\u009E\u00A4\u0092\u00D6$m\u00A1\x07\x1Fw\u00C3\u00E3\u00E3~\u00F72\u0099U\x16\x00\x04\u0088\u00F82\x0F\x00(\u00A4\u008A\x10\u00F1\x15\x00TEQN\u00E2\x00\u0080\x1B\x00\u00F8D\u00C4/Y\u0096s\u00A9\"UU\u00F3E\u00DD\u00AB\x0B$\u00E8G\u00B8\n7V\x00\u00C0E\u00C4\x0BD\u00FC\u0090$i/U$\x10\u00BFW\u00D2\u0083\u00F1\x1F$x\u008C\u008A\u00C2\u0099o\u00F7$\u00CB\u00F2F\u00A2\u00A8L\u00FC\u00F3\x12\t\u00AC\t\u0082\x1E\\FD\u00DF\u00E1\u00AD\u00DE\x10q\x0C\x00\u00D7\u0089\u00A2Sr\u00BF[!\u00A3C\u00DE\x1D\u00C7Yg\u008C\x1Dsl\u00DB.w:\x1D\u0085C\x089\x03\u0080>\x00\u00D8s\u00A3\u00F1\u00CE\x18;\u00A2\u0094\u00BE\u00C7P\x01\x00}aQ\u00DA/\u00C32\u00A2\u00C1`\u0090g\u008C\u008Dg\u00A1\u0094V\u0097\x12y\u009E\u00B7\u00E6\u00BA\u00EE\u00FE,\u008E\u00E3d5M\u00DBl6\u009B[\x0B\u0089\u0086\u00C3a\u008ER\u00EA\u00C7P\u00A8u\u008D\u00AAh\x1A\u00DA\u00A2\u00A2\x1D\x1E\u0083\u00FE\u00E7\u00A0n\u00B6t\u00D14z\u0089\u00A2\x12\x19\x15\x05\x12\u00E8\u00BC\u00C7\x1D\u00B9\u00D65\u00AA\u00BF\x12\u00AB\u00E5\u00D7-\u00E3!\x14*S\"Dl\u00AB\u00AA*&\u00D1h4\u00B2<\x0E\u00DF\u0084KD\u00B3\u00F5\u00CCg\u00D12\u00DA\u00D1\u00EF\u00BCE\u00C4\u00BB4$I\u00DA\u009E\u00BCO\u008C\u00B6l\u00F18S\u009B\u00AC\u00B2~\x00\u009CK\u0097F\u00DE\u00D7\u00C6k\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  loopAnim: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\u00C2IDATx\u009C\u00C5TMK\x15a\x14\x1E$\u00D2JWb\x10\u008A\u0096\u00DC\u009Cs\u00DE\x0BV\u00E4\u00C2E\u00E0\x0F\u00A8]\u0085\x08\x06\u00FD\x02\u0091\u0084\u00B6n]\u00D7\x0Fh?\u00F4\u009E3W!\u00A8\x16\u0081B?A\"\x12t\x15b\x05\u00CE9\u00E3]\u0098\u00BErF\u00AF\u00C8\u00E5\u00CE\\7\u00D1\u00B3z?\u009F\u00F7\u0099\u00E7<g\u00A2\u00E8\x7F\u00C2e\u00A9\x1B\x0B\u00EF\u00FA.u8\u00CE\u00D3)T~\u008DB+ \u00F4\n\u00A5Q/6\u00C2r\x0F*\u00ED\u0083\u00D0\\\u00F5k\x07\u00AB\u00A3\u00A0\u00F4\x19\u0095\x03(\u00FFF\u00E1-\u00BBX\u00CC\u0085\x1A.\u00A3G\u00C58\u00F7\u00D3\u00A5$w\u00F3\u00B5a\x10\u00DAA\u00A5o\u00A0\u00F4d&|\u00B9R\u0090\u0087\u00E4j\u009C\u00F1S\x10\u00FE\u0089\u00C2\x07(|\u00E4v\u0093\u00FER\"\x10NAx\x1B\u00F6i\u00B0\u00B56\x12\u0092k\u00B1\u00F0\x12(\u00BD\x01\u00A5\u00F53\u00A5?\u00CA\u00D54\u00DF\u008F\u00A3\u00D01\n\u00CD_\\\u009Fh6\u00EE\u0080\u00F2&\n\x7F\x05!F\u00E5\u00B7\u00A0\u00FE\u00F1\u00C3\u00B0z\u00BD\u00B3\u00B9\u00CA/\u008Dh2|\u00BCQib\x14EN\u00F9>\x08i-K\u0086:}\u00D6\"*\u00EDu#1\u00C4{\u00E9\x00\n\u00FFuB\u00CF\u00A3v\u00A0\u00F0,\x08\x1DV\u009Ax\x01\u00A8\u00FC\x0B\u00C5/D\u00ED\u0098\x14\x7F\u00D3\u00E4\u00D6\u00D5\u00DF\u008B\u00BA\u00C0\u00ED&\u00FD\u009D\u00FC<\u0087\x19he/\x0C5c\u00CD`\u00E5M3\u00BCM\u00CD\x0B#\u008A\u009B|\u00BB\u00F45+\u00EDY\u00897\u00AC\u00E4\u00B1\u00F0\u0092E\u00A0\u00B5o\x06\u009Ff\u008D}\x17\u00C9|d\u00A1\u00B3\u00F0\u00B9,}V\x0B\x1Fzm\u00CF\u00C2ijA\u00F9{\u00915\u00F5\u00B7\u00CA\u00D5\u00E4~\u00DA\u00D4X\x1BX8m\u008C\u00D6\x1E\u00C2[\u00A0\u00F4\u00E7t\u00CE\u009Fj\u00B9\x1F\u00A94\u00D1\x1A\u00D1.Zc\x16\n\u00B3\u00D4Ye\u00CE\x1BW\u00D3\x07\u0095\x04-\u00D8\u00AF\u00A1\u009E\x11^\u00EA\u00F0\u00BF\u00C2\t\x12Z\x1D\u009Dk\u008E\u00C6Z\x00\x00\x00\x00IEND\u00AEB`\u0082",
   pagExport: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x03NIDATx\u009C\u009D\u0094mh[U\x18\u00C7\u00AF\x13\u00ACum\u00ED\u00BA\u00D5R\u00D8\u00A4S\u00A4C\x1CV\u00AA\u00F8I\u00F7i\u00B0`]\u00FB\u00A1\x03ac\u00D14m\u00C7j\u00E7\u00BAu\u00C3v\x1Du\u00C8\x1A'n\u00B3\u00A8 S)\u00E2+\x19vU\u00B4\u00F8!0\u00B1\u00C5m]_\u009C\u00ED\u00FAron\u00EE\u00BD\u00B9iS\u009B\u00D0\u00F4%\u00EBbnn~r\u00C3h\u00B3\u00E0@=\u00F0p\u009E\u00C3\u00E1\u00F9\x1D\u00CE\u00F3\u00F2\x17\u0084\u008C\x05\u00DC\x07\u00DCo\u00ED\u00FF\u00E5\u00EE\u00AEE{\u00FB:`]\u00CA\u00BF\u00E2)bQ\u00B7\u0081Q\u0099\u00B2\u00A8n\u00E3\u00D7\u00DE\u00C2\u00D4\u009D\u00DB}o\u0098\x05\u00B1\u00F6\u00C8\u00A5\u00CB\u00F9\u00DC\x0Eu\u00C4\u0097\u00A2\x01Q7\x18\r\u0092\x1C\x0B\u0092\u009C\u00D0\x13\u00DC\u009A\u009B\u00D7\u0098\u00BC\u00DE4]Q\u00F1Pz\u00CC\x1A\u00E4\x0E\x1Du\u00AE\u0098\u0095\u0085\u0091\u009B\u00B3P\u00DB\x151\u00CBZT\u00F3\u00D9\x13\u00AAQ\u00DD\x190*\u00CF\x05\u00CC\u00D6\u008BK\u00C9\u00D1\x19@\x11=\u00E1\u00BD{\u00F3\u00D2cW\u009D\u00FEO{r\u0089-\r\x7F\u00F7{\u0092m\u00C7\u0094\u00F8S\u00C7}\u00E6\u00F3'5\u00CAZT\u009Ek\u00D3\u00A8<\x1B\u00C0\u00F6\u008Ef\u00EEt\u00E9\u00C6\x0F\u00A3\u0080_\u00F2\u00B8\x05\u00E1\u0081U\u0086\u0095\u00BC\u00D4\u00E1V\u00D8uM\u0083\u00D2\u00A3\u00BE\u00F83\u00AD*\u0096\u00956+\u00BCxJ\u00A3\u00E5\u00AB\x00\x1F\u00F6\u00CE\u00D2?\u00B1L\u00DD'3\u00ECx[\u008F\x0F\u00E8\u00C0\u00D4p\u00F3\x1DP\u008A!\u00D0\u00EB.4Vb\u00F2\u00FE\x0Ba\x1E;,\u009BO\x1EWx\u00E2\u0088By\u00AB\u00C2\u00BB\u00DF\x07\u00D9\u00D9\u00A1R\u00E0\u009C\u00E4\u0097\u00B1%Nw\u00CF\u00B2\u00FD\u0098\u00CFlv/\u00B3\x12\u008E\u00FC\u0081 d\u00AD\u00E5(\u00AA\u00DB\u00C65\u0083\u00ADMJ\u00A2\u00ECM\u0085mG}\x14\x1F\u0094i\u00F9z\u0086\u008A3*\u009B\x0E\u00F8(: 1\u00E8\u008Dr\u00F0\u00B3iJ\x0E\u00C9\u00BCp:\u0090\x1C\x18\u009A\u0085\u00DF\u00BAw\u00A4'{\u00F7\u00A0\x0E\x1B\u00EB%c\u00CFy\u008D\u00ADox)=\"\u00E3\u00EA\t\u0092\u00EB\u0090x\u00A4^\u00E2\u00CB\u00BEy~\x1A\u008A\u00B0\u00B9\u00C1\u00CB\u00E3\u0087}\u0094\u00B7\u00F9\u008D\u0081\u00C98\u00CC\u00CB/\u00DF\x05\u00BA\u00EE\u0087\u00DC\x1A\u00D1\u00B0\x7F\u00A4S}^\u00A3\u00EA\u00AC\u009F\u0093\u00DF\u00E8\u00ECy\u00DF\u00CF\u00CF#\x0Bt]\x0E\u00F1\u00E8\u00EB\x12\u009B\u00EA\u00BD\u0094\x1C\u00F2\u00F1t\u00ABf\\\x19\u00CF\x04\u00C5t\u00DB\u0098bP\u00DC\u00E0Kli\u0090\u00A8\u00FD\u00D8\u00CF\u008FC\u008B\u009C\u00BA8MGw\u0090].\u0085l\u00FB\x14\x1B\u009C^\n\u00EA,\u0090\u0097\u00ED'\u00FC\u00C9\u00AB\u0083\x7Ff|\u00CD\u00ED.L\u00AC\u00C4\u00E4\u00AA\u00CE968%S\u00A8\u009E\u00E0-w\u0090}\x1F\u00E8\x08\u00BBo\u0092\u00B5_$\u00BFV\"\u00DF)\u0091\u00E3\u0090(i\u00F4\u009A\u00FB.,\x10\u008B,\u00AE%{\u00B5\u00FC\u00B7\u00C3\u00AE~\x1F<\\#\u00C5\u00D7\u00BF&\u00D2\u00F6\u00ED\x0CU\u00EF\u00A9\x08\u00AFL\u0092\u00E3\x10\u00C9\u00B2\u008B<h\x17\u00D9\u00D2(\u00B3\u00B9Q\u008E\u00F7\u00F92\u00CA\u00BF\u00DA\u0090gzr1\u0096\u0087?\u00BF\u009A\u00B0\x02\u00E2\u00B9\u00AFN\u0098y\u008E)\u00B2\u00ED\x12\u00D9v\u00D1z\u0080\x02\u00A7hn\u00AC\u00F3\x1A_\\\x03\u00A6eO{zC\u00A6;\u00D1q\u00B5\u0098\u00D8\u00E2\u0088U\u00C1\u0097\u00CE\u0085\u00CC\u00BC\x1A\u00D1\\\u00EF\x10\u008D\x1C\u0087h\x14\u00D4\u0089fUg(9\u00A0Z]-z\u00C4]\x19#\u00929\u00B4J\u00D7\u00A5|\u00FE\nu\u0098\u00D1h\u00E0\u0086\x1C\u00A7O&\u00D9\u00E7%yCI\u0090\u0088\u00CCk\u0088CM\u0083\u00E5\u00F7\x18\u00DA\x7F\u0094\x11\u008F\u00A7(%\x1D\u00E92\u00D2\u00FB/d$]\t\u00FE\u008F\u00B0\u00FD\r\u00A3\u00EB\u00B0o\x1FD\u00FD\u0087\x00\x00\x00\x00IEND\u00AEB`\u0082",
   refresh: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01MIDATx\u009C\u00A5\u0093?/\x04a\x10\u00C6\u009FSHtW\u00A0\x10\u00BD\n-\n\u008Dh$*>\x01\u00E1+\u00D0=\u00B3+J\r\u00A5\u00A8|\u0080\u00EB.\u009A\u00BB\u0099\u00BB8:\u009A\u00ADU$.Z\u00F1'\x12+\u00FB\u00EE\u00B9\u00BB\u008D\u00CD\u00BB\u009B3\u00C9\x16\u00FB\u00EE\u00BB\u00BF\u0099g\u009E\x19\u00A0L\u00B4\u008F\u00A7`r\u008E\x7F\u0085\x05\u00EBPy\u0082Jw4\u00C0\u00CD\u00C9\x04\u008C\u00A7P~\u00C3$\u0086\u00F1\x03&Ghq\u00A5<\u00A4\u00CD\x05\x18\u00A3\x14 y\u00CF-\x1A\u00E1b\u0081\u0094p\x1E\u00CA7\x0F$\u00EEW\u00A8\u00DC\u00F6\u00C3\u009A\u00C1\x1A\u008C\u008F\u00C50\u00F9B\u008B\u00AB~\u0098r\x12&\u00B5\u00CCO\u00CA;\u00D7\u00F4a\u0098\u00F2\x01\x11\u00C7\u0081\u0098c~\u00A9\u00DC\u0087\u00F15\u00E3\u00DA5g`r\u00E0\u00DCLe\u00EE$\u0099\x051*\u00B9\u0090\u00DF$\u008Dp\x0E\u00CAzN\u00D5U\u0098\\\u00A6\u00DF\u008CW\u00BD\u0097j\u00CE\u00C5\u00BA\u0083\x0CC\u00FF$C\x05&\x04Z\u00B2\u009BjM\u0086\u008E\u0087P\u00CE\x0E@\u00D2\u00ED\u00C9\u00DA\u00F3\u00CAwI\u0092F%\r\u00CB\u00BA\u00F1\x02\u0093{\u00D7`\u00EB\u009F\u00D5\u009C\x01\u00DE\u00B0`\x19*\u009F%f\u00E7\x19\u00C6\r?\u00AC\x19l\u00F5\u00D6\u00A0hv\u00DE\u00DD\u00D0\x16\u00AE\u0086J\u00C7SQT\u00BC\x1A\u00C3\u00A1\\\u00821\u00ECW\u0098.\u00EE\u0099[\u00E4\u0091\"q\u00CD9\x17l\u008E\x06\x18\u0080.\u00D0\u00E1t\u0099\u00BB?^\x7F&-\u00C9\u00EF+6\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  rename: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01aIDATx\u009C\u00BD\u0093KJ\x03A\x10\u0086\u00DB\u00F7F\u00F1\u0081\u00B8N\u0082\u00CCX\x15\u00A2\u0082\x07p\u00E3J\u00DD%^A\x05_7\x10\\\u00E9R/\u00E1\u00C6;x\x08A\x05\u00C1\u0085\u008FqR=\u0098LR\x1DfeZ*\x1A\u0099\u0084\x04\u0093\x11,\u00A8MS\u00F5\u00F1\u00D7_\u00D5J\u00FDw\x18\u0082K\u00D6\u00F0\x18\u00CB\u00A3D\u00A0J\u00E0\u00BA\u00B5\x00w\u008C\x06\u00E6\"\u00AC\u00B1\u00BF8\u00D7\u00B5\u00B8\\^\u009A\n\u00C3\u00DCt\u00A7\u00B4V\r\x19\u00C2eCP\u0096Zkq\u00B4\u00A5\u00D9Z5\u00C0\x1A\x0E\u0099\u00E0\u00C5h\u00B4]\u0093\u00F0\u00BC\t\u00B2V\r\x1A\u0082w&|e\u00C2\u0083\x06\u00A8V\u0084]y0\x1A\u00D6\u00AB\u009E3\u00DB]\u00D1\u00EAp\\Q\x10\u00B8\x13\u00D2\u00C3\u0084\u009E\u008C,&\u00DEW)\u009B\u00EF\u00CDp\u00FC\x015\u00835n\x19\u0082[\u00C5\u0084\x1F\u0091\u00EF\u00A4\u0093\u0082\u00A2b.\u00C3\u0084u%\u00F3G\u00BE\u009B\u0092\u00C7*a\u00C1h\u00B8\x120k8e\rg\u008D$8\u00B1ve\u00A4#\u00C8wS\u00C2h\x03e\u00F3\u0089ALX\x17y\u0089G\u00F3\u009D\u00B4\u00D8\u00F3m6\x16\u00FEh\u00F6]s\u00FD\u009E\u00D1\u00D9\u00CD0\u00C4\u0099^\x0F\u0092\x08\u00C7\u00A5\u0087\t\u00DFj\x01n\x7FQ\t\u00F7\u0099\u00E0\u00F9\u0097\u0083\u00BC\u0088\u0083\u008C\u00C6\x1B&xb\u00C2=9\u00EA\x16\u00E9rd\u0089\u00BF\u0088\u00EA#:y\u00D4w\u0094J\u0099I\u00A3\x176\x0CaE\u00B6l\x1F\u00E6\u00C7\x12\u00AA\u0081\u00EB6\u00DF\u008E\u00E3\x05\u009F8k\u0097\u00B1\x7F\u00FB\u008A\x15\x00\x00\x00\x00IEND\u00AEB`\u0082",
   renderMp4: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x00\u00CAIDATx\u009C\u00ED\u00D11K\u0082Q\x18\u00C5\u00F1\u0097R$C\u00A4L\u00B4\u00B1\u00AD\u00A1A!\x08*\x02!H\u00DD\u00FD\x0C\u00BA5\u00B4\x1486\u00B9H\u0083\u00AB\u00E0W\u00F2\u00AB\u00B8\u00F7\x13\u00F1\n/o\u00C2{\u00B1\u00B1\u00CEry\u00E0\u00B9\x7F\u00CEsN\u0092\u00FC+-Tp\u0091\u00FCF8\u00C5\x14\u00E71\u00CB-\u008Cp\x14\u00E61\u0096\x012G\x07\u00B71\u00A0w[\x15\u00C3<\u00C0,8\u00B9F{\u00F3\u00C6\u0080N\u00D2\x19\u00D8:Y\u00A0\u0097\x7F\u00FCO\u00D8+\u00EER\u0099\u00BC\u00E0\u00F9\x10\u00D07>w\u00C1\u00A2\u008C\u00B3\u00D8\u00CFC\u00ACPE\x1D_Q\u00ED\u00EC\x01\u00DDc\u0082Zpr\u0089Bf\u00A7\u0080R\x1E\u00A8\u0088F\u00804\u00D1\u00C5Cf\u00E7\t\u00FD<\u00D0[\u00A8\u00FD\n\u00C7x\u00CC\u00D6\u008C\u009B,|\x1Fh\u00E3\u00E0#\u00D7z\u00F2\u00A7\u00B4\x06Bn\u00EF0\u00C5QQ\u0080\x00\x00\x00\x00IEND\u00AEB`\u0082",
   saveProject: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\u00A2IDATx\u009C\u00A5\u0094\u00CFK\x02A\x14\u00C7\u00FD/\u00FA\x0B:\u00D6\u00B5\u00DAY\u00B3\u0082H\u00E8\x07E\x04u\u00E8 \u009D;u\u00EB\u00DC\x7F\u00D01\u00A8\x1D\u00D3D\u00AD\x08\u00AA\u0083DZ\u008A\x11IF\x11\x04\x05\x12A)\u00CE\u00CC\u00AE\u00A5\u00A6\u00A6\u00EB\u008B\u00B1\u00B6\u00CC&\u00DA\u00EC\x0Bs\u0098\u00E5\u00CDg\u00DE\u00FB\u00BE\u009Dg\u00B1\u00FC\u00A2\u00D4ZG\x0BQ\u00A4c\u00AA\u00A0g\u0082\u00A5\u00F3\u00F4rw\u00AB\u00A5\x19\u00A5\x15y\u008Ab\x04\u00C6\"\x18\u00CD5\x05R\u0097;\u00DB\u00EAAlE\u00B6\u009B:HW\u00FB\u00DC\u00DA\u00E6\u00E4\x1D?\u00A4m;n\u00EA!\u00A2E\x14t$\x04\x11,y\u0089\"Wy\u00D0Sp>N\u009C\u00D6r\u00D3\u00A0\u00C6`mw\u00E6\u009A\u00B9l\u00C57\u008F\u00E4\u008Ai\x10s\u00F7g\u00BF\x06\u00CB\u00B5\x0C\u0099w\u0098\u0094\u00B5DT\u00F5\u008F\u00A6\u0084 \u00B2\u0082zxk)FA\u008A\u00A5k#\u00A8\u0094<;d\u00DE!\u00FAa\u00B4\x7F,U\u00A6Wa\u00D57\u00FC\u00C0\u009C\u00F2\u0084\u00AA\u00C8\u00ED\x0Cw\r|\x1A\u008C\u00D1\u00CE\u00B7\u00DA\u009DV=\x13\u0098\u00BD\u00AC\u00ED=\u0083\u00AC\u00FE;Q\u00A4=q\u00A7\x04\u00A0\u008F,<\x03\u008F\u00D4c\u00CF\x18{u},\u00F9#HT\x1A\u00BF\u0099{\u0091\u00BF\u00C0\u00E1b\"\x10\u00E2&\x17\u00AE6\x0EJ\u00B7\u00FB!\u0082\u00D1\u008B\u00B04Q\u00D78\u0088{\u00A2\u00FAF\u00D2\x00P\x01\u00BD\u0092\x04\x00x4\u00CA\u00FDk\u00FB\u00B5m\u00C7\r\u0080\u009E\u0081w\u00E5\u00E3K\u0091?\u0083r\u00B1\u00C5(\x00\u00E4\x0C\x08\x00\x14\x01t\u00ADt\x1F; \u00AB\u00B6\x17\u00F3\x19y\u00EC\x1As\u00F5\x16T\u00FF\u00F8\x03\x00T\u00B3\u0091\u0085\x13\u00D3\x7Fv\u00A3\u008CG\u00AB\x17\u00D8)\u0087\u009A~\u00B4\u008D2\u00C6\u0088\u00BA5\u009D\u00F8\u00D7\x181;\u00D8^\x01-\u00EC\x14\u008B\x10\u00A8\u008F1\x00\x00\x00\x00IEND\u00AEB`\u0082",
   sortOutput: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x02\x19IDATx\u009C\u00D5\u0094Kh\x13Q\x14\u0086\x03\u0082\x0B\u00DD(\u0088YI\u00EF\u009D*\u00B8\x10[Q\u00F2\u00B0M&\x0B\x11\u00B3\u00F1\u0081\u00A8\u0088\u00A2.\u00DCT\u008C\x0B\x15I+U\u00AB\u00B4J\u00A4\u00AD\u0082\u008FZA\x10\u00A4 \x086P\x05\u0093HL\x16EQ\u00D0\x06M1\x0Ey\u00CCd\u009A\u00CC\u00E8\u00C4\u00E2\u00A3\u00C6\u00C8\u00ED/\x13Mm\u009C\x06\u00BB\u00D0\u0085\x07\u00BE\u00CD\u00E1\u00F0q\x1E\u0097k2\u00FD7\u00C1q\u00DCNJ\u00E9yJ\u00E9\u00B9\x1A\u00F8\x08!\u009D\x1C\u00C7-\u00AE)YV_\u00EF\u00E9\u00F44^\u00D5\x02\u00FC\u00A0\x16p\x05\r\u0084\u00D6?|\x17\u00E4oG\u00FA\u00D6\u00EE \u0084\u00DC0\u009B\u00CD\u00F3g\x14mw/\x0FiA\x17j1>\u00BC\x17\x13\u00C9\u009B\u00D0\u00C2nv|\u00FF\u008A]\u0084\u0090=&Ie\u0082\u00A4N\"\x16\u00FB\u0082\u00F8h\x11)\u00F9+\u00BA\u008Em\u00AC)\u00D1~Rx\u00B4\t\u009F^\u00F9\u0090\u00B8\u00D3|\u0082R\u00DAa\u0092e,\x12\x15,}\u00F1\u00FCs<\x1E/\u00E6\u0092r\x11]G7\u0094\u008B\u00C3}vD\u00FA\u00ED\u00B8\u00DE\u00BE\u00DA@\u00B4\u00DF^\u00AE\x11\u00EE:\u00BA\u00CB\u00A2\u008C\nGV\u00C56\x1DI\u0081w\u00BA(9\u00E8@\u00DA\u00EF\u00C4\u00C8@\u0093\x01=_%\x12\x15\u00D6#\u00AA,$)\u00AC$\u008E1\x08\u00C9\u0089)Qv\u00C8\u0089\u00DC}\x1E)\u00BF\u00D3\u0080\u009E\u00AF\x12\u00E9\u0091z\u008F\x05\u00A2\u00CA\u0086\u00D3\u00A9\u00D2\u00EB\u00C4\u00E8\u00C7)Q\u00E0\u0092\r\u00C1+6t\x1FYe p\u00D9V-\u00CAjX\"\u00A9\u00EC\u0081\u00A8\u00B2\u00E0\u00D3\x0C\x1By\u0093\u00FD5\u00DAl\x10*\u00A2\u0097\u00C0\\1\u008F\u00CD\u00FA\u008E\u00841\u00B4O\u00DF\u0091\u00BF\u00C7\u008A{\x17\u00AD\u00E8hi40t\u00C1j\x1CMT\u00E1\u0094\x14V\x10\x15\u00F6!\u009D\u00FB\u00863\u0087\u00DD\u00B3\u00EE(6\u00D0\u00E4\u00A3\u0094\u00B6\u0096E\x00\u00E6d\u00F2\u00E0\u00C4<\u00B6\u00E4\nO\u00E0\u00F5l\u00C5\u00DB\u00C0\u008Fej\x7F\u00E0\u00D0\u00EE\u0095\u00BD\u0084\x10\u00DE$),\u0092\x10J\u00D0\x1Fe\u0085p\u00F41\u00BC-\u00EB\x10\u00BEf<{\u0085g\u00B7\u009C\u0093\u00A7\x0F4Di]\u00DD\u00A9r7\u00B2\u008Cy\u0099q,\u00FC\u009D\u0093g{\t\u00CF;\u00F6\u00B9\u009A\u00D7\u00B4\u00CD\u0084\u00C5b9H\x08i\u00F8\x07\u00FF\u00C5_\u008A\u00EF\u00BF\u0087G\x0F\u00D6\x0B+\u00A6\x00\x00\x00\x00IEND\u00AEB`\u0082",
@@ -444,6 +448,199 @@ function renderSingleFrame(comp, outputFolder, fileName, time) {
 
 // ===== END 05a-render-engine.jsx =====
 
+// ===== BEGIN 05c-loop-animation.jsx =====
+function setupLoopAnimation(comp, layer, loopDuration) {
+    logMessage("设置循环动画: comp=" + decodeUrlString(comp.name) + ", layer=" + layer.name + ", duration=" + loopDuration + "s", LOG_LEVEL.NORMAL, "LOOP");
+
+    // === 第 1 层：原始图层提前 1 秒 ===
+    layer.startTime -= 1;
+
+    // 设置工作区
+    comp.workAreaStart = 0;
+    comp.workAreaDuration = loopDuration;
+
+    // === 第 2 层：复制层，放到循环衔接位置，淡入 0→100 ===
+    var layer2 = layer.duplicate();
+    layer2.startTime += loopDuration;
+
+    var op2 = layer2.property("Opacity");
+    if (op2) {
+        op2.setValueAtTime(layer2.startTime, 0);
+        op2.setValueAtTime(layer2.startTime + 1, 100);
+    }
+
+    // === 第 3 层：从第 2 层第二个关键帧处派生，后半段移到合成开头 ===
+    var splitTime = layer2.startTime + 1;
+    var layer3 = layer2.duplicate();
+    layer2.outPoint = splitTime;
+
+    // 原层 startTime=-1，合成 0 帧自动对齐到源素材第 1 秒（裁切起点）
+    layer3.startTime = -1;
+    layer3.inPoint = 0;
+    layer3.outPoint = 1;
+
+    // 常量 100% 透明度（去除继承的淡入关键帧）
+    var op3 = layer3.property("Opacity");
+    if (op3) {
+        while (op3.numKeys > 0) {
+            op3.removeKey(1);
+        }
+        op3.setValue(100);
+    }
+
+    // 标记首帧和展示帧
+    var markers = comp.markerProperty;
+    markers.setValueAtTime(0, new MarkerValue("\u9996\u5E27"));
+    markers.setValueAtTime(loopDuration, new MarkerValue("\u5C55\u793A\u5E27"));
+
+    logMessage("循环动画设置完成: 第2层淡入段裁切保留原位, 第3层后半段移到开头", LOG_LEVEL.NORMAL, "LOOP");
+}
+
+// ===== END 05c-loop-animation.jsx =====
+
+// ===== BEGIN 05d-frame-export.jsx =====
+function getMarkerTime(comp, markerName) {
+    var markers = comp.markerProperty;
+    if (!markers || markers.numKeys === 0) return -1;
+    for (var i = 1; i <= markers.numKeys; i++) {
+        try {
+            var t = markers.keyTime(i);
+            var v = markers.keyValue(i);
+            if (!v) continue;
+            if (v.comment === markerName) return t;
+            if (v.toString() === markerName) return t;
+            if (v.comment && v.comment.indexOf(markerName) >= 0) return t;
+        } catch(e) {}
+    }
+    return -1;
+}
+
+function findGiftWallFolder(projectDir) {
+    var outputDir = new Folder(projectDir + "/输出");
+    if (!outputDir.exists) {
+        alert("未找到'输出'文件夹，请先保存项目。");
+        return null;
+    }
+
+    var items = outputDir.getFiles();
+    var giftDirs = [];
+    for (var i = 0; i < items.length; i++) {
+        if (items[i] instanceof Folder) {
+            var name = decodeUrlString(items[i].name);
+            if (name.indexOf("礼物墙") >= 0) {
+                giftDirs.push(items[i]);
+            }
+        }
+    }
+
+    if (giftDirs.length === 0) {
+        alert("输出文件夹中未找到包含'礼物墙'的文件夹。\n请在输出目录下创建对应文件夹。");
+        return null;
+    }
+
+    if (giftDirs.length === 1) return giftDirs[0];
+
+    var dialog = new Window("dialog", "选择礼物墙文件夹");
+    dialog.orientation = "column";
+    dialog.alignChildren = "left";
+    dialog.add("statictext", undefined, "找到多个包含'礼物墙'的文件夹，请选择:");
+
+    var dd = dialog.add("dropdownlist", undefined, []);
+    for (var j = 0; j < giftDirs.length; j++) {
+        dd.add("item", decodeUrlString(giftDirs[j].name));
+    }
+    dd.selection = 0;
+
+    var btnRow = dialog.add("group");
+    btnRow.alignment = "center";
+    var okBtn = btnRow.add("button", undefined, "确定");
+    var cancelBtn = btnRow.add("button", undefined, "取消");
+
+    var picked = null;
+    okBtn.onClick = function() {
+        try {
+            picked = giftDirs[dd.selection.index];
+            dialog.close();
+        } catch(e) { alert("选择出错: " + (e.message || e.toString())); }
+    };
+    cancelBtn.onClick = function() {
+        try { dialog.close(); } catch(e) {}
+    };
+
+    dialog.show();
+    return picked;
+}
+
+function exportOneFrame(comp, outputFolder, fileName, time) {
+    var destFile = renderSingleFrame(comp, outputFolder, fileName, time);
+    if (destFile) {
+        logMessage(fileName + "已保存: " + destFile.fsName, 2, "FRAME");
+    } else {
+        logMessage(fileName + "渲染失败", 3, "FRAME");
+    }
+    return destFile;
+}
+
+function autoExportFrames(comp) {
+    if (!comp || !(comp instanceof CompItem)) {
+        alert("请先选择一个合成！");
+        return;
+    }
+    if (!app.project.file) {
+        alert("请先保存项目文件！");
+        return;
+    }
+
+    var projectDir = app.project.file.parent.fsName;
+    var tHL = getMarkerTime(comp, "高光图");
+    var tFF = getMarkerTime(comp, "首帧");
+    var tDF = getMarkerTime(comp, "展示帧");
+
+    var anyMarker = (tHL >= 0 || tFF >= 0 || tDF >= 0);
+    var exported = [];
+
+    if (!anyMarker) {
+        logMessage("未找到标记，使用当前时间导出高光图", 2, "FRAME");
+        var outDir = new Folder(projectDir + "/输出");
+        if (!outDir.exists) outDir.create();
+        var f = exportOneFrame(comp, outDir, "高光图", comp.time);
+        if (f) exported.push("高光图: " + f.fsName);
+    } else {
+        if (tHL >= 0) {
+            logMessage("找到标记 高光图 在 " + tHL.toFixed(2) + "s", 2, "FRAME");
+            var outDir = new Folder(projectDir + "/输出");
+            if (!outDir.exists) outDir.create();
+            var f = exportOneFrame(comp, outDir, "高光图", tHL);
+            if (f) exported.push("高光图: " + f.fsName);
+        }
+        if (tFF >= 0 || tDF >= 0) {
+            var giftFolder = findGiftWallFolder(projectDir);
+            if (giftFolder) {
+                if (tFF >= 0) {
+                    logMessage("找到标记 首帧 在 " + tFF.toFixed(2) + "s", 2, "FRAME");
+                    var f = exportOneFrame(comp, giftFolder, "首帧", tFF);
+                    if (f) exported.push("首帧: " + f.fsName);
+                }
+                if (tDF >= 0) {
+                    logMessage("找到标记 展示帧 在 " + tDF.toFixed(2) + "s", 2, "FRAME");
+                    var f = exportOneFrame(comp, giftFolder, "展示帧", tDF);
+                    if (f) exported.push("展示帧: " + f.fsName);
+                }
+            }
+        }
+    }
+
+    if (exported.length > 0) {
+        alert("导出完成:\n" + exported.join("\n"));
+    } else {
+        alert("导出失败，请检查渲染队列。");
+    }
+
+    try { comp.openInViewer(); } catch(e) {}
+}
+
+// ===== END 05d-frame-export.jsx =====
+
 // ===== BEGIN 05-workflow-engine.jsx =====
 function resolveOutputName(baseName, step) {
     if (step.rename) {
@@ -524,7 +721,8 @@ function runSteps(sourceComp, baseName, steps, activeStates) {
         logMessage("执行步骤 " + (j + 1) + ": " + outputName, LOG_LEVEL.NORMAL, "ENGINE");
 
         var durationVal = s.duration;
-        if (typeof durationVal === "string" && durationVal === "custom") {
+        var durStr = String(durationVal);
+        if (durStr === "custom") {
             if (_customDuration === null) {
                 var result = prompt("请输入步骤 \"" + s.name + "\" 的时长（秒）:", "5");
                 if (result === null || result === "") return null;
@@ -536,6 +734,22 @@ function runSteps(sourceComp, baseName, steps, activeStates) {
                 _customDuration = num;
             }
             durationVal = _customDuration;
+        } else if (durStr === "source") {
+            durationVal = currentComp.duration;
+            logMessage("步骤" + (j + 1) + " duration=source, 解析为: " + durationVal + " (currentComp=" + currentComp.name + ")", LOG_LEVEL.NORMAL, "ENGINE");
+        }
+
+        var trimEnd = Number(s.trimEnd) || 0;
+        var loopCount = Number(s.loopCount) || 1;
+        if (trimEnd > 0 && loopCount > 1) {
+            durationVal = (durationVal - trimEnd) * loopCount;
+            logMessage("步骤" + (j + 1) + " trimEnd=" + trimEnd + " loopCount=" + loopCount + " 计算后duration=" + durationVal, LOG_LEVEL.NORMAL, "ENGINE");
+        }
+
+        if (typeof durationVal !== "number" || isNaN(durationVal) || durationVal <= 0) {
+            logMessage("步骤" + (j + 1) + " duration无效: " + durationVal + " (类型=" + typeof durationVal + ")", LOG_LEVEL.ERROR, "ENGINE");
+            alert("步骤" + (j + 1) + " 时长计算异常:\n原始配置: " + durStr + "\n解析值: " + durationVal + "\n类型: " + typeof durationVal + "\n源合成时长: " + currentComp.duration + "s");
+            return null;
         }
 
         var newComp = createComp(outputName, s.width, s.height, s.frameRate, durationVal);
@@ -548,6 +762,17 @@ function runSteps(sourceComp, baseName, steps, activeStates) {
                 var dup = firstLayer.duplicate();
                 dup.startTime = k * staggerOffset;
                 logMessage("  错层 " + (k + 1) + ": startTime=" + dup.startTime + "s (偏移=" + staggerOffset + "s)", LOG_LEVEL.NORMAL, "ENGINE");
+            }
+        }
+
+        if (trimEnd > 0 && loopCount > 1) {
+            var srcDuration = currentComp.duration;
+            var trimmedDur = srcDuration - trimEnd;
+            var firstLayer = newComp.layer(1);
+            firstLayer.outPoint = trimmedDur;
+            for (var k = 1; k < loopCount; k++) {
+                var dup = firstLayer.duplicate();
+                dup.startTime = k * trimmedDur;
             }
         }
 
@@ -604,7 +829,8 @@ function executeSingleStep(sourceComp, baseName, presetFile, stepIndex) {
         logMessage("执行步骤 " + stepIndex + ": " + outputName, LOG_LEVEL.NORMAL, "ENGINE");
 
         var durationVal = s.duration;
-        if (typeof durationVal === "string" && durationVal === "custom") {
+        var durStr = String(durationVal);
+        if (durStr === "custom") {
             var result = prompt("请输入步骤 \"" + s.name + "\" 的时长（秒）:", "5");
             if (result === null || result === "") {
                 app.endUndoGroup();
@@ -617,6 +843,22 @@ function executeSingleStep(sourceComp, baseName, presetFile, stepIndex) {
                 return false;
             }
             durationVal = num;
+        } else if (durStr === "source") {
+            durationVal = stepSource.duration;
+            logMessage("单步" + stepIndex + " duration=source, 解析为: " + durationVal + " (stepSource=" + stepSource.name + ")", LOG_LEVEL.NORMAL, "ENGINE");
+        }
+
+        var trimEnd = Number(s.trimEnd) || 0;
+        var loopCount = Number(s.loopCount) || 1;
+        if (trimEnd > 0 && loopCount > 1) {
+            durationVal = (durationVal - trimEnd) * loopCount;
+        }
+
+        if (typeof durationVal !== "number" || isNaN(durationVal) || durationVal <= 0) {
+            logMessage("单步" + stepIndex + " duration无效: " + durationVal + " (类型=" + typeof durationVal + ")", LOG_LEVEL.ERROR, "ENGINE");
+            alert("单步" + stepIndex + " 时长计算异常:\n原始配置: " + durStr + "\n解析值: " + durationVal + "\n类型: " + typeof durationVal + "\n源合成时长: " + stepSource.duration + "s");
+            app.endUndoGroup();
+            return false;
         }
 
         var newComp = createComp(outputName, s.width, s.height, s.frameRate, durationVal);
@@ -628,6 +870,17 @@ function executeSingleStep(sourceComp, baseName, presetFile, stepIndex) {
             for (var k = 1; k < s.stagger.count; k++) {
                 var dup = firstLayer.duplicate();
                 dup.startTime = k * staggerOffset;
+            }
+        }
+
+        if (trimEnd > 0 && loopCount > 1) {
+            var srcDuration = stepSource.duration;
+            var trimmedDur = srcDuration - trimEnd;
+            var firstLayer = newComp.layer(1);
+            firstLayer.outPoint = trimmedDur;
+            for (var k = 1; k < loopCount; k++) {
+                var dup = firstLayer.duplicate();
+                dup.startTime = k * trimmedDur;
             }
         }
 
@@ -672,9 +925,14 @@ function createMainUI(parentPanel) {
     win.onResizing = win.onResize = function() {
         try { this.layout.resize(); } catch(e) {}
         try { relayoutFuncButtons(); } catch(e) {}
+        try { relayoutFuncButtons2(); } catch(e) {}
     };
 
     win.parentPanel = parentPanel;
+
+    // 全局键盘状态跟踪（解决 ScriptUI.environment.keyboardState 在 onClick 中不可靠的问题）
+    var _ctrlKey = false;
+    var _shiftKey = false;
 
     function setTextColor(ctrl, color) {
         try {
@@ -758,6 +1016,14 @@ function createMainUI(parentPanel) {
             currentCompName = "（无活动合成）";
             nameInput.helpTip = "输入基础名称，源合成将被重命名为此名称\n当前合成: " + currentCompName;
         }
+        updateTabEnabledState();
+    }
+
+    function updateTabEnabledState() {
+        var hasComp = getActiveComp() !== null;
+        tabOrganize.enabled = hasComp;
+        tabOutput.enabled = hasComp;
+        tabSync.enabled = hasComp;
     }
 
     btnRefresh.onClick = function() {
@@ -1174,11 +1440,15 @@ function createMainUI(parentPanel) {
         tabSync.helpTip = "切换到同步标签 | Ctrl+单击: 执行同步";
     });
 
-    // 键盘事件监听，实时更新 tab 文本
-    win.addEventListener("keydown", function() {
+    // 键盘事件监听，实时更新 tab 文本和键盘状态
+    win.addEventListener("keydown", function(evt) {
+        _ctrlKey = evt.ctrlKey;
+        _shiftKey = evt.shiftKey;
         if (tabHovered) updateTabText();
     });
-    win.addEventListener("keyup", function() {
+    win.addEventListener("keyup", function(evt) {
+        _ctrlKey = evt.ctrlKey;
+        _shiftKey = evt.shiftKey;
         if (tabHovered) updateTabText();
     });
 
@@ -1267,8 +1537,8 @@ function createMainUI(parentPanel) {
 
     function relayoutFuncButtons() {
         if (funcButtons.length === 0) return;
-        var pw = funcPanel.preferredSize.width;
-        var totalWidth = pw - 12;
+        var pw = (funcPanel.size && funcPanel.size.width) || funcPanel.preferredSize.width;
+        var totalWidth = pw - funcRow.margins[0] - funcRow.margins[1];
         var spacing = funcRow.spacing * (funcButtons.length - 1);
         var unitWidth = Math.max(32, (totalWidth - spacing) / funcButtons.length);
         for (var fi = 0; fi < funcButtons.length; fi++) {
@@ -1307,14 +1577,10 @@ function createMainUI(parentPanel) {
         try { pagExport(); } catch(e) { alert("PAG按钮出错: " + (e.message || e.toString())); }
     };
 
-    var btnImportTemplate = addFuncButton("模板", "importTemplate", "单击: 导入高光图并替换模板末尾图层 | Ctrl+单击: 渲染当前帧为高光图");
+    var btnImportTemplate = addFuncButton("模板", "importTemplate", "导入高光图并替换模板末尾图层");
     btnImportTemplate.onClick = function() {
         try {
-            if (ScriptUI.environment.keyboardState.ctrlKey) {
-                renderHighlightFrame();
-            } else {
-                importTemplateAndReplace();
-            }
+            importTemplateAndReplace();
         } catch(e) { alert("模板按钮出错: " + (e.message || e.toString())); }
     };
 
@@ -1401,8 +1667,8 @@ function createMainUI(parentPanel) {
 
     function relayoutFuncButtons2() {
         if (funcButtons2.length === 0) return;
-        var pw = funcPanel.preferredSize.width;
-        var totalWidth = pw - 12;
+        var pw = (funcPanel.size && funcPanel.size.width) || funcPanel.preferredSize.width;
+        var totalWidth = pw - funcRow2.margins[0] - funcRow2.margins[1];
         var spacing = funcRow2.spacing * (funcButtons2.length - 1);
         var unitWidth = Math.max(32, (totalWidth - spacing) / funcButtons2.length);
         for (var fi = 0; fi < funcButtons2.length; fi++) {
@@ -1428,10 +1694,69 @@ function createMainUI(parentPanel) {
         try { renderPreviewToMp4(); } catch(e) { alert("渲染合成按钮出错: " + (e.message || e.toString())); }
     };
 
-    var btnRename = addIconButton2("重命名", "saveProject", "重命名当前项目文件（另存为新文件，自动删除旧文件）");
+    var btnRename = addIconButton2("重命名", "rename", "重命名当前项目 | Ctrl+单击: 重新加载文件");
     btnRename.onClick = function() {
-        try { renameProject(); } catch(e) { alert("重命名按钮出错: " + (e.message || e.toString())); }
+        try {
+            if (ScriptUI.environment.keyboardState.ctrlKey) {
+                reloadCurrentProject();
+            } else {
+                renameProject();
+            }
+        } catch(e) { alert("重命名按钮出错: " + (e.message || e.toString())); }
     };
+
+    var btnLoopAnim = addIconButton2("循环", "loopAnim", "复制图层+偏移1s+透明度渐隐，制作无缝循环动画");
+    btnLoopAnim.onClick = function() {
+        try {
+            var comp = app.project.activeItem;
+            if (!comp || !(comp instanceof CompItem)) {
+                alert("请先选中一个合成！");
+                return;
+            }
+
+            if (comp.width !== 750 || comp.height !== 1624) {
+                if (!confirm("当前合成尺寸不是礼物墙标准尺寸（750×1624），是否继续？", false, "尺寸提醒")) {
+                    return;
+                }
+            }
+
+            var layers = comp.selectedLayers;
+            if (layers.length !== 1) {
+                alert("请选中一个图层！");
+                return;
+            }
+            var layer = layers[0];
+            var layerDuration = layer.outPoint - layer.inPoint;
+            var suggestedDuration = Math.max(0.5, layerDuration - 1);
+
+            var result = prompt("请输入循环时长（秒）:", suggestedDuration.toFixed(1));
+            if (!result) return;
+            var loopDuration = parseFloat(result);
+            if (isNaN(loopDuration) || loopDuration <= 0) {
+                alert("无效的时长！");
+                return;
+            }
+
+            app.beginUndoGroup("循环动画设置");
+            try {
+                setupLoopAnimation(comp, layer, loopDuration);
+            } catch(e) {
+                alert("循环动画设置出错: " + (e.message || e.toString()));
+            }
+            app.endUndoGroup();
+
+        } catch(e) {
+            alert("循环按钮出错: " + (e.message || e.toString()));
+        }
+    };
+
+    var btnFrameExport = addIconButton2("帧导出", "frameExport", "自动检测标记并导出: 高光图/首帧/展示帧");
+    btnFrameExport.onClick = function() {
+        try {
+            autoExportFrames(app.project.activeItem);
+        } catch(e) { alert("帧导出按钮出错: " + (e.message || e.toString())); }
+    };
+
     relayoutFuncButtons2();
 
     // ================== 内置功能函数 ==================
@@ -1849,30 +2174,6 @@ function createMainUI(parentPanel) {
         }
     }
 
-    function renderHighlightFrame() {
-        var comp = app.project.activeItem;
-        if (!(comp instanceof CompItem)) {
-            alert("请先选择一个活动合成！");
-            return;
-        }
-
-        if (!app.project.file) {
-            alert("请先保存项目文件！");
-            return;
-        }
-
-        var projectDir = app.project.file.parent.fsName;
-        var outputFolder = new Folder(projectDir + "/输出");
-        var currentTimeStr = comp.time.toFixed(2);
-
-        var destFile = renderSingleFrame(comp, outputFolder, "高光图", comp.time);
-        if (destFile) {
-            alert("高光图已保存:\n" + destFile.fsName + "\n\n当前帧位置: " + currentTimeStr + "秒");
-        } else {
-            alert("渲染高光图失败！\n请检查渲染队列。");
-        }
-    }
-
     function importTemplateAndReplace() {
         if (!app.project.file) {
             alert("请先保存项目文件！");
@@ -2231,6 +2532,52 @@ function createMainUI(parentPanel) {
         }
     }
 
+    function getMp4Dimensions(filePath) {
+        try {
+            var f = new File(filePath);
+            if (!f.exists) return null;
+            f.open("r");
+            f.encoding = "BINARY";
+            f.seek(0, 2);
+            var fileLen = f.tell;
+            if (fileLen < 100) { f.close(); return null; }
+            var raw = "";
+            var readSize = Math.min(fileLen, 262144);
+            f.seek(0, 0);
+            raw = f.read(readSize);
+            if (raw.indexOf("tkhd") < 0 && fileLen > 262144) {
+                f.seek(fileLen - 262144, 0);
+                raw = f.read(262144);
+            }
+            f.close();
+            var searchPos = 0;
+            while (true) {
+                var pos = raw.indexOf("tkhd", searchPos);
+                if (pos < 0) return null;
+                if (pos + 100 > raw.length) return null;
+                var ver = raw.charCodeAt(pos + 4);
+                var wOff, hOff;
+                if (ver === 0) { wOff = 80; hOff = 84; }
+                else if (ver === 1) { wOff = 92; hOff = 96; }
+                else { searchPos = pos + 1; continue; }
+                var w = ((raw.charCodeAt(pos + wOff) << 24) | (raw.charCodeAt(pos + wOff + 1) << 16) |
+                         (raw.charCodeAt(pos + wOff + 2) << 8) | raw.charCodeAt(pos + wOff + 3)) >> 16;
+                var h = ((raw.charCodeAt(pos + hOff) << 24) | (raw.charCodeAt(pos + hOff + 1) << 16) |
+                         (raw.charCodeAt(pos + hOff + 2) << 8) | raw.charCodeAt(pos + hOff + 3)) >> 16;
+            if (w > 0 && h > 0) return [w, h];
+            searchPos = pos + 1;
+        }
+    } catch(e) {
+        return null;
+    }
+}
+
+    function getFileDimensions(filePath) {
+        var dims = getPngDimensions(filePath);
+        if (dims) return dims;
+        return getMp4Dimensions(filePath);
+    }
+
     function sortOutputFiles() {
         if (!app.project.file) {
             alert("请先保存项目文件！");
@@ -2251,6 +2598,51 @@ function createMainUI(parentPanel) {
         if (!sortConfig) {
             alert("当前预设（" + (presetDropdown.selection ? presetDropdown.selection.text : "未选择") + "）无需输出整理。");
             return;
+        }
+
+        function isExcluded(name, excludeName, excludeRegex) {
+            if (excludeName) {
+                if (typeof excludeName === "string") { if (name === excludeName) return true; }
+                else {
+                    for (var ei = 0; ei < excludeName.length; ei++) {
+                        if (name === excludeName[ei]) return true;
+                    }
+                }
+            }
+            if (excludeRegex) {
+                var re = new RegExp(excludeRegex, "i");
+                if (re.test(name)) return true;
+            }
+            return false;
+        }
+
+        function fmtExclude(excludeName) {
+            if (!excludeName) return "";
+            if (typeof excludeName === "string") return excludeName;
+            return excludeName.join(", ");
+        }
+
+        function matchRenameRule(rule, fileName, filePath) {
+            var matched = false;
+            if (rule.match && fileName === rule.match) matched = true;
+            if (!matched && rule.regex) {
+                if (!isExcluded(fileName, rule.excludeName, rule.excludeRegex)) {
+                    var re = new RegExp(rule.regex, "i");
+                    if (re.test(fileName)) matched = true;
+                }
+            }
+            if (rule.size) {
+                var dims = getFileDimensions(filePath);
+                var sizeMatch = dims && dims[0] === rule.size[0] && dims[1] === rule.size[1];
+                if (matched) {
+                    if (!sizeMatch) matched = false;
+                } else {
+                    if (sizeMatch && !isExcluded(fileName, rule.excludeName, rule.excludeRegex)) {
+                        matched = true;
+                    }
+                }
+            }
+            return matched;
         }
 
         var dialog = new Window("dialog", "输出文件整理");
@@ -2274,12 +2666,17 @@ function createMainUI(parentPanel) {
         infoLines.push("需要文件: " + sortConfig.required.length + " 项");
         for (var ri = 0; ri < sortConfig.required.length; ri++) {
             var r = sortConfig.required[ri];
-            infoLines.push("  " + (ri+1) + ". " + (r.label || r.name || r.regex || "尺寸 " + r.size));
+            var label = r.label || r.name || r.regex || "尺寸 " + r.size;
+            if (r.count) label += " x" + r.count;
+            if (r.excludeName) label += " (排除: " + fmtExclude(r.excludeName) + ")";
+            infoLines.push("  " + (ri+1) + ". " + label);
         }
         infoLines.push("重命名规则: " + sortConfig.rename.length + " 条");
         for (var rr = 0; rr < sortConfig.rename.length; rr++) {
             var rn = sortConfig.rename[rr];
-            infoLines.push("  " + (rr+1) + ". " + (rn.match || rn.regex || "") + " → " + rn.to);
+            var rnLabel = rn.match || rn.regex || "";
+            if (rn.excludeName) rnLabel += " (排除: " + fmtExclude(rn.excludeName) + ")";
+            infoLines.push("  " + (rr+1) + ". " + rnLabel + " → " + rn.to);
         }
         if (sortConfig.zip) {
             infoLines.push("打包: " + sortConfig.zip.files.join(", ") + " → " + sortConfig.zip.name);
@@ -2292,6 +2689,7 @@ function createMainUI(parentPanel) {
         logText.text = infoLines.join("\n");
 
         var buttonGroup = dialog.add("group");
+        var checkButton = buttonGroup.add("button", undefined, "检查");
         var confirmButton = buttonGroup.add("button", undefined, "确认");
         var cancelButton = buttonGroup.add("button", undefined, "取消");
 
@@ -2309,7 +2707,16 @@ function createMainUI(parentPanel) {
                     output_name = safeName;
                 }
                 var projectFolder = projectPath.parent;
-                var outputFolder = new Folder(projectFolder.fullName + "/输出");
+                var outputFolder;
+
+                if (sortConfig.subfolder) {
+                    var subDir = findGiftWallFolder(projectFolder.fsName);
+                    if (!subDir) return;
+                    outputFolder = subDir;
+                    logText.text += "使用子文件夹: " + decodeUrlString(subDir.name) + "\n";
+                } else {
+                    outputFolder = new Folder(projectFolder.fullName + "/输出");
+                }
 
                 if (!outputFolder.exists) {
                     logText.text += "错误：未找到'输出'文件夹\n";
@@ -2323,36 +2730,50 @@ function createMainUI(parentPanel) {
                 for (var ri = 0; ri < sortConfig.required.length; ri++) {
                     var req = sortConfig.required[ri];
                     var found = false;
-                    for (var si = 0; si < files.length; si++) {
-                        var sName = decodeUrlString(files[si].name);
-                        var matched = false;
-                        if (req.name && sName === req.name) matched = true;
-                        if (!matched && req.regex) {
-                            var re = new RegExp(req.regex, "i");
-                            if (re.test(sName)) matched = true;
-                        }
-                        if (!matched && req.fallback && sName === req.fallback) matched = true;
-                        if (matched && req.size) {
-                            var dims = getPngDimensions(files[si].fsName);
-                            if (!dims || dims[0] !== req.size[0] || dims[1] !== req.size[1]) {
-                                matched = false;
-                                continue;
-                            }
-                        }
-                        if (matched) { found = true; break; }
-                    }
-                    // 尺寸兜底：名字没匹配上但有 size 要求的，试试按尺寸找
-                    if (!found && req.size) {
+                    if (req.count && req.regex) {
+                        var matchCount = 0;
                         for (var si = 0; si < files.length; si++) {
-                            var dims = getPngDimensions(files[si].fsName);
-                            if (dims && dims[0] === req.size[0] && dims[1] === req.size[1]) {
-                                found = true;
-                                break;
+                            var sName2 = decodeUrlString(files[si].name);
+                            if (isExcluded(sName2, req.excludeName, req.excludeRegex)) continue;
+                            var re = new RegExp(req.regex, "i");
+                            if (re.test(sName2)) matchCount++;
+                        }
+                        found = (matchCount >= req.count);
+                    } else {
+                        for (var si = 0; si < files.length; si++) {
+                            var sName = decodeUrlString(files[si].name);
+                            var matched = false;
+                            if (req.name && sName === req.name) matched = true;
+                            if (!matched && req.regex) {
+                                if (!isExcluded(sName, req.excludeName, req.excludeRegex)) {
+                                    var re = new RegExp(req.regex, "i");
+                                    if (re.test(sName)) matched = true;
+                                }
+                            }
+                            if (!matched && req.fallback && sName === req.fallback) matched = true;
+                            if (matched && req.size) {
+                                var dims = getPngDimensions(files[si].fsName);
+                                if (!dims || dims[0] !== req.size[0] || dims[1] !== req.size[1]) {
+                                    matched = false;
+                                    continue;
+                                }
+                            }
+                            if (matched) { found = true; break; }
+                        }
+                        if (!found && req.size) {
+                            for (var si = 0; si < files.length; si++) {
+                                var dims = getPngDimensions(files[si].fsName);
+                                if (dims && dims[0] === req.size[0] && dims[1] === req.size[1]) {
+                                    found = true;
+                                    break;
+                                }
                             }
                         }
                     }
                     if (!found) {
-                        missing.push(req.label || req.name || req.regex);
+                        var label = req.label || req.name || req.regex;
+                        if (req.count) label = "MP4 文件（需要 " + req.count + " 个）";
+                        missing.push(label);
                     }
                 }
                 if (missing.length > 0) {
@@ -2362,25 +2783,45 @@ function createMainUI(parentPanel) {
 
                 // --- Rename files ---
                 logText.text += "\n========== 开始处理文件 ==========\n";
+                var processedNames = {};
+
+                // 先处理带 order 的规则（按文件名排序后取第 N 个匹配）
+                for (var rr = 0; rr < sortConfig.rename.length; rr++) {
+                    var rule = sortConfig.rename[rr];
+                    if (rule.order === undefined) continue;
+                    var matches = [];
+                    for (var i = 0; i < files.length; i++) {
+                        var fName = decodeUrlString(files[i].name);
+                        if (processedNames[fName]) continue;
+                        if (matchRenameRule(rule, fName, files[i].fsName)) matches.push({idx: i, name: fName});
+                    }
+                    matches.sort(function(a, b) { return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0); });
+                    if (matches.length > 0) {
+                        var takeIdx = Math.min(rule.order, matches.length - 1);
+                        var m = matches[takeIdx];
+                        var newName = String(rule.to).replace("{prefix}", output_name);
+                        var newFile = new File(files[m.idx].parent.fsName + "/" + newName);
+                        if (newFile.exists) {
+                            logText.text += "已存在: " + newName + "\n";
+                        } else if (files[m.idx].rename(newFile)) {
+                            logText.text += "重命名成功: " + m.name + " -> " + newName + "\n";
+                        } else {
+                            logText.text += "重命名失败: " + m.name + "\n";
+                        }
+                        processedNames[m.name] = true;
+                        processedNames[newName] = true;
+                    }
+                }
+
+                // 再处理不带 order 的标准规则（每个文件匹配第一条规则）
                 for (var i = 0; i < files.length; i++) {
                     var file = files[i];
                     var fileName = decodeUrlString(file.name);
+                    if (processedNames[fileName]) continue;
                     for (var rr = 0; rr < sortConfig.rename.length; rr++) {
                         var rule = sortConfig.rename[rr];
-                        var matches = false;
-                        if (rule.match && fileName === rule.match) matches = true;
-                        if (!matches && rule.regex) {
-                            var re2 = new RegExp(rule.regex, "i");
-                            if (re2.test(fileName)) matches = true;
-                        }
-                        // 尺寸兜底：名字没匹配上但有 size 的，按 PNG 尺寸匹配
-                        if (!matches && rule.size) {
-                            var dims2 = getPngDimensions(file.fsName);
-                            if (dims2 && dims2[0] === rule.size[0] && dims2[1] === rule.size[1]) {
-                                matches = true;
-                            }
-                        }
-                        if (matches) {
+                        if (rule.order !== undefined) continue;
+                        if (matchRenameRule(rule, fileName, file.fsName)) {
                             var newName = String(rule.to).replace("{prefix}", output_name);
                             var newFile = new File(file.parent.fsName + "/" + newName);
                             if (newFile.exists) {
@@ -2390,6 +2831,8 @@ function createMainUI(parentPanel) {
                             } else {
                                 logText.text += "重命名失败: " + fileName + "\n";
                             }
+                            processedNames[fileName] = true;
+                            processedNames[newName] = true;
                             break;
                         }
                     }
@@ -2398,7 +2841,8 @@ function createMainUI(parentPanel) {
                 // --- Generate bat ---
                 var zipFiles = [];
                 for (var zf = 0; zf < sortConfig.zip.files.length; zf++) {
-                    zipFiles.push("'" + sortConfig.zip.files[zf] + "'");
+                    var zipSrcName = String(sortConfig.zip.files[zf]).replace("{prefix}", output_name);
+                    zipFiles.push("'" + zipSrcName + "'");
                 }
                 var zipName = String(sortConfig.zip.name).replace("{prefix}", output_name);
 
@@ -2410,9 +2854,10 @@ function createMainUI(parentPanel) {
                 var hasZipSources = true;
                 var delFiles = [];
                 for (var df = 0; df < sortConfig.zip.files.length; df++) {
-                    var zipSrc = new File(outputFolder.fsName + "/" + sortConfig.zip.files[df]);
+                    var zipSrcName = String(sortConfig.zip.files[df]).replace("{prefix}", output_name);
+                    var zipSrc = new File(outputFolder.fsName + "/" + zipSrcName);
                     if (!zipSrc.exists) { hasZipSources = false; break; }
-                    delFiles.push('"' + sortConfig.zip.files[df] + '"');
+                    delFiles.push('"' + zipSrcName + '"');
                 }
 
                 if (hasZipSources) {
@@ -2426,7 +2871,9 @@ function createMainUI(parentPanel) {
                     batContent += 'powershell -NoProfile -Command "& {';
                     batContent += 'Compress-Archive -Path ' + zipFiles.join(',') + ' ';
                     batContent += '-DestinationPath \'' + zipName + '\'}"\r\n';
-                    batContent += 'if %errorlevel%==0 del ' + delFiles.join(' ') + '\r\n';
+                    if (!sortConfig.zip.keepOriginals) {
+                        batContent += 'if %errorlevel%==0 del ' + delFiles.join(' ') + '\r\n';
+                    }
                     batContent += 'timeout /t 1 /nobreak >nul\r\n';
                     batContent += 'powershell -Command "Get-Item ' + clipItems.join(',') + ' | Set-Clipboard"\r\n';
                     batContent += 'echo 文件已复制到剪贴板\r\n';
@@ -2472,6 +2919,152 @@ function createMainUI(parentPanel) {
                 }
             } catch(e) {
                 alert("整理输出出错: " + (e.message || e.toString()));
+            }
+        };
+
+        checkButton.onClick = function() {
+            try {
+                var output_name = prefixInput.text.trim();
+                if (!output_name) { alert("请输入前缀名称！"); return; }
+                var safeName = output_name.replace(/[\\\/:*?"<>|]/g, "-");
+                if (safeName !== output_name) {
+                    logText.text += "前缀含非法字符，已替换为: " + safeName + "\n";
+                    output_name = safeName;
+                }
+                var projectFolder = projectPath.parent;
+                var outputFolder;
+                if (sortConfig.subfolder) {
+                    var subDir = findGiftWallFolder(projectFolder.fsName);
+                    if (!subDir) return;
+                    outputFolder = subDir;
+                    logText.text += "使用子文件夹: " + decodeUrlString(subDir.name) + "\n";
+                } else {
+                    outputFolder = new Folder(projectFolder.fsName + "/输出");
+                }
+                if (!outputFolder.exists) { logText.text += "错误：未找到输出文件夹\n"; return; }
+
+                var files = outputFolder.getFiles();
+                logText.text += "\n========== 检查开始 ==========\n";
+                logText.text += "文件夹内文件 (" + files.length + " 个):\n";
+                for (var fi = 0; fi < files.length; fi++) {
+                    var fname = decodeUrlString(files[fi].name);
+                    var fsize = files[fi].length || 0;
+                    var info = "  " + fname;
+                    if (/\.png$/i.test(fname)) {
+                        var dims = getPngDimensions(files[fi].fsName);
+                        if (dims) info += " (" + dims[0] + "\u00D7" + dims[1] + ")";
+                    } else if (/\.mp4$/i.test(fname)) {
+                        var dims = getMp4Dimensions(files[fi].fsName);
+                        if (dims) info += " (" + dims[0] + "\u00D7" + dims[1] + ")";
+                    }
+                    if (fsize > 0) info += " [" + (fsize > 1048576 ? (fsize/1048576).toFixed(1)+"MB" : (fsize/1024).toFixed(1)+"KB") + "]";
+                    logText.text += info + "\n";
+                }
+
+                logText.text += "\n--- 文件存在检查 ---\n";
+                var allFound = true;
+                for (var ri = 0; ri < sortConfig.required.length; ri++) {
+                    var req = sortConfig.required[ri];
+                    var found = false;
+                    if (req.count && req.regex) {
+                        var matchCount = 0;
+                        for (var si = 0; si < files.length; si++) {
+                            var sName = decodeUrlString(files[si].name);
+                            if (isExcluded(sName, req.excludeName, req.excludeRegex)) continue;
+                            var re = new RegExp(req.regex, "i");
+                            if (re.test(sName)) matchCount++;
+                        }
+                        found = (matchCount >= req.count);
+                        var lb = req.label || req.regex;
+                        logText.text += "  " + (found ? "\u2713" : "\u2717") + " " + lb + " (需要 " + req.count + " 个, 找到 " + matchCount + " 个)" + (req.excludeName ? ", 排除: " + fmtExclude(req.excludeName) : "") + "\n";
+                    } else {
+                        for (var si = 0; si < files.length; si++) {
+                            var sName = decodeUrlString(files[si].name);
+                            var matched = false;
+                            if (req.name && sName === req.name) matched = true;
+                            if (!matched && req.regex) {
+                                if (!isExcluded(sName, req.excludeName, req.excludeRegex)) {
+                                    var re = new RegExp(req.regex, "i");
+                                    if (re.test(sName)) matched = true;
+                                }
+                            }
+                            if (!matched && req.fallback && sName === req.fallback) matched = true;
+                            if (matched && req.size) {
+                                var dims = getPngDimensions(files[si].fsName);
+                                if (!dims || dims[0] !== req.size[0] || dims[1] !== req.size[1]) matched = false;
+                            }
+                            if (matched) { found = true; break; }
+                        }
+                        if (!found && req.size) {
+                            for (var si = 0; si < files.length; si++) {
+                                var dims = getPngDimensions(files[si].fsName);
+                                if (dims && dims[0] === req.size[0] && dims[1] === req.size[1]) { found = true; break; }
+                            }
+                        }
+                        var lb = req.label || req.name || req.regex || "尺寸 " + req.size;
+                        logText.text += "  " + (found ? "\u2713" : "\u2717") + " " + lb + (req.excludeName ? " (排除: " + fmtExclude(req.excludeName) + ")" : "") + "\n";
+                    }
+                    if (!found) allFound = false;
+                }
+
+                logText.text += "\n--- 重命名预览 ---\n";
+                var processedNames = {};
+                for (var rr = 0; rr < sortConfig.rename.length; rr++) {
+                    var rule = sortConfig.rename[rr];
+                    var newName = String(rule.to).replace("{prefix}", output_name);
+                    var matches = [];
+                    for (var i = 0; i < files.length; i++) {
+                        var fName = decodeUrlString(files[i].name);
+                        if (processedNames[fName]) continue;
+                        if (isExcluded(fName, rule.excludeName, rule.excludeRegex)) continue;
+                        if (matchRenameRule(rule, fName, files[i].fsName)) matches.push(fName);
+                    }
+                    if (rule.order !== undefined) {
+                        matches.sort(function(a, b) { return a < b ? -1 : (a > b ? 1 : 0); });
+                        if (matches.length > 0) {
+                            var takeIdx = Math.min(rule.order, matches.length - 1);
+                            logText.text += "  " + matches[takeIdx] + " \u2192 " + newName + " (order:" + rule.order + ")\n";
+                            processedNames[matches[takeIdx]] = true;
+                        } else {
+                            logText.text += "  [无匹配] \u2192 " + newName + " (order:" + rule.order + ", 共 0 个候选)\n";
+                        }
+                    } else {
+                        if (matches.length > 0) {
+                            logText.text += "  " + matches[0] + " \u2192 " + newName + "\n";
+                            processedNames[matches[0]] = true;
+                        } else {
+                            logText.text += "  [无匹配] \u2192 " + newName + "\n";
+                        }
+                    }
+                }
+
+                logText.text += "\n--- 打包计划 ---\n";
+                if (sortConfig.zip) {
+                    var zipName = String(sortConfig.zip.name).replace("{prefix}", output_name);
+                    logText.text += "  ZIP: " + zipName + "\n";
+                    for (var zf = 0; zf < sortConfig.zip.files.length; zf++) {
+                        var zfName = String(sortConfig.zip.files[zf]).replace("{prefix}", output_name);
+                        var zfFile = new File(outputFolder.fsName + "/" + zfName);
+                        logText.text += "    " + (zfFile.exists ? "\u2713" : "\u2717") + " " + zfName + "\n";
+                    }
+                    logText.text += "  打包后" + (sortConfig.zip.keepOriginals ? "保留源文件（不删除）" : "删除源文件") + "\n";
+                } else {
+                    logText.text += "  （无打包配置）\n";
+                }
+
+                logText.text += "\n--- 复制到剪贴板 ---\n";
+                if (sortConfig.clipboard && sortConfig.clipboard.length > 0) {
+                    for (var ci = 0; ci < sortConfig.clipboard.length; ci++) {
+                        logText.text += "  " + String(sortConfig.clipboard[ci]).replace("{prefix}", output_name) + "\n";
+                    }
+                } else {
+                    logText.text += "  （无剪贴板配置）\n";
+                }
+
+                logText.text += "========== 检查完成 ==========\n";
+                logText.text += (allFound ? "结论: 所有必需文件已就绪，可执行整理" : "结论: 缺失必需文件，请先补充后再执行整理") + "\n";
+            } catch(e) {
+                logText.text += "检查出错: " + (e.message || e.toString()) + "\n";
             }
         };
 
@@ -2527,6 +3120,20 @@ function createMainUI(parentPanel) {
             alert("项目已保存到：\n" + saveFile.fsName);
         } catch(e) {
             alert("保存失败：" + e.toString());
+        }
+    }
+
+    function reloadCurrentProject() {
+        if (!app.project.file) {
+            alert("项目未保存，无法重新加载。");
+            return;
+        }
+
+        try {
+            app.project.save();
+            app.open(app.project.file);
+        } catch(e) {
+            alert("重新加载失败：" + e.toString());
         }
     }
 
@@ -2734,6 +3341,8 @@ function createMainUI(parentPanel) {
         tip += "时长: ";
         if (typeof s.duration === "string" && s.duration === "custom") {
             tip += "自定义（运行前弹窗输入）\n";
+        } else if (typeof s.duration === "string" && s.duration === "source") {
+            tip += "与源合成相同\n";
         } else {
             tip += s.duration + "s\n";
         }
@@ -2743,15 +3352,18 @@ function createMainUI(parentPanel) {
         } else if (s.scaleMode === "custom") {
             tip += s.scalePercent + "% 缩放";
         }
-        if (s.stagger && s.stagger.enabled) {
-            tip += "\n错层: " + s.stagger.count + "层, 偏移=";
-            if (index > 0) {
-                tip += s.duration + "s";
-            } else {
-                tip += "?s";
-            }
+    if (s.stagger && s.stagger.enabled) {
+        tip += "\n错层: " + s.stagger.count + "层, 偏移=";
+        if (index > 0) {
+            tip += s.duration + "s";
+        } else {
+            tip += "?s";
         }
-        tip += "\n\n单击: 切换启用/禁用 | Ctrl+单击: 立即执行此步骤";
+    }
+    if (s.trimEnd && s.loopCount > 1) {
+        tip += "\n循环: 裁减尾端" + s.trimEnd + "s, 循环" + s.loopCount + "次, 首尾相接";
+    }
+    tip += "\n\n单击: 切换启用/禁用 | Ctrl+单击: 立即执行此步骤";
         return tip;
     }
 
@@ -2980,9 +3592,11 @@ function createMainUI(parentPanel) {
 
     // ================== 初始化 ==================
     detectCurrentComp();
+    updateTabEnabledState();
     refreshPresetList();
     funcPanel.preferredSize.width = win.preferredSize.width - 12;
     relayoutFuncButtons();
+    relayoutFuncButtons2();
 
     return win;
 }
