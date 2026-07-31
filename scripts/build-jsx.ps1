@@ -117,6 +117,8 @@ if (-not (Test-Path -LiteralPath $configDir)) {
 
 $configSource = Join-Path $root "config"
 if (Test-Path -LiteralPath $configSource) {
+  # 清理 dist 配置目录中的残留文件（config 删除后旧文件不应残留）
+  Get-ChildItem -LiteralPath $configDir -Force | Remove-Item -Recurse -Force
   Get-ChildItem -LiteralPath $configSource | ForEach-Object {
     $dest = Join-Path $configDir $_.Name
     if ((Test-Path -LiteralPath $_.FullName -PathType Container) -and (Test-Path -LiteralPath $dest)) {

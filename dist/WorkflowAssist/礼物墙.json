@@ -2,6 +2,7 @@
   "name": "礼物墙",
   "description": "礼物墙工作流 - 先创建礼物墙再创建预览",
   "sortConfig": "sort/giftwall.json",
+  "functions": ["sort", "save", "renderMp4", "rename", "loopAnim", "frameExp"],
   "steps": [
     {
       "name": "礼物墙",

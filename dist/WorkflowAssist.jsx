@@ -925,7 +925,6 @@ function createMainUI(parentPanel) {
     win.onResizing = win.onResize = function() {
         try { this.layout.resize(); } catch(e) {}
         try { relayoutFuncButtons(); } catch(e) {}
-        try { relayoutFuncButtons2(); } catch(e) {}
     };
 
     win.parentPanel = parentPanel;
@@ -1074,6 +1073,7 @@ function createMainUI(parentPanel) {
         try {
             updateStepPreview();
             refreshOutputUI();
+            updateFuncButtons();
             if (syncTargetInput) syncTargetInput.text = getSyncTargetPath();
             tabContent.layout.layout(true);
         } catch(e) {
@@ -1496,19 +1496,34 @@ function createMainUI(parentPanel) {
     funcPanel.margins = 6;
     funcPanel.text = "功能";
 
-    var funcRow = funcPanel.add("group");
-    funcRow.orientation = "row";
-    funcRow.alignment = ["fill", "top"];
-    funcRow.alignChildren = ["fill", "center"];
-    funcRow.spacing = 6;
-    funcRow.margins = [0, 0, 0, 0];
+    var BTNS_PER_ROW = 5;
+    var funcRowsContainer = funcPanel.add("group");
+    funcRowsContainer.orientation = "column";
+    funcRowsContainer.alignment = ["fill", "top"];
+    funcRowsContainer.alignChildren = ["fill", "top"];
+    funcRowsContainer.spacing = 4;
+    funcRowsContainer.margins = [0, 0, 0, 0];
 
     var funcButtons = [];
 
+    function getCurrentRow() {
+        var rowIdx = Math.floor(funcButtons.length / BTNS_PER_ROW);
+        while (funcRowsContainer.children.length <= rowIdx) {
+            var row = funcRowsContainer.add("group");
+            row.orientation = "row";
+            row.alignment = ["fill", "top"];
+            row.alignChildren = ["fill", "center"];
+            row.spacing = 6;
+            row.margins = [0, 0, 0, 0];
+        }
+        return funcRowsContainer.children[rowIdx];
+    }
+
     function addFuncButton(label, iconKey, tip) {
+        var row = getCurrentRow();
         if (iconKey && typeof ICON_DATA !== 'undefined' && ICON_DATA[iconKey]) {
             try {
-                var group = funcRow.add("group");
+                var group = row.add("group");
                 group.orientation = "column";
                 group.alignChildren = ["center", "center"];
                 group.spacing = 0;
@@ -1524,13 +1539,11 @@ function createMainUI(parentPanel) {
 
                 funcButtons.push(group);
                 return icon;
-            } catch (e) {
-                // iconbutton failed, will fall through to text button below
-            }
+            } catch (e) {}
         }
-        var btn = funcRow.add("button", undefined, label);
+        var btn = row.add("button", undefined, label);
         btn.helpTip = tip || "";
-        btn.preferredSize.height = 22;
+        btn.preferredSize.height = 24;
         funcButtons.push(btn);
         return btn;
     }
@@ -1538,226 +1551,223 @@ function createMainUI(parentPanel) {
     function relayoutFuncButtons() {
         if (funcButtons.length === 0) return;
         var pw = (funcPanel.size && funcPanel.size.width) || funcPanel.preferredSize.width;
-        var totalWidth = pw - funcRow.margins[0] - funcRow.margins[1];
-        var spacing = funcRow.spacing * (funcButtons.length - 1);
-        var unitWidth = Math.max(32, (totalWidth - spacing) / funcButtons.length);
-        for (var fi = 0; fi < funcButtons.length; fi++) {
-            var item = funcButtons[fi];
-            if (item.type === "group") {
-                item.preferredSize.width = unitWidth;
-            } else if (item.type === "iconbutton" || item.type === "image") {
-                item.preferredSize = [20, 20];
-            } else {
-                item.preferredSize.width = Math.max(60, unitWidth);
-            }
-        }
-        funcRow.layout.layout(true);
-    }
-
-    var btnMask = addFuncButton("蒙版", "addMask", "单击: 创建蒙版 | Ctrl+单击: 设置轨道遮罩");
-    btnMask.onClick = function() {
-        try {
-            if (ScriptUI.environment.keyboardState.ctrlKey) {
-                toggleTrackMatte();
-            } else {
-                createMaskLayer();
-            }
-        } catch(e) {
-            alert("蒙版按钮出错: " + (e.message || e.toString()));
-        }
-    };
-
-    var btnImportBg = addFuncButton("背景", "importBg", "从预设目录导入 bg.png 作为背景图层");
-    btnImportBg.onClick = function() {
-        try { importBgImage(); } catch(e) { alert("背景按钮出错: " + (e.message || e.toString())); }
-    };
-
-    var btnPag = addFuncButton("PAG", "pagExport", "独显选中图层 → 打标记 → 预合成为 animated → 生成高光图");
-    btnPag.onClick = function() {
-        try { pagExport(); } catch(e) { alert("PAG按钮出错: " + (e.message || e.toString())); }
-    };
-
-    var btnImportTemplate = addFuncButton("模板", "importTemplate", "导入高光图并替换模板末尾图层");
-    btnImportTemplate.onClick = function() {
-        try {
-            importTemplateAndReplace();
-        } catch(e) { alert("模板按钮出错: " + (e.message || e.toString())); }
-    };
-
-    var btnOpenSVGA = addFuncButton("SVGA", "svgaPanel", "打开SVGAConverter面板");
-    btnOpenSVGA.onClick = function() {
-        try {
-            var cmdId = app.findMenuCommandId("SVGAConverter_AE");
-            if (cmdId !== 0) {
-                app.executeCommand(cmdId);
-            } else {
-                alert("未找到 SVGAConverter_AE 面板命令！\n请确认该扩展已安装。");
-            }
-        } catch(e) {
-            alert("SVGA按钮出错: " + (e.message || e.toString()));
-        }
-    };
-
-    var btnCopyBanner = addFuncButton("Banner", "copyBanner", "根据合成时长选择并复制PAG文件到输出文件夹");
-    btnCopyBanner.onClick = function() {
-        try { copyBannerPag(); } catch(e) { alert("Banner按钮出错: " + (e.message || e.toString())); }
-    };
-
-    var btnCompress = addFuncButton("压缩", "autoTiny", "打开 Auto_Tinify 图片压缩工具");
-    btnCompress.onClick = function() {
-        try {
-            var scriptPath = EXT_SCRIPTS.compress;
-            if (!scriptPath) {
-                alert("未配置压缩脚本路径！\n请在 01-constants.jsx 中设置 EXT_SCRIPTS.compress");
-                return;
-            }
-            var scriptFile = new File(scriptPath);
-            if (!scriptFile.exists) {
-                alert("压缩脚本不存在: " + scriptPath);
-                return;
-            }
-            $.evalFile(scriptFile);
-        } catch(e) {
-            alert("加载压缩脚本出错: " + e.toString());
-        }
-    };
-
-    var btnSortOutput = addFuncButton("输出", "sortOutput", "整理输出文件夹文件并生成批处理");
-    btnSortOutput.onClick = function() {
-        try { sortOutputFiles(); } catch(e) { alert("整理输出按钮出错: " + (e.message || e.toString())); }
-    };
-
-    // ================== 第二行功能按钮 ==================
-    var funcRow2 = funcPanel.add("group");
-    funcRow2.orientation = "row";
-    funcRow2.alignment = ["fill", "top"];
-    funcRow2.alignChildren = ["fill", "center"];
-    funcRow2.spacing = 6;
-    funcRow2.margins = [0, 0, 0, 0];
-
-    var funcButtons2 = [];
-
-    function addIconButton2(label, iconKey, tip) {
-        if (iconKey && typeof ICON_DATA !== 'undefined' && ICON_DATA[iconKey]) {
-            try {
-                var group = funcRow2.add("group");
-                group.orientation = "column";
-                group.alignChildren = ["center", "center"];
-                group.spacing = 0;
-                group.helpTip = tip || "";
-                group.preferredSize = [32, 36];
-
-                var icon = group.add("iconbutton", undefined, ICON_DATA[iconKey], {style: "toolbutton"});
-                icon.preferredSize = [20, 20];
-                icon.helpTip = tip || "";
-
-                var lbl = group.add("statictext", undefined, label);
-                lbl.alignment = ["center", "center"];
-
-                funcButtons2.push(group);
-                return icon;
-            } catch (e) {}
-        }
-        var btn = funcRow2.add("button", undefined, label);
-        btn.helpTip = tip || "";
-        btn.preferredSize.height = 26;
-        funcButtons2.push(btn);
-        return btn;
-    }
-
-    function relayoutFuncButtons2() {
-        if (funcButtons2.length === 0) return;
-        var pw = (funcPanel.size && funcPanel.size.width) || funcPanel.preferredSize.width;
-        var totalWidth = pw - funcRow2.margins[0] - funcRow2.margins[1];
-        var spacing = funcRow2.spacing * (funcButtons2.length - 1);
-        var unitWidth = Math.max(32, (totalWidth - spacing) / funcButtons2.length);
-        for (var fi = 0; fi < funcButtons2.length; fi++) {
-            var item = funcButtons2[fi];
-            if (item.type === "group") {
-                item.preferredSize.width = unitWidth;
-            } else if (item.type === "iconbutton" || item.type === "image") {
-                item.preferredSize = [20, 20];
-            } else {
-                item.preferredSize.width = Math.max(60, unitWidth);
-            }
-        }
-        funcRow2.layout.layout(true);
-    }
-
-    var btnSaveProject = addIconButton2("保存", "saveProject", "自动保存未保存的项目到素材文件所在目录");
-    btnSaveProject.onClick = function() {
-        try { autoSaveProject(); } catch(e) { alert("保存按钮出错: " + (e.message || e.toString())); }
-    };
-
-    var btnRenderMp4 = addIconButton2("渲染合成", "renderMp4", "将'预览'文件夹中的序列帧重命名并合成为MP4视频");
-    btnRenderMp4.onClick = function() {
-        try { renderPreviewToMp4(); } catch(e) { alert("渲染合成按钮出错: " + (e.message || e.toString())); }
-    };
-
-    var btnRename = addIconButton2("重命名", "rename", "重命名当前项目 | Ctrl+单击: 重新加载文件");
-    btnRename.onClick = function() {
-        try {
-            if (ScriptUI.environment.keyboardState.ctrlKey) {
-                reloadCurrentProject();
-            } else {
-                renameProject();
-            }
-        } catch(e) { alert("重命名按钮出错: " + (e.message || e.toString())); }
-    };
-
-    var btnLoopAnim = addIconButton2("循环", "loopAnim", "复制图层+偏移1s+透明度渐隐，制作无缝循环动画");
-    btnLoopAnim.onClick = function() {
-        try {
-            var comp = app.project.activeItem;
-            if (!comp || !(comp instanceof CompItem)) {
-                alert("请先选中一个合成！");
-                return;
-            }
-
-            if (comp.width !== 750 || comp.height !== 1624) {
-                if (!confirm("当前合成尺寸不是礼物墙标准尺寸（750×1624），是否继续？", false, "尺寸提醒")) {
-                    return;
+        var margin = 6;
+        var rows = funcRowsContainer.children;
+        for (var ri = 0; ri < rows.length; ri++) {
+            var row = rows[ri];
+            var children = row.children;
+            if (children.length === 0) continue;
+            var totalWidth = pw - margin * 2;
+            var spacing = row.spacing * (children.length - 1);
+            var unitWidth = Math.max(32, (totalWidth - spacing) / children.length);
+            for (var ci = 0; ci < children.length; ci++) {
+                var item = children[ci];
+                if (item.type === "group") {
+                    item.preferredSize.width = unitWidth;
+                } else if (item.type === "iconbutton" || item.type === "image") {
+                    item.preferredSize = [20, 20];
+                } else {
+                    item.preferredSize.width = Math.max(60, unitWidth);
                 }
             }
+            row.layout.layout(true);
+        }
+    }
 
-            var layers = comp.selectedLayers;
-            if (layers.length !== 1) {
-                alert("请选中一个图层！");
-                return;
-            }
-            var layer = layers[0];
-            var layerDuration = layer.outPoint - layer.inPoint;
-            var suggestedDuration = Math.max(0.5, layerDuration - 1);
+    var FUNC_CREATORS = {
+        mask: function() {
+            var btn = addFuncButton("蒙版", "addMask", "单击: 创建蒙版 | Ctrl+单击: 设置轨道遮罩");
+            btn.onClick = function() {
+                try {
+                    if (ScriptUI.environment.keyboardState.ctrlKey) {
+                        toggleTrackMatte();
+                    } else {
+                        createMaskLayer();
+                    }
+                } catch(e) {
+                    alert("蒙版按钮出错: " + (e.message || e.toString()));
+                }
+            };
+        },
+        bg: function() {
+            var btn = addFuncButton("背景", "importBg", "从预设目录导入 bg.png 作为背景图层");
+            btn.onClick = function() {
+                try { importBgImage(); } catch(e) { alert("背景按钮出错: " + (e.message || e.toString())); }
+            };
+        },
+        pag: function() {
+            var btn = addFuncButton("PAG", "pagExport", "独显选中图层 → 打标记 → 预合成为 animated → 生成高光图");
+            btn.onClick = function() {
+                try { pagExport(); } catch(e) { alert("PAG按钮出错: " + (e.message || e.toString())); }
+            };
+        },
+        template: function() {
+            var btn = addFuncButton("模板", "importTemplate", "导入高光图并替换模板末尾图层");
+            btn.onClick = function() {
+                try {
+                    importTemplateAndReplace();
+                } catch(e) { alert("模板按钮出错: " + (e.message || e.toString())); }
+            };
+        },
+        svga: function() {
+            var btn = addFuncButton("SVGA", "svgaPanel", "打开SVGAConverter面板");
+            btn.onClick = function() {
+                try {
+                    var cmdId = app.findMenuCommandId("SVGAConverter_AE");
+                    if (cmdId !== 0) {
+                        app.executeCommand(cmdId);
+                    } else {
+                        alert("未找到 SVGAConverter_AE 面板命令！\n请确认该扩展已安装。");
+                    }
+                } catch(e) {
+                    alert("SVGA按钮出错: " + (e.message || e.toString()));
+                }
+            };
+        },
+        banner: function() {
+            var btn = addFuncButton("Banner", "copyBanner", "根据合成时长选择并复制PAG文件到输出文件夹");
+            btn.onClick = function() {
+                try { copyBannerPag(); } catch(e) { alert("Banner按钮出错: " + (e.message || e.toString())); }
+            };
+        },
+        compress: function() {
+            var btn = addFuncButton("压缩", "autoTiny", "打开 Auto_Tinify 图片压缩工具");
+            btn.onClick = function() {
+                try {
+                    var scriptPath = EXT_SCRIPTS.compress;
+                    if (!scriptPath) {
+                        alert("未配置压缩脚本路径！\n请在 01-constants.jsx 中设置 EXT_SCRIPTS.compress");
+                        return;
+                    }
+                    var scriptFile = new File(scriptPath);
+                    if (!scriptFile.exists) {
+                        alert("压缩脚本不存在: " + scriptPath);
+                        return;
+                    }
+                    $.evalFile(scriptFile);
+                } catch(e) {
+                    alert("加载压缩脚本出错: " + e.toString());
+                }
+            };
+        },
+        sort: function() {
+            var btn = addFuncButton("输出", "sortOutput", "整理输出文件夹文件并生成批处理");
+            btn.onClick = function() {
+                try { sortOutputFiles(); } catch(e) { alert("整理输出按钮出错: " + (e.message || e.toString())); }
+            };
+        },
+        save: function() {
+            var btn = addFuncButton("保存", "saveProject", "自动保存未保存的项目到素材文件所在目录");
+            btn.onClick = function() {
+                try { autoSaveProject(); } catch(e) { alert("保存按钮出错: " + (e.message || e.toString())); }
+            };
+        },
+        renderMp4: function() {
+            var btn = addFuncButton("渲染合成", "renderMp4", "将'预览'文件夹中的序列帧重命名并合成为MP4视频");
+            btn.onClick = function() {
+                try { renderPreviewToMp4(); } catch(e) { alert("渲染合成按钮出错: " + (e.message || e.toString())); }
+            };
+        },
+        rename: function() {
+            var btn = addFuncButton("重命名", "rename", "重命名当前项目 | Ctrl+单击: 重新加载文件");
+            btn.onClick = function() {
+                try {
+                    if (ScriptUI.environment.keyboardState.ctrlKey) {
+                        reloadCurrentProject();
+                    } else {
+                        renameProject();
+                    }
+                } catch(e) { alert("重命名按钮出错: " + (e.message || e.toString())); }
+            };
+        },
+        loopAnim: function() {
+            var btn = addFuncButton("循环", "loopAnim", "复制图层+偏移1s+透明度渐隐，制作无缝循环动画");
+            btn.onClick = function() {
+                try {
+                    var comp = app.project.activeItem;
+                    if (!comp || !(comp instanceof CompItem)) {
+                        alert("请先选中一个合成！");
+                        return;
+                    }
 
-            var result = prompt("请输入循环时长（秒）:", suggestedDuration.toFixed(1));
-            if (!result) return;
-            var loopDuration = parseFloat(result);
-            if (isNaN(loopDuration) || loopDuration <= 0) {
-                alert("无效的时长！");
-                return;
-            }
+                    if (comp.width !== 750 || comp.height !== 1624) {
+                        if (!confirm("当前合成尺寸不是礼物墙标准尺寸（750×1624），是否继续？", false, "尺寸提醒")) {
+                            return;
+                        }
+                    }
 
-            app.beginUndoGroup("循环动画设置");
-            try {
-                setupLoopAnimation(comp, layer, loopDuration);
-            } catch(e) {
-                alert("循环动画设置出错: " + (e.message || e.toString()));
-            }
-            app.endUndoGroup();
+                    var layers = comp.selectedLayers;
+                    if (layers.length !== 1) {
+                        alert("请选中一个图层！");
+                        return;
+                    }
+                    var layer = layers[0];
+                    var layerDuration = layer.outPoint - layer.inPoint;
+                    var suggestedDuration = Math.max(0.5, layerDuration - 1);
 
-        } catch(e) {
-            alert("循环按钮出错: " + (e.message || e.toString()));
+                    var result = prompt("请输入循环时长（秒）:", suggestedDuration.toFixed(1));
+                    if (!result) return;
+                    var loopDuration = parseFloat(result);
+                    if (isNaN(loopDuration) || loopDuration <= 0) {
+                        alert("无效的时长！");
+                        return;
+                    }
+
+                    app.beginUndoGroup("循环动画设置");
+                    try {
+                        setupLoopAnimation(comp, layer, loopDuration);
+                    } catch(e) {
+                        alert("循环动画设置出错: " + (e.message || e.toString()));
+                    }
+                    app.endUndoGroup();
+
+                } catch(e) {
+                    alert("循环按钮出错: " + (e.message || e.toString()));
+                }
+            };
+        },
+        frameExp: function() {
+            var btn = addFuncButton("帧导出", "frameExport", "自动检测标记并导出: 高光图/首帧/展示帧");
+            btn.onClick = function() {
+                try {
+                    autoExportFrames(app.project.activeItem);
+                } catch(e) { alert("帧导出按钮出错: " + (e.message || e.toString())); }
+            };
         }
     };
 
-    var btnFrameExport = addIconButton2("帧导出", "frameExport", "自动检测标记并导出: 高光图/首帧/展示帧");
-    btnFrameExport.onClick = function() {
+    function updateFuncButtons() {
+        // 先解析 keys，再清空重建。解析失败时保留旧按钮不清空。
+        var keys = null;
+        var presetFile = getSelectedPresetFile();
+        if (presetFile) {
+            var data = loadPreset(presetFile);
+            if (data && data.functions) keys = data.functions;
+        }
+        if (!keys) {
+            keys = ["mask", "bg", "pag", "template", "svga", "banner", "compress", "sort",
+                    "save", "renderMp4", "rename", "loopAnim", "frameExp"];
+        }
         try {
-            autoExportFrames(app.project.activeItem);
-        } catch(e) { alert("帧导出按钮出错: " + (e.message || e.toString())); }
-    };
+            // Clear all rows inside funcRowsContainer
+            while (funcRowsContainer.children.length > 0) {
+                funcRowsContainer.remove(funcRowsContainer.children[0]);
+            }
+            funcButtons = [];
+            for (var i = 0; i < keys.length; i++) {
+                var creator = FUNC_CREATORS[keys[i]];
+                if (creator) creator();
+            }
+            relayoutFuncButtons();
+            // 强制刷新容器和面板布局，否则重建的按钮可能不可见
+            funcRowsContainer.layout.layout(true);
+            funcPanel.layout.layout(true);
+        } catch(e) {
+            alert("更新功能按钮出错: " + (e.message || e.toString()));
+        }
+    }
 
-    relayoutFuncButtons2();
+    updateFuncButtons();
 
     // ================== 内置功能函数 ==================
 
@@ -3595,8 +3605,7 @@ function createMainUI(parentPanel) {
     updateTabEnabledState();
     refreshPresetList();
     funcPanel.preferredSize.width = win.preferredSize.width - 12;
-    relayoutFuncButtons();
-    relayoutFuncButtons2();
+    updateFuncButtons();
 
     return win;
 }
