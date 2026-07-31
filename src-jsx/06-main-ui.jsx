@@ -22,7 +22,7 @@ function createMainUI(parentPanel) {
 
     win.onResizing = win.onResize = function() {
         try { this.layout.resize(); } catch(e) {}
-        try { relayoutFuncButtons(); } catch(e) {}
+        try { handleFuncResize(); } catch(e) {}
     };
 
     win.parentPanel = parentPanel;
@@ -594,7 +594,6 @@ function createMainUI(parentPanel) {
     funcPanel.margins = 6;
     funcPanel.text = "功能";
 
-    var BTNS_PER_ROW = 5;
     var funcRowsContainer = funcPanel.add("group");
     funcRowsContainer.orientation = "column";
     funcRowsContainer.alignment = ["fill", "top"];
@@ -603,23 +602,72 @@ function createMainUI(parentPanel) {
     funcRowsContainer.margins = [0, 0, 0, 0];
 
     var funcButtons = [];
+    var _rowWidths = [];
 
-    function getCurrentRow() {
-        var rowIdx = Math.floor(funcButtons.length / BTNS_PER_ROW);
+    var FUNC_ROW_MARGIN = 6;
+    var FUNC_ROW_SPACING = 6;
+    var ICON_BTN_WIDTH = 32;
+
+    function getFuncPanelWidth() {
+        var w = 0;
+        if (funcPanel.size && funcPanel.size.width > 0) w = funcPanel.size.width;
+        if (!w || w <= 0) w = funcPanel.preferredSize.width;
+        if (!w || w <= 0) w = 368;
+        return w;
+    }
+
+    function getBtnWidth(btn) {
+        if (btn.type === "group") return ICON_BTN_WIDTH;
+        if (btn.type === "button") {
+            var w = (btn.text ? btn.text.length : 0) * 12 + 20;
+            return Math.max(60, w);
+        }
+        return ICON_BTN_WIDTH;
+    }
+
+    function computeRowCount() {
+        var available = getFuncPanelWidth() - FUNC_ROW_MARGIN * 2;
+        var rows = 1;
+        var curW = 0;
+        for (var i = 0; i < funcButtons.length; i++) {
+            var w = getBtnWidth(funcButtons[i]);
+            if (curW > 0 && curW + FUNC_ROW_SPACING + w > available) {
+                rows++;
+                curW = 0;
+            }
+            curW += (curW > 0 ? FUNC_ROW_SPACING : 0) + w;
+        }
+        return rows;
+    }
+
+    function getCurrentRow(idealW) {
+        var available = getFuncPanelWidth() - FUNC_ROW_MARGIN * 2;
+        var rowIdx = -1;
+        for (var i = 0; i < _rowWidths.length; i++) {
+            if (_rowWidths[i] === 0 || _rowWidths[i] + FUNC_ROW_SPACING + idealW <= available) {
+                rowIdx = i;
+                break;
+            }
+        }
+        if (rowIdx < 0) rowIdx = _rowWidths.length;
         while (funcRowsContainer.children.length <= rowIdx) {
             var row = funcRowsContainer.add("group");
             row.orientation = "row";
             row.alignment = ["fill", "top"];
             row.alignChildren = ["fill", "center"];
-            row.spacing = 6;
+            row.spacing = FUNC_ROW_SPACING;
             row.margins = [0, 0, 0, 0];
+            _rowWidths.push(0);
         }
+        _rowWidths[rowIdx] += (_rowWidths[rowIdx] > 0 ? FUNC_ROW_SPACING : 0) + idealW;
         return funcRowsContainer.children[rowIdx];
     }
 
     function addFuncButton(label, iconKey, tip) {
-        var row = getCurrentRow();
-        if (iconKey && typeof ICON_DATA !== 'undefined' && ICON_DATA[iconKey]) {
+        var useIcon = !!(iconKey && typeof ICON_DATA !== 'undefined' && ICON_DATA[iconKey]);
+        var idealW = useIcon ? ICON_BTN_WIDTH : Math.max(60, (label ? label.length : 0) * 12 + 20);
+        var row = getCurrentRow(idealW);
+        if (useIcon) {
             try {
                 var group = row.add("group");
                 group.orientation = "column";
@@ -669,6 +717,16 @@ function createMainUI(parentPanel) {
                 }
             }
             row.layout.layout(true);
+        }
+    }
+
+    function handleFuncResize() {
+        if (funcButtons.length === 0) return;
+        var rows = computeRowCount();
+        if (rows !== funcRowsContainer.children.length) {
+            updateFuncButtons();
+        } else {
+            relayoutFuncButtons();
         }
     }
 
@@ -852,6 +910,7 @@ function createMainUI(parentPanel) {
                 funcRowsContainer.remove(funcRowsContainer.children[0]);
             }
             funcButtons = [];
+            _rowWidths = [];
             for (var i = 0; i < keys.length; i++) {
                 var creator = FUNC_CREATORS[keys[i]];
                 if (creator) creator();

@@ -353,6 +353,15 @@ btn.onClick = function() {
 - 控件优先级：`iconbutton`（有按钮背景+hover）→ `image`（纯图标）→ `button`（文字 fallback）
 - 外部脚本调用使用 `EXT_SCRIPTS` 配置模式，路径定义在 `01-constants.jsx`
 
+### 功能按钮自适应布局（重要）
+按钮布局**不按固定每行个数**，而是按面板实际宽度 flow 排布（`06-main-ui.jsx`）：
+- 每个按钮的固有宽度：图标组 = `ICON_BTN_WIDTH`(32)，文字按钮 = `max(60, label.length*12+20)`
+- `getCurrentRow(idealW)`：创建按钮时按当前面板宽度 first-fit 分派到行（`_rowWidths` 记录每行已占宽度）
+- `computeRowCount()`：按当前宽度重新估算需要几行
+- 窗口 `onResize` → `handleFuncResize()`：行数变化时调用 `updateFuncButtons()` 整体重建（ScriptUI 控件无法跨容器移动，只能重建），行数不变时仅 `relayoutFuncButtons()` 均分宽度
+- `updateFuncButtons()` 重建前必须重置 `_rowWidths = []`，否则分派错乱
+- 面板宽度取值：`funcPanel.size.width`（布局后真实值）→ `preferredSize.width` → 兜底 368
+
 ### 重命名项目文件用 save(newFile) + remove(oldFile)
 AE 没有原生"重命名项目"API。`File.rename()` 在 AE 打开项目时不更新 `app.project.file`，后续 Ctrl+S 会写到不存在的旧路径。
 
