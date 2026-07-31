@@ -146,6 +146,7 @@ node -e "const fs=require('fs'); new Function(fs.readFileSync('dist/WorkflowAssi
 - 在项目目录旁创建 `{项目名}文件夹/`，复制 `源文件/` 和 `输出/` 进去
 - 再整体推到网络路径
 - 勋章/头像框/挂件/礼物/礼物墙 等需要团队共享的项目使用（礼物墙与礼物同目标路径）
+- 同步三步（收集/推送/清理）每步执行完必须 `alert()` 弹窗通知执行结果——不管全量执行（`executeAllSync`）还是 Ctrl+单击单步（`executeSyncStep`），走同一函数自动生效
 
 ---
 
@@ -408,6 +409,27 @@ var bgFile = new File(getPresetResourcePath("bg.png"));
 3. 没有则从预设目录复制到项目目录
 4. **文件复制操作放在 undo group 外部**，只有导入+图层操作在 undo group 内
 5. 这样撤回不会删除已存在的资源文件，下次执行也无需重新复制
+
+### 渲染序列去重（`importSequenceToComp`）
+重复渲染同一个合成会堆积重复素材和图层（`xxx_序列`、`xxx_序列_1`… 和多个渲染图层）。`importSequenceToComp()`（`05a-render-engine.jsx`）在导入前必须清理：
+
+```javascript
+// 先移除旧的导入图层（合成内叫 `合成名_渲染`）
+for (var li = 1; li <= comp.layers.length; li++) {
+    var lyr = comp.layer(li);
+    if (lyr && lyr.name === layerName) { try { lyr.remove(); } catch(e) {} break; }
+}
+// 再移除旧素材项（项目面板叫 `合成名_序列`）
+for (var i = 1; i <= app.project.items.length; i++) {
+    var item = app.project.items[i];
+    if (item && item.name === footageName) { try { item.remove(); } catch(e) {} break; }
+}
+```
+
+- 图层名 = `合成名_渲染`，素材名 = `合成名_序列`，两者约定固定
+- 清理顺序：先图层后素材（素材被图层引用时 remove 会失败）
+- `renderCompToSequence()` 渲染前清空输出目录旧帧（`outDir.getFiles("*")` 逐个 remove）
+- 每次 import 前先移除旧的图层和素材，确保重复执行结果一致
 
 ### 第二行功能按钮（`addIconButton2`）
 `addIconButton2` 与 `addFuncButton` 的区别：
