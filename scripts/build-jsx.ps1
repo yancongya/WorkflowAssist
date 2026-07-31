@@ -53,6 +53,9 @@ if (Test-Path -LiteralPath $sortDir) {
           if ($req.size -and ($req.size.Count -ne 2 -or $req.size[0] -notmatch '^\d+$' -or $req.size[1] -notmatch '^\d+$')) {
             $errors += "  required 项 size 应为 [宽, 高]"
           }
+          if ($req.maxSize -and $req.maxSize -notmatch '^\d+(\.\d+)?\s*(b|kb|mb|gb)?$') {
+            $errors += "  required 项 maxSize 应为数字或 '500kb'/'5mb' 格式"
+          }
         }
       }
       if ($config.rename) {

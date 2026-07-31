@@ -3,7 +3,7 @@
   "required": [
     { "name": "animated.pag", "fallback": "animated_bmp.pag" },
     { "name": "banner.pag" },
-    { "regex": "\\.png$", "label": "PNG 图片（高光图）" },
+    { "regex": "\\.png$", "label": "PNG 图片（高光图）", "maxSize": "500kb" },
     { "regex": "\\.svga$", "label": "SVGA 文件" }
   ],
   "rename": [

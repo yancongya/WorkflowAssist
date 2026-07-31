@@ -2823,6 +2823,95 @@ function createMainUI(parentPanel) {
             return matched;
         }
 
+        function parseMaxSize(maxSize) {
+            if (!maxSize) return null;
+            if (typeof maxSize === "number") return maxSize;
+            var s = String(maxSize).toLowerCase().replace(/\s/g, "");
+            var m = s.match(/^(\d+(?:\.\d+)?)(b|kb|mb|gb)?$/);
+            if (!m) return null;
+            var val = parseFloat(m[1]);
+            var unit = m[2] || "b";
+            if (unit === "kb") return val * 1024;
+            if (unit === "mb") return val * 1024 * 1024;
+            if (unit === "gb") return val * 1024 * 1024 * 1024;
+            return val;
+        }
+
+        function fmtMaxSize(maxSize) {
+            var bytes = parseMaxSize(maxSize);
+            if (!bytes) return "";
+            if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)) + "MB";
+            if (bytes >= 1024) return (bytes / 1024) + "KB";
+            return bytes + "B";
+        }
+
+        function getKeepSourceFiles(sortConfig) {
+            if (sortConfig.keepSourceFiles !== undefined) return !!sortConfig.keepSourceFiles;
+            if (sortConfig.zip && sortConfig.zip.keepOriginals !== undefined) return !!sortConfig.zip.keepOriginals;
+            return false;
+        }
+
+        function matchRequiredRule(req, fileName, filePath) {
+            var matched = false;
+            if (req.name && fileName === req.name) matched = true;
+            if (!matched && req.regex) {
+                if (!isExcluded(fileName, req.excludeName, req.excludeRegex)) {
+                    var re = new RegExp(req.regex, "i");
+                    if (re.test(fileName)) matched = true;
+                }
+            }
+            if (!matched && req.fallback && fileName === req.fallback) matched = true;
+            if (matched && req.size) {
+                var dims = getFileDimensions(filePath);
+                if (!dims || dims[0] !== req.size[0] || dims[1] !== req.size[1]) matched = false;
+            }
+            return matched;
+        }
+
+        function checkRequiredEntry(req, files) {
+            var result = { found: false, matchCount: 0, oversize: [] };
+            var maxBytes = parseMaxSize(req.maxSize);
+            if (req.count && req.regex) {
+                var re = new RegExp(req.regex, "i");
+                for (var si = 0; si < files.length; si++) {
+                    var sName = decodeUrlString(files[si].name);
+                    if (isExcluded(sName, req.excludeName, req.excludeRegex)) continue;
+                    if (!re.test(sName)) continue;
+                    result.matchCount++;
+                    if (maxBytes && files[si].length > maxBytes) {
+                        result.oversize.push(sName);
+                    }
+                }
+                result.found = (result.matchCount >= req.count);
+            } else {
+                for (var si = 0; si < files.length; si++) {
+                    var sName = decodeUrlString(files[si].name);
+                    if (!matchRequiredRule(req, sName, files[si].fsName)) continue;
+                    result.matchCount++;
+                    if (maxBytes && files[si].length > maxBytes) {
+                        result.oversize.push(sName);
+                    } else {
+                        result.found = true;
+                    }
+                }
+                if (!result.found && req.size) {
+                    for (var si = 0; si < files.length; si++) {
+                        var dims = getPngDimensions(files[si].fsName);
+                        if (dims && dims[0] === req.size[0] && dims[1] === req.size[1]) {
+                            var dimName = decodeUrlString(files[si].name);
+                            result.matchCount++;
+                            if (maxBytes && files[si].length > maxBytes) {
+                                result.oversize.push(dimName);
+                            } else {
+                                result.found = true;
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
         var dialog = new Window("dialog", "输出文件整理");
         dialog.orientation = "column";
         dialog.alignChildren = "left";
@@ -2847,6 +2936,7 @@ function createMainUI(parentPanel) {
             var label = r.label || r.name || r.regex || "尺寸 " + r.size;
             if (r.count) label += " x" + r.count;
             if (r.excludeName) label += " (排除: " + fmtExclude(r.excludeName) + ")";
+            if (r.maxSize) label += " (限制 <" + fmtMaxSize(r.maxSize) + ")";
             infoLines.push("  " + (ri+1) + ". " + label);
         }
         infoLines.push("重命名规则: " + sortConfig.rename.length + " 条");
@@ -2905,57 +2995,24 @@ function createMainUI(parentPanel) {
 
                 // --- Check required files ---
                 var missing = [];
+                var oversize = [];
                 for (var ri = 0; ri < sortConfig.required.length; ri++) {
                     var req = sortConfig.required[ri];
-                    var found = false;
-                    if (req.count && req.regex) {
-                        var matchCount = 0;
-                        for (var si = 0; si < files.length; si++) {
-                            var sName2 = decodeUrlString(files[si].name);
-                            if (isExcluded(sName2, req.excludeName, req.excludeRegex)) continue;
-                            var re = new RegExp(req.regex, "i");
-                            if (re.test(sName2)) matchCount++;
-                        }
-                        found = (matchCount >= req.count);
-                    } else {
-                        for (var si = 0; si < files.length; si++) {
-                            var sName = decodeUrlString(files[si].name);
-                            var matched = false;
-                            if (req.name && sName === req.name) matched = true;
-                            if (!matched && req.regex) {
-                                if (!isExcluded(sName, req.excludeName, req.excludeRegex)) {
-                                    var re = new RegExp(req.regex, "i");
-                                    if (re.test(sName)) matched = true;
-                                }
-                            }
-                            if (!matched && req.fallback && sName === req.fallback) matched = true;
-                            if (matched && req.size) {
-                                var dims = getPngDimensions(files[si].fsName);
-                                if (!dims || dims[0] !== req.size[0] || dims[1] !== req.size[1]) {
-                                    matched = false;
-                                    continue;
-                                }
-                            }
-                            if (matched) { found = true; break; }
-                        }
-                        if (!found && req.size) {
-                            for (var si = 0; si < files.length; si++) {
-                                var dims = getPngDimensions(files[si].fsName);
-                                if (dims && dims[0] === req.size[0] && dims[1] === req.size[1]) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (!found) {
+                    var res = checkRequiredEntry(req, files);
+                    if (!res.found) {
                         var label = req.label || req.name || req.regex;
                         if (req.count) label = "MP4 文件（需要 " + req.count + " 个）";
                         missing.push(label);
                     }
+                    for (var oi = 0; oi < res.oversize.length; oi++) {
+                        oversize.push(res.oversize[oi] + "（限制 " + fmtMaxSize(req.maxSize) + "）");
+                    }
                 }
-                if (missing.length > 0) {
-                    alert("输出文件夹缺少以下文件：\n- " + missing.join("\n- ") + "\n\n请先执行其他步骤生成所需文件。");
+                if (missing.length > 0 || oversize.length > 0) {
+                    var msg = "";
+                    if (missing.length > 0) msg += "输出文件夹缺少以下文件：\n- " + missing.join("\n- ") + "\n";
+                    if (oversize.length > 0) msg += "以下文件超过大小限制：\n- " + oversize.join("\n- ") + "\n";
+                    alert(msg + "\n请先处理后再执行整理。");
                     return;
                 }
 
@@ -3049,7 +3106,7 @@ function createMainUI(parentPanel) {
                     batContent += 'powershell -NoProfile -Command "& {';
                     batContent += 'Compress-Archive -Path ' + zipFiles.join(',') + ' ';
                     batContent += '-DestinationPath \'' + zipName + '\'}"\r\n';
-                    if (!sortConfig.zip.keepOriginals) {
+                    if (!getKeepSourceFiles(sortConfig)) {
                         batContent += 'if %errorlevel%==0 del ' + delFiles.join(' ') + '\r\n';
                     }
                     batContent += 'timeout /t 1 /nobreak >nul\r\n';
@@ -3143,46 +3200,18 @@ function createMainUI(parentPanel) {
                 var allFound = true;
                 for (var ri = 0; ri < sortConfig.required.length; ri++) {
                     var req = sortConfig.required[ri];
-                    var found = false;
-                    if (req.count && req.regex) {
-                        var matchCount = 0;
-                        for (var si = 0; si < files.length; si++) {
-                            var sName = decodeUrlString(files[si].name);
-                            if (isExcluded(sName, req.excludeName, req.excludeRegex)) continue;
-                            var re = new RegExp(req.regex, "i");
-                            if (re.test(sName)) matchCount++;
-                        }
-                        found = (matchCount >= req.count);
-                        var lb = req.label || req.regex;
-                        logText.text += "  " + (found ? "\u2713" : "\u2717") + " " + lb + " (需要 " + req.count + " 个, 找到 " + matchCount + " 个)" + (req.excludeName ? ", 排除: " + fmtExclude(req.excludeName) : "") + "\n";
-                    } else {
-                        for (var si = 0; si < files.length; si++) {
-                            var sName = decodeUrlString(files[si].name);
-                            var matched = false;
-                            if (req.name && sName === req.name) matched = true;
-                            if (!matched && req.regex) {
-                                if (!isExcluded(sName, req.excludeName, req.excludeRegex)) {
-                                    var re = new RegExp(req.regex, "i");
-                                    if (re.test(sName)) matched = true;
-                                }
-                            }
-                            if (!matched && req.fallback && sName === req.fallback) matched = true;
-                            if (matched && req.size) {
-                                var dims = getPngDimensions(files[si].fsName);
-                                if (!dims || dims[0] !== req.size[0] || dims[1] !== req.size[1]) matched = false;
-                            }
-                            if (matched) { found = true; break; }
-                        }
-                        if (!found && req.size) {
-                            for (var si = 0; si < files.length; si++) {
-                                var dims = getPngDimensions(files[si].fsName);
-                                if (dims && dims[0] === req.size[0] && dims[1] === req.size[1]) { found = true; break; }
-                            }
-                        }
-                        var lb = req.label || req.name || req.regex || "尺寸 " + req.size;
-                        logText.text += "  " + (found ? "\u2713" : "\u2717") + " " + lb + (req.excludeName ? " (排除: " + fmtExclude(req.excludeName) + ")" : "") + "\n";
+                    var res = checkRequiredEntry(req, files);
+                    var found = res.found;
+                    var lb = req.label || req.name || req.regex || "尺寸 " + (req.size ? req.size.join("\u00D7") : "");
+                    var logLine = "  " + (found ? "\u2713" : "\u2717") + " " + lb;
+                    if (req.count) logLine += " (需要 " + req.count + " 个, 找到 " + res.matchCount + " 个)";
+                    if (req.excludeName) logLine += " (排除: " + fmtExclude(req.excludeName) + ")";
+                    if (req.maxSize) logLine += " [限制 <" + fmtMaxSize(req.maxSize) + "]";
+                    if (res.oversize.length > 0) {
+                        logLine += "  超标: " + res.oversize.join(", ");
                     }
-                    if (!found) allFound = false;
+                    logText.text += logLine + "\n";
+                    if (!found || res.oversize.length > 0) allFound = false;
                 }
 
                 logText.text += "\n--- 重命名预览 ---\n";
@@ -3225,7 +3254,7 @@ function createMainUI(parentPanel) {
                         var zfFile = new File(outputFolder.fsName + "/" + zfName);
                         logText.text += "    " + (zfFile.exists ? "\u2713" : "\u2717") + " " + zfName + "\n";
                     }
-                    logText.text += "  打包后" + (sortConfig.zip.keepOriginals ? "保留源文件（不删除）" : "删除源文件") + "\n";
+                    logText.text += "  打包后" + (getKeepSourceFiles(sortConfig) ? "保留源文件（不删除）" : "删除源文件") + "\n";
                 } else {
                     logText.text += "  （无打包配置）\n";
                 }
@@ -3240,7 +3269,7 @@ function createMainUI(parentPanel) {
                 }
 
                 logText.text += "========== 检查完成 ==========\n";
-                logText.text += (allFound ? "结论: 所有必需文件已就绪，可执行整理" : "结论: 缺失必需文件，请先补充后再执行整理") + "\n";
+                logText.text += (allFound ? "结论: 所有必需文件已就绪，可执行整理" : "结论: 存在缺失或超标文件，请先处理后再执行整理") + "\n";
             } catch(e) {
                 logText.text += "检查出错: " + (e.message || e.toString()) + "\n";
             }

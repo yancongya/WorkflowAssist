@@ -162,6 +162,7 @@ node -e "const fs=require('fs'); new Function(fs.readFileSync('dist/WorkflowAssi
 | `required` | array | yes | 所需文件列表，全部存在才能执行整理 |
 | `rename` | array | yes | 重命名规则列表 |
 | `zip` | object | no | 打包配置（PAG 文件打包为 zip） |
+| `keepSourceFiles` | boolean | no | **顶层变量**。`true` 时打包后不删除源文件（默认删除）。由 `getKeepSourceFiles()`（06-main-ui.jsx）统一读取，兼容旧的 `zip.keepOriginals`（已废弃，优先读顶层） |
 | `clipboard` | array | no | 完成后复制到剪贴板的文件列表（支持 `{prefix}` 模板） |
 | `subfolder` | string | no | 在 `输出/` 下进一步定位子文件夹，值是**正则表达式**（如 `"礼物墙"`）。配合 `findGiftWallFolder(dir, keyword)` 使用，keyword 即此字段值；匹配失败回退 `indexOf`。无此字段的预设直接读 `输出/` 根目录 |
 
@@ -175,6 +176,7 @@ node -e "const fs=require('fs'); new Function(fs.readFileSync('dist/WorkflowAssi
 | `label` | string | 缺失时显示的人类可读名称（优先于 name/regex） |
 | `size` | [number, number] | 可选。PNG 尺寸校验 `[宽, 高]`。同时作为**尺寸兜底匹配**——名字没对上但尺寸对的 PNG 也算匹配 |
 | `count` | number | 可选。需要匹配的数量（配合 `regex` 使用，如 `count: 2` 要求至少 2 个文件匹配 regex） |
+| `maxSize` | string / number | 可选。文件大小上限。字符串支持 `"500kb"`/`"5mb"`/`"1gb"`（大小写不敏感、可带空格），数字视为字节数。匹配的文件超过上限时检查/执行都会停止并提示。由 `parseMaxSize()`/`fmtMaxSize()`（06-main-ui.jsx）解析显示 |
 | `excludeName` | string / string[] | 可选。精确排除文件名（单字符串或数组） |
 | `excludeRegex` | string | 可选。正则排除文件名（如 `"预览"` 排除所有带"预览"的文件） |
 
@@ -196,7 +198,7 @@ node -e "const fs=require('fs'); new Function(fs.readFileSync('dist/WorkflowAssi
 |-------|------|----------|-------------|
 | `files` | string[] | yes | 要打包的文件列表（支持 `{prefix}` 模板） |
 | `name` | string | yes | ZIP 文件名（支持 `{prefix}` 模板） |
-| `keepOriginals` | boolean | no | `true` 时打包后不删除源文件（默认删除） |
+| `keepOriginals` | boolean | no | **已废弃**。改用顶层 `keepSourceFiles`。仅当顶层未定义时由 `getKeepSourceFiles()` 读取 |
 
 ### 匹配优先级
 
@@ -592,6 +594,8 @@ node -e "const fs=require('fs'); new Function(fs.readFileSync('dist/WorkflowAssi
 新增 sortConfig 功能时逐一核对：
 
 - [ ] `matchRenameRule()` 中实现了新逻辑，三处调用点自动生效
+- [ ] required 检查用 `checkRequiredEntry()` 统一（检查/执行两处共用），不要各自实现
+- [ ] `maxSize` 用 `parseMaxSize()` 解析（支持 `"500kb"`/`"5mb"`/数字=字节），不要直接比较字符串
 - [ ] `if (rule.size)` 而不是 `if (!matched && rule.size)`（否则 size 过滤在 regex 匹配后不执行）
 - [ ] size 作为 standalone 匹配时也检查 `isExcluded`（预览视频和主效果同分辨率时容易误匹配）
 - [ ] rename 后 `processedNames` 同时标记旧名和新名（`File.name` 在 rename 后自动更新）
