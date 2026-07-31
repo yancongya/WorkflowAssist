@@ -3705,9 +3705,11 @@ function createMainUI(parentPanel) {
 
             if (copied.length === 0) {
                 syncStatusText.text = "状态: 收集失败 - 未找到源文件或输出文件夹";
+                alert("收集失败：未找到源文件或输出文件夹\n请确认项目目录下存在这两个文件夹。");
                 return false;
             }
             syncStatusText.text = "状态: 收集完成 - " + copied.join("、");
+            alert("收集完成：已复制 " + copied.join("、") + "\n到: " + targetFolder.fsName);
             return true;
         }
 
@@ -3795,6 +3797,7 @@ function createMainUI(parentPanel) {
             }
 
             syncStatusText.text = "状态: 清理完成 - 移除了 " + count + " 项到 _回收站";
+            alert("清理完成：已移动 " + count + " 项到 _回收站\n文件夹: " + trashBatch.fsName);
             return true;
         }
 
