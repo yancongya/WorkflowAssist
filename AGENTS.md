@@ -163,7 +163,7 @@ node -e "const fs=require('fs'); new Function(fs.readFileSync('dist/WorkflowAssi
 | `rename` | array | yes | 重命名规则列表 |
 | `zip` | object | no | 打包配置（PAG 文件打包为 zip） |
 | `clipboard` | array | no | 完成后复制到剪贴板的文件列表（支持 `{prefix}` 模板） |
-| `subfolder` | string | no | 在 `输出/` 下进一步定位子文件夹（如 `"礼物墙"`）。配合 `findGiftWallFolder()` 使用 |
+| `subfolder` | string | no | 在 `输出/` 下进一步定位子文件夹，值是**正则表达式**（如 `"礼物墙"`）。配合 `findGiftWallFolder(dir, keyword)` 使用，keyword 即此字段值；匹配失败回退 `indexOf`。无此字段的预设直接读 `输出/` 根目录 |
 
 ### required 条目字段
 
@@ -355,7 +355,7 @@ btn.onClick = function() {
 
 ### 功能按钮自适应布局（重要）
 按钮布局**不按固定每行个数**，而是按面板实际宽度 flow 排布（`06-main-ui.jsx`）：
-- 每个按钮的固有宽度：图标组 = `ICON_BTN_WIDTH`(32)，文字按钮 = `max(60, label.length*12+20)`
+- 每个按钮的固有宽度：图标组 = `ICON_BTN_WIDTH`(32)，文字按钮 = `max(60, label.length*12+20)`；图标组高度 `[32, 30]`、图标 `[18, 18]`（紧凑版）
 - `getCurrentRow(idealW)`：创建按钮时按当前面板宽度 first-fit 分派到行（`_rowWidths` 记录每行已占宽度）
 - `computeRowCount()`：按当前宽度重新估算需要几行
 - 窗口 `onResize` → `handleFuncResize()`：行数变化时调用 `updateFuncButtons()` 整体重建（ScriptUI 控件无法跨容器移动，只能重建），行数不变时仅 `relayoutFuncButtons()` 均分宽度
@@ -376,6 +376,19 @@ if (oldFile.exists) {
 ```
 
 参考实现：`06-main-ui.jsx` 的 `renameProject()` 函数。
+
+### Tab 步骤区可滚动高度约定
+三个 Tab（整理/输出/同步）的步骤区都包在 `{scrollable: true}` 的滚动面板里（`stepScroll`/`outputScroll`/`syncScroll`），限制最大可见高度：
+- `STEP_SCROLL_MAX_H = 170`（`06-main-ui.jsx`）
+- 高度按条目数动态计算：`setScrollPanelHeight(scrollPanel, itemCount, itemHeight, itemSpacing, extraPad)`，取 `min(内容高度, 170)`，条目少时自动变矮、条目多时出现内部滚动条
+- 外层步骤面板（`stepPreviewPanel`/`outputStepPanel`/`syncPanel`）与 `tabContent` 全部用 `["fill", "top"]` 对齐 + `maximumSize.height` 硬上限（220/220/240），防止被窗口高度拉伸出大块空白
+- 新增/修改步骤区刷新函数时，所有路径（含 early-return）都要调用 `setScrollPanelHeight()`，否则高度不会更新
+
+### 窗口缩放右侧裁切约定
+窗口 `onResizing`/`onResize` 处理（`06-main-ui.jsx`）固定顺序：`layout.resize()` → `handleFuncResize()` → `relayoutOutputRows()` → `layout.layout(true)`。
+- `getFuncPanelWidth()` 取值顺序：`funcPanel.size.width` → `win.size.width - 12`（缩放中实时值，防按钮按旧宽度换行导致右侧裁切）→ `preferredSize.width` → 兜底 368
+- 输出 Tab 行内宽度用 `relayoutOutputRows()` 动态分配：中间 label 吸收宽度变化，固定项（渲染 45 / 导入 55 / 状态 60）永远不裁切
+- `refreshOutputUI()` 和 `showOutputTab()` 布局后都要调用 `relayoutOutputRows()`，否则 label 宽度不更新
 
 ### 资源文件约定
 `config/` 目录不仅存放 JSON 预设，也存放资源文件（如图片）。通过 `getPresetResourcePath(filename)`（`03-config-store.jsx`）解析运行时路径：

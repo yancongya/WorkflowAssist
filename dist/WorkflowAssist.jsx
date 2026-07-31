@@ -350,12 +350,33 @@ function importSequenceToComp(comp, outDir) {
         return null;
     }
 
+    var footageName = comp.name + "_序列";
+    var layerName = comp.name + "_渲染";
+
+    // 先移除旧的导入图层，再移除旧素材项，避免项目面板堆积重复素材
+    for (var li = 1; li <= comp.layers.length; li++) {
+        var lyr = comp.layer(li);
+        if (lyr && lyr.name === layerName) {
+            try { lyr.remove(); } catch(e) {}
+            break;
+        }
+    }
+    for (var i = 1; i <= app.project.items.length; i++) {
+        var item = app.project.items[i];
+        if (item && item.name === footageName) {
+            try { item.remove(); } catch(e) {
+                logMessage("移除旧素材失败: " + e.toString(), LOG_LEVEL.WARNING, "RENDER");
+            }
+            break;
+        }
+    }
+
     var importOpt = new ImportOptions(firstFile);
     importOpt.sequence = true;
     importOpt.forceAlphabetical = true;
 
     var footage = app.project.importFile(importOpt);
-    footage.name = comp.name + "_序列";
+    footage.name = footageName;
 
     var targetFrameRate = comp.frameRate;
     var actualRate = footage.frameRate;
@@ -372,7 +393,7 @@ function importSequenceToComp(comp, outDir) {
 
     var layer = comp.layers.add(footage);
     layer.solo = true;
-    layer.name = comp.name + "_渲染";
+    layer.name = layerName;
     layer.moveToBeginning();
 
     logMessage("渲染结果已导入: " + comp.name + " (" + targetFrameRate + "fps)", LOG_LEVEL.NORMAL, "RENDER");
@@ -515,11 +536,19 @@ function getMarkerTime(comp, markerName) {
     return -1;
 }
 
-function findGiftWallFolder(projectDir) {
+function findGiftWallFolder(projectDir, keyword) {
+    if (!keyword) keyword = "礼物墙";
     var outputDir = new Folder(projectDir + "/输出");
     if (!outputDir.exists) {
         alert("未找到'输出'文件夹，请先保存项目。");
         return null;
+    }
+
+    var re = null;
+    try {
+        re = new RegExp(keyword);
+    } catch(e) {
+        re = null;
     }
 
     var items = outputDir.getFiles();
@@ -527,23 +556,27 @@ function findGiftWallFolder(projectDir) {
     for (var i = 0; i < items.length; i++) {
         if (items[i] instanceof Folder) {
             var name = decodeUrlString(items[i].name);
-            if (name.indexOf("礼物墙") >= 0) {
-                giftDirs.push(items[i]);
+            var matched = false;
+            if (re) {
+                matched = re.test(name);
+            } else {
+                matched = name.indexOf(keyword) >= 0;
             }
+            if (matched) giftDirs.push(items[i]);
         }
     }
 
     if (giftDirs.length === 0) {
-        alert("输出文件夹中未找到包含'礼物墙'的文件夹。\n请在输出目录下创建对应文件夹。");
+        alert("输出文件夹中未找到匹配 '" + keyword + "' 的文件夹。\n请在输出目录下创建对应文件夹。");
         return null;
     }
 
     if (giftDirs.length === 1) return giftDirs[0];
 
-    var dialog = new Window("dialog", "选择礼物墙文件夹");
+    var dialog = new Window("dialog", "选择" + keyword + "文件夹");
     dialog.orientation = "column";
     dialog.alignChildren = "left";
-    dialog.add("statictext", undefined, "找到多个包含'礼物墙'的文件夹，请选择:");
+    dialog.add("statictext", undefined, "找到多个匹配 '" + keyword + "' 的文件夹，请选择:");
 
     var dd = dialog.add("dropdownlist", undefined, []);
     for (var j = 0; j < giftDirs.length; j++) {
@@ -919,12 +952,14 @@ function createMainUI(parentPanel) {
     }
 
     win.preferredSize.width = 380;
-    win.preferredSize.height = 420;
+    win.preferredSize.height = 380;
     win.minimumSize = [320, 300];
 
     win.onResizing = win.onResize = function() {
         try { this.layout.resize(); } catch(e) {}
         try { handleFuncResize(); } catch(e) {}
+        try { relayoutOutputRows(); } catch(e) {}
+        try { this.layout.layout(true); } catch(e) {}
     };
 
     win.parentPanel = parentPanel;
@@ -943,6 +978,21 @@ function createMainUI(parentPanel) {
         while (container.children.length > 0) {
             container.remove(container.children[0]);
         }
+    }
+
+    var STEP_SCROLL_MAX_H = 170;
+
+    function setScrollPanelHeight(scrollPanel, itemCount, itemHeight, itemSpacing, extraPad) {
+        if (!scrollPanel) return;
+        if (itemCount <= 0) {
+            scrollPanel.preferredSize.height = 30;
+            scrollPanel.maximumSize.height = STEP_SCROLL_MAX_H;
+            return;
+        }
+        var h = itemCount * itemHeight + Math.max(0, itemCount - 1) * itemSpacing + (extraPad || 4);
+        h = Math.min(STEP_SCROLL_MAX_H, h);
+        scrollPanel.preferredSize.height = h;
+        scrollPanel.maximumSize.height = STEP_SCROLL_MAX_H;
     }
 
     // ================== 当前合成信息（hover显示） ==================
@@ -1101,14 +1151,14 @@ function createMainUI(parentPanel) {
     // ================== 内容容器 ==================
     var tabContent = win.add("panel");
     tabContent.orientation = "stack";
-    tabContent.alignment = ["fill", "fill"];
-    tabContent.minimumSize.height = 160;
+    tabContent.alignment = ["fill", "top"];
+    tabContent.minimumSize.height = 100;
 
     // --- 整理面板 ---
     var organizeGroup = tabContent.add("group");
     organizeGroup.orientation = "column";
     organizeGroup.alignChildren = ["fill", "top"];
-    organizeGroup.alignment = ["fill", "fill"];
+    organizeGroup.alignment = ["fill", "top"];
     organizeGroup.spacing = 4;
     organizeGroup.margins = 6;
 
@@ -1116,12 +1166,22 @@ function createMainUI(parentPanel) {
     var stepPreviewPanel = organizeGroup.add("panel");
     stepPreviewPanel.orientation = "column";
     stepPreviewPanel.alignChildren = ["fill", "top"];
-    stepPreviewPanel.alignment = ["fill", "fill"];
+    stepPreviewPanel.alignment = ["fill", "top"];
     stepPreviewPanel.spacing = 3;
     stepPreviewPanel.margins = 4;
     stepPreviewPanel.text = "工作流步骤";
+    stepPreviewPanel.maximumSize.height = 220;
 
-    var stepContainer = stepPreviewPanel.add("group");
+    var stepScroll = stepPreviewPanel.add("panel", undefined, undefined, {scrollable: true});
+    stepScroll.orientation = "column";
+    stepScroll.alignChildren = ["fill", "top"];
+    stepScroll.alignment = ["fill", "top"];
+    stepScroll.spacing = 2;
+    stepScroll.margins = 0;
+    stepScroll.preferredSize.height = 100;
+    stepScroll.maximumSize.height = STEP_SCROLL_MAX_H;
+
+    var stepContainer = stepScroll.add("group");
     stepContainer.orientation = "column";
     stepContainer.alignChildren = ["fill", "top"];
     stepContainer.alignment = ["fill", "top"];
@@ -1129,7 +1189,7 @@ function createMainUI(parentPanel) {
     stepContainer.margins = [0, 0, 0, 0];
 
     var stepTipLine = stepPreviewPanel.add("statictext", undefined, "点击切换 | Ctrl+点击单步执行");
-    stepTipLine.alignment = ["center", "bottom"];
+    stepTipLine.alignment = ["center", "top"];
     stepTipLine.margins = [0, 2, 0, 0];
 
     var stepButtons = [];
@@ -1138,8 +1198,8 @@ function createMainUI(parentPanel) {
     // --- 输出面板 ---
     var outputGroup = tabContent.add("group");
     outputGroup.orientation = "column";
-    outputGroup.alignChildren = ["fill", "fill"];
-    outputGroup.alignment = ["fill", "fill"];
+    outputGroup.alignChildren = ["fill", "top"];
+    outputGroup.alignment = ["fill", "top"];
     outputGroup.spacing = 4;
     outputGroup.margins = 6;
     outputGroup.visible = false;
@@ -1147,12 +1207,22 @@ function createMainUI(parentPanel) {
     var outputStepPanel = outputGroup.add("panel");
     outputStepPanel.orientation = "column";
     outputStepPanel.alignChildren = ["fill", "top"];
-    outputStepPanel.alignment = ["fill", "fill"];
+    outputStepPanel.alignment = ["fill", "top"];
     outputStepPanel.spacing = 3;
     outputStepPanel.margins = 4;
     outputStepPanel.text = "输出步骤";
+    outputStepPanel.maximumSize.height = 220;
 
-    var outputStepContainer = outputStepPanel.add("group");
+    var outputScroll = outputStepPanel.add("panel", undefined, undefined, {scrollable: true});
+    outputScroll.orientation = "column";
+    outputScroll.alignChildren = ["fill", "top"];
+    outputScroll.alignment = ["fill", "top"];
+    outputScroll.spacing = 2;
+    outputScroll.margins = 0;
+    outputScroll.preferredSize.height = 100;
+    outputScroll.maximumSize.height = STEP_SCROLL_MAX_H;
+
+    var outputStepContainer = outputScroll.add("group");
     outputStepContainer.orientation = "column";
     outputStepContainer.alignChildren = ["fill", "top"];
     outputStepContainer.alignment = ["fill", "top"];
@@ -1173,10 +1243,16 @@ function createMainUI(parentPanel) {
 
         var baseName = nameInput.text || "{基础名称}";
         var presetFile = getSelectedPresetFile();
-        if (!presetFile) return;
+        if (!presetFile) {
+            setScrollPanelHeight(outputScroll, 0, 20, 4, 4);
+            return;
+        }
 
         var presetData = loadPreset(presetFile);
-        if (!presetData || !presetData.steps) return;
+        if (!presetData || !presetData.steps) {
+            setScrollPanelHeight(outputScroll, 0, 20, 4, 4);
+            return;
+        }
 
         for (var i = 0; i < presetData.steps.length; i++) {
             var s = presetData.steps[i];
@@ -1191,20 +1267,20 @@ function createMainUI(parentPanel) {
 
             var chkRender = row.add("checkbox", undefined, "渲染");
             chkRender.value = rc.enabled;
-            chkRender.preferredSize.width = 50;
+            chkRender.preferredSize.width = 45;
             chkRender._stepIdx = i;
 
             var label = row.add("statictext", undefined, "Step " + (i + 1) + ": " + s.name);
-            label.preferredSize.width = 100;
+            label.alignment = ["left", "center"];
 
             var chkImport = row.add("checkbox", undefined, "导入");
             chkImport.value = rc.importBack;
-            chkImport.preferredSize.width = 65;
+            chkImport.preferredSize.width = 55;
             chkImport._stepIdx = i;
 
             var status = row.add("statictext", undefined, "待渲染");
             status.alignment = ["right", "center"];
-            status.preferredSize.width = 80;
+            status.preferredSize.width = 60;
             status.margins = [0, 0, 4, 0];
             setTextColor(status, [0.5, 0.5, 0.5, 1]);
 
@@ -1222,7 +1298,28 @@ function createMainUI(parentPanel) {
             importActiveStates.push(chkImport);
             renderStatusTexts.push(status);
         }
+        setScrollPanelHeight(outputScroll, renderRows.length, 20, 4, 4);
+        relayoutOutputRows();
         outputStepContainer.layout.layout(true);
+    }
+
+    function relayoutOutputRows() {
+        if (!outputStepContainer || renderRows.length === 0) return;
+        var avail = 0;
+        if (outputStepPanel && outputStepPanel.size && outputStepPanel.size.width > 0) {
+            avail = outputStepPanel.size.width - 8;
+        } else if (win.size && win.size.width > 0) {
+            avail = win.size.width - 32;
+        }
+        if (avail <= 0) avail = 340;
+        var labelW = Math.max(40, avail - 45 - 55 - 60 - 4 * 3 - 4);
+        for (var i = 0; i < renderRows.length; i++) {
+            var row = renderRows[i];
+            if (row && row.children && row.children.length > 1) {
+                row.children[1].preferredSize.width = labelW;
+            }
+        }
+        if (outputStepContainer) outputStepContainer.layout.layout(true);
     }
 
     function saveCurrentRenderState(stepIdx) {
@@ -1237,13 +1334,13 @@ function createMainUI(parentPanel) {
     }
 
     // --- 同步面板 ---
-    var syncGroup, syncPanel, syncStepContainer, syncStepButtons, syncStepActiveStates;
+    var syncGroup, syncPanel, syncScroll, syncStepContainer, syncStepButtons, syncStepActiveStates;
     var syncStepTipLine, syncTargetRow, syncTargetLabel, syncTargetInput, syncStatusText;
     try {
         syncGroup = tabContent.add("group");
         syncGroup.orientation = "column";
-        syncGroup.alignChildren = ["fill", "fill"];
-        syncGroup.alignment = ["fill", "fill"];
+        syncGroup.alignChildren = ["fill", "top"];
+        syncGroup.alignment = ["fill", "top"];
         syncGroup.spacing = 4;
         syncGroup.margins = 6;
         syncGroup.visible = false;
@@ -1251,12 +1348,22 @@ function createMainUI(parentPanel) {
         syncPanel = syncGroup.add("panel");
         syncPanel.orientation = "column";
         syncPanel.alignChildren = ["fill", "top"];
-        syncPanel.alignment = ["fill", "fill"];
+        syncPanel.alignment = ["fill", "top"];
         syncPanel.spacing = 3;
         syncPanel.margins = 4;
         syncPanel.text = "同步步骤";
+        syncPanel.maximumSize.height = 240;
 
-        syncStepContainer = syncPanel.add("group");
+        syncScroll = syncPanel.add("panel", undefined, undefined, {scrollable: true});
+        syncScroll.orientation = "column";
+        syncScroll.alignChildren = ["fill", "top"];
+        syncScroll.alignment = ["fill", "top"];
+        syncScroll.spacing = 2;
+        syncScroll.margins = 0;
+        syncScroll.preferredSize.height = 100;
+        syncScroll.maximumSize.height = STEP_SCROLL_MAX_H;
+
+        syncStepContainer = syncScroll.add("group");
         syncStepContainer.orientation = "column";
         syncStepContainer.alignChildren = ["fill", "top"];
         syncStepContainer.alignment = ["fill", "top"];
@@ -1267,7 +1374,7 @@ function createMainUI(parentPanel) {
         syncStepActiveStates = [];
 
         syncStepTipLine = syncPanel.add("statictext", undefined, "点击切换 | Ctrl+点击单步执行");
-        syncStepTipLine.alignment = ["center", "bottom"];
+        syncStepTipLine.alignment = ["center", "top"];
         syncStepTipLine.margins = [0, 2, 0, 0];
 
         syncTargetRow = syncPanel.add("group");
@@ -1307,6 +1414,7 @@ function createMainUI(parentPanel) {
         if (syncGroup) syncGroup.visible = false;
         refreshOutputUI();
         tabContent.layout.layout(true);
+        try { relayoutOutputRows(); } catch(e) {}
     }
 
     function showSyncTab() {
@@ -1492,8 +1600,8 @@ function createMainUI(parentPanel) {
     funcPanel.orientation = "column";
     funcPanel.alignment = ["fill", "top"];
     funcPanel.alignChildren = ["fill", "top"];
-    funcPanel.spacing = 4;
-    funcPanel.margins = 6;
+    funcPanel.spacing = 3;
+    funcPanel.margins = 4;
     funcPanel.text = "功能";
 
     var funcRowsContainer = funcPanel.add("group");
@@ -1506,13 +1614,14 @@ function createMainUI(parentPanel) {
     var funcButtons = [];
     var _rowWidths = [];
 
-    var FUNC_ROW_MARGIN = 6;
+    var FUNC_ROW_MARGIN = 4;
     var FUNC_ROW_SPACING = 6;
     var ICON_BTN_WIDTH = 32;
 
     function getFuncPanelWidth() {
         var w = 0;
         if (funcPanel.size && funcPanel.size.width > 0) w = funcPanel.size.width;
+        if (!w || w <= 0 && win.size && win.size.width > 0) w = win.size.width - 12;
         if (!w || w <= 0) w = funcPanel.preferredSize.width;
         if (!w || w <= 0) w = 368;
         return w;
@@ -1576,10 +1685,10 @@ function createMainUI(parentPanel) {
                 group.alignChildren = ["center", "center"];
                 group.spacing = 0;
                 group.helpTip = tip || "";
-                group.preferredSize = [32, 36];
+                group.preferredSize = [32, 30];
 
                 var icon = group.add("iconbutton", undefined, ICON_DATA[iconKey], {style: "toolbutton"});
-                icon.preferredSize = [20, 20];
+                icon.preferredSize = [18, 18];
                 icon.helpTip = tip || "";
 
                 var lbl = group.add("statictext", undefined, label);
@@ -1599,7 +1708,7 @@ function createMainUI(parentPanel) {
     function relayoutFuncButtons() {
         if (funcButtons.length === 0) return;
         var pw = (funcPanel.size && funcPanel.size.width) || funcPanel.preferredSize.width;
-        var margin = 6;
+        var margin = FUNC_ROW_MARGIN;
         var rows = funcRowsContainer.children;
         for (var ri = 0; ri < rows.length; ri++) {
             var row = rows[ri];
@@ -2779,7 +2888,7 @@ function createMainUI(parentPanel) {
                 var outputFolder;
 
                 if (sortConfig.subfolder) {
-                    var subDir = findGiftWallFolder(projectFolder.fsName);
+                    var subDir = findGiftWallFolder(projectFolder.fsName, sortConfig.subfolder);
                     if (!subDir) return;
                     outputFolder = subDir;
                     logText.text += "使用子文件夹: " + decodeUrlString(subDir.name) + "\n";
@@ -3003,7 +3112,7 @@ function createMainUI(parentPanel) {
                 var projectFolder = projectPath.parent;
                 var outputFolder;
                 if (sortConfig.subfolder) {
-                    var subDir = findGiftWallFolder(projectFolder.fsName);
+                    var subDir = findGiftWallFolder(projectFolder.fsName, sortConfig.subfolder);
                     if (!subDir) return;
                     outputFolder = subDir;
                     logText.text += "使用子文件夹: " + decodeUrlString(subDir.name) + "\n";
@@ -3373,12 +3482,14 @@ function createMainUI(parentPanel) {
         var presetFile = getSelectedPresetFile();
         if (!presetFile) {
             clearContainer(stepContainer);
+            setScrollPanelHeight(stepScroll, 0, 22, 2, 4);
             return;
         }
 
         var presetData = loadPreset(presetFile);
         if (!presetData || !presetData.steps) {
             clearContainer(stepContainer);
+            setScrollPanelHeight(stepScroll, 0, 22, 2, 4);
             return;
         }
 
@@ -3392,12 +3503,13 @@ function createMainUI(parentPanel) {
 
             var btn = stepContainer.add("button", undefined, "");
             btn.alignment = ["fill", "top"];
-            btn.preferredSize.height = 24;
+            btn.preferredSize.height = 22;
 
             buildStepButton(btn, i, s, baseName, true, presetFile);
             stepButtons.push(btn);
         }
 
+        setScrollPanelHeight(stepScroll, stepButtons.length, 22, 2, 4);
         stepContainer.layout.layout(true);
     }
 
@@ -3499,12 +3611,13 @@ function createMainUI(parentPanel) {
             syncStepActiveStates[i] = true;
             var btn = syncStepContainer.add("button", undefined, "");
             btn.alignment = ["fill", "top"];
-            btn.preferredSize.height = 24;
+            btn.preferredSize.height = 22;
 
             buildSyncStepButton(btn, i, true);
             syncStepButtons.push(btn);
         }
 
+        setScrollPanelHeight(syncScroll, syncStepButtons.length, 22, 2, 4);
         syncStatusText.text = "状态: 就绪";
         syncStepContainer.layout.layout(true);
     }
@@ -3684,6 +3797,7 @@ if (thisObj instanceof Panel) {
         this.layout.resize();
     };
 } else {
+    try { win.size = win.preferredSize; } catch(e) {}
     win.show();
 }
 

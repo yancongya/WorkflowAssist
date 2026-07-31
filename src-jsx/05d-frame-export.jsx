@@ -14,11 +14,19 @@ function getMarkerTime(comp, markerName) {
     return -1;
 }
 
-function findGiftWallFolder(projectDir) {
+function findGiftWallFolder(projectDir, keyword) {
+    if (!keyword) keyword = "礼物墙";
     var outputDir = new Folder(projectDir + "/输出");
     if (!outputDir.exists) {
         alert("未找到'输出'文件夹，请先保存项目。");
         return null;
+    }
+
+    var re = null;
+    try {
+        re = new RegExp(keyword);
+    } catch(e) {
+        re = null;
     }
 
     var items = outputDir.getFiles();
@@ -26,23 +34,27 @@ function findGiftWallFolder(projectDir) {
     for (var i = 0; i < items.length; i++) {
         if (items[i] instanceof Folder) {
             var name = decodeUrlString(items[i].name);
-            if (name.indexOf("礼物墙") >= 0) {
-                giftDirs.push(items[i]);
+            var matched = false;
+            if (re) {
+                matched = re.test(name);
+            } else {
+                matched = name.indexOf(keyword) >= 0;
             }
+            if (matched) giftDirs.push(items[i]);
         }
     }
 
     if (giftDirs.length === 0) {
-        alert("输出文件夹中未找到包含'礼物墙'的文件夹。\n请在输出目录下创建对应文件夹。");
+        alert("输出文件夹中未找到匹配 '" + keyword + "' 的文件夹。\n请在输出目录下创建对应文件夹。");
         return null;
     }
 
     if (giftDirs.length === 1) return giftDirs[0];
 
-    var dialog = new Window("dialog", "选择礼物墙文件夹");
+    var dialog = new Window("dialog", "选择" + keyword + "文件夹");
     dialog.orientation = "column";
     dialog.alignChildren = "left";
-    dialog.add("statictext", undefined, "找到多个包含'礼物墙'的文件夹，请选择:");
+    dialog.add("statictext", undefined, "找到多个匹配 '" + keyword + "' 的文件夹，请选择:");
 
     var dd = dialog.add("dropdownlist", undefined, []);
     for (var j = 0; j < giftDirs.length; j++) {

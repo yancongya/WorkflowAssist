@@ -128,12 +128,33 @@ function importSequenceToComp(comp, outDir) {
         return null;
     }
 
+    var footageName = comp.name + "_序列";
+    var layerName = comp.name + "_渲染";
+
+    // 先移除旧的导入图层，再移除旧素材项，避免项目面板堆积重复素材
+    for (var li = 1; li <= comp.layers.length; li++) {
+        var lyr = comp.layer(li);
+        if (lyr && lyr.name === layerName) {
+            try { lyr.remove(); } catch(e) {}
+            break;
+        }
+    }
+    for (var i = 1; i <= app.project.items.length; i++) {
+        var item = app.project.items[i];
+        if (item && item.name === footageName) {
+            try { item.remove(); } catch(e) {
+                logMessage("移除旧素材失败: " + e.toString(), LOG_LEVEL.WARNING, "RENDER");
+            }
+            break;
+        }
+    }
+
     var importOpt = new ImportOptions(firstFile);
     importOpt.sequence = true;
     importOpt.forceAlphabetical = true;
 
     var footage = app.project.importFile(importOpt);
-    footage.name = comp.name + "_序列";
+    footage.name = footageName;
 
     var targetFrameRate = comp.frameRate;
     var actualRate = footage.frameRate;
@@ -150,7 +171,7 @@ function importSequenceToComp(comp, outDir) {
 
     var layer = comp.layers.add(footage);
     layer.solo = true;
-    layer.name = comp.name + "_渲染";
+    layer.name = layerName;
     layer.moveToBeginning();
 
     logMessage("渲染结果已导入: " + comp.name + " (" + targetFrameRate + "fps)", LOG_LEVEL.NORMAL, "RENDER");

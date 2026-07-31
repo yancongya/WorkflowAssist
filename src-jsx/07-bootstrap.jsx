@@ -10,6 +10,7 @@ if (thisObj instanceof Panel) {
         this.layout.resize();
     };
 } else {
+    try { win.size = win.preferredSize; } catch(e) {}
     win.show();
 }
 
