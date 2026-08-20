@@ -995,6 +995,41 @@ function createMainUI(parentPanel) {
             // 强制刷新容器和面板布局，否则重建的按钮可能不可见
             funcRowsContainer.layout.layout(true);
             funcPanel.layout.layout(true);
+            // 根据实际行数显式设置按钮容器与面板高度，防止行被窗口挤压裁切
+            var rowCount = funcRowsContainer.children.length;
+            if (rowCount > 0) {
+                var rowItemH = 34;
+                var rowsTotalH = rowCount * rowItemH + Math.max(0, rowCount - 1) * funcRowsContainer.spacing;
+                funcRowsContainer.preferredSize.height = rowsTotalH;
+                var panelPadH = (funcPanel.margins && funcPanel.margins.length) ? funcPanel.margins[0] + funcPanel.margins[2] : 8;
+                var textH = funcPanel.text ? 16 : 0;
+                var needH = rowsTotalH + panelPadH + funcPanel.spacing + textH;
+                if (funcPanel.preferredSize.height < needH) {
+                    funcPanel.preferredSize.height = needH;
+                }
+                // 确保窗口总高度足够容纳功能面板，防止 funcPanel 被上方元素挤压
+                try {
+                    // 先按当前窗口高度布局一次，让各子元素 size 落位，测量才可靠
+                    win.layout.layout(true);
+                    var totalNeeded = 0;
+                    var chs = win.children;
+                    for (var ci = 0; ci < chs.length; ci++) {
+                        var ch = chs[ci];
+                        if (!ch) continue;
+                        var chH = (ch.size && ch.size.height) ? ch.size.height : 0;
+                        if (ch === funcPanel) chH = needH;
+                        totalNeeded += chH;
+                        totalNeeded += (ci > 0 ? win.spacing : 0);
+                    }
+                    totalNeeded += (win.margins && win.margins.length) ? win.margins[0] + win.margins[2] : 0;
+                    if (totalNeeded > 0 && win.preferredSize.height < totalNeeded) {
+                        win.preferredSize.height = totalNeeded;
+                    }
+                    win.layout.layout(true);
+                } catch(e) {}
+                funcRowsContainer.layout.layout(true);
+                funcPanel.layout.layout(true);
+            }
         } catch(e) {
             alert("更新功能按钮出错: " + (e.message || e.toString()));
         }
@@ -1370,6 +1405,11 @@ function createMainUI(parentPanel) {
             alert("请选择至少一个图层！");
             return;
         }
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+        var projectDir = app.project.file.parent.fsName;
 
         app.beginUndoGroup("PAG Export");
 
@@ -1401,19 +1441,33 @@ function createMainUI(parentPanel) {
 
         app.endUndoGroup();
 
-        if (confirm("是否创建高光图合成？\n\n是 = 创建 675×1125 的高光图合成并打开预览\n否 = 仅完成预合成")) {
+        if (confirm("是否创建高光图合成？\n\n是 = 创建 675×1125 的高光图合成并导出高光图\n否 = 仅完成预合成")) {
+            var currentTime = comp.time;
+            var newComp = null;
             app.beginUndoGroup("PAG 高光图");
             try {
-                var newComp = app.project.items.addComp("高光图", 675, 1125, comp.pixelAspect, comp.duration, comp.frameRate);
+                newComp = app.project.items.addComp("高光图", 675, 1125, comp.pixelAspect, comp.duration, comp.frameRate);
                 var precompLayer = newComp.layers.add(comp);
                 var scaleFactor = (newComp.width / comp.width) * 100;
                 precompLayer.property("Scale").setValue([scaleFactor, scaleFactor]);
                 precompLayer.property("Position").setValue([newComp.width / 2, newComp.height / 2]);
+
                 newComp.openInViewer();
+                try { newComp.time = currentTime; } catch(e) {}
             } catch(e) {
                 alert("创建高光图合成出错: " + e.toString());
             }
             app.endUndoGroup();
+
+            if (newComp) {
+                try {
+                    var hlDir = new Folder(projectDir + "/输出");
+                    if (!hlDir.exists) hlDir.create();
+                    exportOneFrame(newComp, hlDir, "高光图", currentTime);
+                } catch(e) {
+                    alert("导出高光图出错: " + e.toString());
+                }
+            }
         }
     }
 
@@ -2500,15 +2554,49 @@ function createMainUI(parentPanel) {
             return;
         }
 
-        var folderListStr = "";
-        for (var fi = 0; fi < previewFolders.length; fi++) {
-            folderListStr += "\n  " + (fi + 1) + ". " + decodeURIComponent(previewFolders[fi].name);
+        var dlg = new Window("dialog", "渲染合成 MP4");
+        dlg.orientation = "column";
+        dlg.alignChildren = ["fill", "top"];
+
+        var headerGrp = dlg.add("group");
+        headerGrp.alignment = ["fill", "top"];
+        var selectAll = headerGrp.add("checkbox", undefined, "全选");
+        selectAll.value = true;
+
+        var chkPanel = dlg.add("panel", undefined, "选择要渲染的预览文件夹");
+        chkPanel.alignChildren = ["fill", "top"];
+        var chks = [];
+        for (var ci = 0; ci < previewFolders.length; ci++) {
+            var chk = chkPanel.add("checkbox", undefined, decodeURIComponent(previewFolders[ci].name));
+            chk.value = true;
+            chks.push(chk);
         }
 
-        if (!confirm("找到以下包含\"预览\"的文件夹：" + folderListStr + "\n\n是否合成MP4？")) return;
+        selectAll.onClick = function() {
+            for (var si = 0; si < chks.length; si++) {
+                chks[si].value = selectAll.value;
+            }
+        };
 
-        for (var fi = 0; fi < previewFolders.length; fi++) {
-            var folder = previewFolders[fi];
+        var btnGrp = dlg.add("group");
+        btnGrp.alignment = ["center", "bottom"];
+        btnGrp.add("button", undefined, "渲染", { name: "ok" });
+        btnGrp.add("button", undefined, "取消", { name: "cancel" });
+
+        if (dlg.show() !== 1) return;
+
+        var selectedFolders = [];
+        for (var si = 0; si < chks.length; si++) {
+            if (chks[si].value) selectedFolders.push(previewFolders[si]);
+        }
+
+        if (selectedFolders.length === 0) {
+            alert("未选择任何文件夹！");
+            return;
+        }
+
+        for (var fi = 0; fi < selectedFolders.length; fi++) {
+            var folder = selectedFolders[fi];
 
             var batContent = '@echo off\r\n';
             batContent += 'chcp 65001 >nul\r\n';
@@ -2542,7 +2630,6 @@ function createMainUI(parentPanel) {
             }
         }
 
-        alert("正在合成 " + previewFolders.length + " 个MP4...\n处理完成后窗口将自动关闭");
     }
 
     // ================== 缓存预设文件列表 ==================

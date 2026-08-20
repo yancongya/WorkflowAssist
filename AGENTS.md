@@ -364,6 +364,19 @@ btn.onClick = function() {
 - `updateFuncButtons()` 重建前必须重置 `_rowWidths = []`，否则分派错乱
 - 面板宽度取值：`funcPanel.size.width`（布局后真实值）→ `preferredSize.width` → 兜底 368
 
+### 功能按钮按行数自适应高度（重要）
+**现象**：12 个按钮全部创建成功（DEBUG 确认 rows=2, buttons=12），但界面只显示第一行——`funcPanel` 实际高度只有 52px，第二行在面板外被裁切。按钮没丢，是被窗口挤压。
+
+**根因**：ScriptUI 布局中 `alignment: ["fill", "top"]` 的面板分到的空间 = 窗口剩余空间，不是它请求的高度。窗口 `preferredSize.height=380`，上方元素（项目名/预设行/Tab/内容面板）占满后，`funcPanel` 只分到 52px。**子面板设 `preferredSize.height` 只是请求，不会让窗口变高。**
+
+**修复**（`updateFuncButtons()` 内，重建后执行）：
+1. 按实际行数算按钮容器高度：`rowsTotalH = rowCount * 34 + (rowCount-1) * spacing`，设 `funcRowsContainer.preferredSize.height`
+2. 算面板需求：`needH = rowsTotalH + 面板上下 margins + funcPanel.spacing + textH(16)`，`funcPanel.preferredSize.height = max(当前, needH)`
+3. **必须同步调窗口**：遍历 `win.children` 累计各子元素高度 + 间距 + 窗口 margins，`win.preferredSize.height = max(当前, totalNeeded)`，再 `win.layout.layout(true)`
+4. **测量前必须先布局**：首次渲染（`createMainUI` 内调用）时窗口尚未 layout，`ch.size.height` 全是 0，直接累计会算出过小的 totalNeeded 导致窗口没变高。必须先 `win.layout.layout(true)` 让子元素 size 落位再测量
+
+**排障手法**：双层 DEBUG 弹窗确认——①函数层打印 `keys count` 排除预设/图标/函数缺失；②布局层打印 `rows/buttons/funcPanel=[w x h]/funcRows=[w x h]` 对比请求高度与实际高度，一眼看出是裁切而非缺失。
+
 ### 重命名项目文件用 save(newFile) + remove(oldFile)
 AE 没有原生"重命名项目"API。`File.rename()` 在 AE 打开项目时不更新 `app.project.file`，后续 Ctrl+S 会写到不存在的旧路径。
 
