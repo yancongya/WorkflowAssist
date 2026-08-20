@@ -31,6 +31,29 @@ function executeWorkflow(sourceComp, baseName, presetFile, activeStates) {
         var lastComp = runSteps(sourceComp, baseName, steps, activeStates);
 
         if (lastComp) {
+            if (presetData.addBlackBg !== false) {
+                for (var pci = 1; pci <= app.project.items.length; pci++) {
+                    var pcItem = app.project.items[pci];
+                    if (pcItem instanceof CompItem) {
+                        var pcName = decodeUrlString(pcItem.name);
+                        if (/_预览$/.test(pcName)) {
+                            var hasBlackBg = false;
+                            for (var pli = 1; pli <= pcItem.layers.length; pli++) {
+                                if (pcItem.layer(pli) && pcItem.layer(pli).name === "黑底") {
+                                    hasBlackBg = true;
+                                    break;
+                                }
+                            }
+                            if (!hasBlackBg) {
+                                var blackSolid = pcItem.layers.addSolid([0, 0, 0], "黑底", pcItem.width, pcItem.height, 1);
+                                blackSolid.moveToEnd();
+                                logMessage("已创建黑底层: " + pcName, LOG_LEVEL.NORMAL, "ENGINE");
+                            }
+                        }
+                    }
+                }
+            }
+
             lastComp.openInViewer();
             app.endUndoGroup();
 

@@ -2,7 +2,9 @@
   "name": "大礼物",
   "description": "大礼物工作流 - 先创建动画层再创建预览层",
   "sortConfig": "sort/gift.json",
-  "functions": ["mask", "bg", "pag", "template", "svga", "banner", "compress", "sort", "save", "renderMp4", "rename", "frameExp"],
+  "addBlackBg": true,
+  "folderOptions": ["礼物墙", "头框", "勋章", "资料卡", "礼物"],
+  "functions": ["mask", "bg", "pag", "template", "svga", "banner", "compress", "sort", "save", "renderMp4", "rename", "frameExp", "folders"],
   "sync": {
     "targetPath": "\\\\172.19.241.43\\互娱中台设计-文件共享\\A礼物"
   },

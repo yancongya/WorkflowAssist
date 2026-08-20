@@ -36,6 +36,7 @@ var ICON_DATA = {
   autoTiny: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0E\u00C4\x00\x00\x0E\u00C4\x01\u0095+\x0E\x1B\x00\x00\x03VIDATx\u009C]TmHSa\x14~\u009BcE?\"]\x7Fr%h\x11B\x0B\u00A6#3\u009C\t\u00F5\u00C7B\u00C2\u00D2]w\u0097wh\u00DAB\x166\u008Ae\u008A\x1F A-\u00C8\x7F\x11\u00F4A2\u00A2}P\u00FAC\u00B0\x0F!\u00E8_(IF\u0086\u00FE\u00B06\"-b\u00CE\u008F\u00C4m\u00F7\u00E3\u0089\u00F7\u00F5\u00DE\u009Bu\u00E0\u00DC{\u00EE\u00E1\u009C\u00E7=\u00E7<\u00E7\u00BD\u0084\x10b \u0084\x10\u0093\u00C9Tl\u00B3\u00D9\u00DEr\x1C\u00F7\u00CD\u00E9t\u00C6\u009DN.\u00C1q\\\\\u00D5D}}}\u009C\u00E7\u00F9/\x0E\u0087\u00E3\u00A7q\u00E7\u00CEn\u009AC\x081\x12B\u00B60\x0B\x003\u00ECv\u00FBH\"\u0091\x00\x00IQ\x14\u00FC/\u0092$\u00B1\u00F7\u00F0\u00F0\u00B0r\u00D4h\u0082\u00C5b\u00E9\u00DA\x04\u00A6\u008B\u00D1\u00E5r}\u00D4rdYVDQ\u00A4h\nUI\u0092\u0094l6\u00CB\u00ECP,&?\u00D9\u00BDG\u00BAYT\x04\u0092k\u00EEP\u00F3\r:Pss\u00F3\u00C7x<\u008E\u00CE\u00CEN\u00B9\u00A5\u00A5\x05\u00AD\u00AD\u00AD\u00F0z\u00BD\x08\u0087\u00C3\u0090e\x19\u00A2(nT\u00F4\u00F2%\u00AEl\u00DD\u00AE\u00ACY\u00ADR\u00C0\u00BC\x0B\x06\u00D3\u00B6\u00ABz9UUU\u00C6\u00E2\u00E2\u00E2\x0F\x1E\u008F\x07\u00A3\u00A3\u00A3r2\u0099\u00C4\u00EA\u00EA*\u00E6\u00E6\u00E6\x10\x08\x04\u00D0\u00DE\u00DE\u00AE\x03eD\x11\u00D7\u00FD~\\\u00B0\u00D9\u0094k\u008Ec\u00F2\u00C1}\u00FB`)(8\u00AEa\x1D\u00A8\u00A9\u00A9YZ[[\u00A3\u00B1\n\u009D\x11UZ\t\u0095`0\u0088\u009E\u009En}V\u00B4\u00C7\u00E4\u00FA:\u00FB|\x1A\x0E\u00C3`0\u00B8\x18Jaa\u00E1\u00E3\u0099\u0099\x195Nb %%\u00A5\x18\x18\x18`\u00C9\u00A2(A\x10<\u00F8\u00FA\u00F5\u008B\u00FA-j\u00C3\u0097\"\u0091\x08\x08!\u00F5\x14\u00C7\u00D2\u00D6\u00D6\u0096\u00A4^u\u00A0L\u00E8\u009C\u00C6\u00C6\u00C6099\u0089F\u00D7\x19\x1C\u00AF*\u00C7\u0083G\u0083zU\u0099L\u0086\u0099t\u0086\u0084\x10'\x05\u00AA\t\u0085B\u00D4)\u00D3\x00\u00DA\x0E\u00ADH\x127\u00E8\u00BE\x19\x1C\u00C0m\u00D7\x0E<\x0F\x14\u00E1\u00FC\u0099r<y6\u008A\u00D4\u00EF\u00CC\u00FF\x15q$77\u00B7cbb\u00829\x17\x16\x16\u00A0\u00CE\u0089\u00C9\u00D4\u00A7Y\\\u00AC+\u00C5R\u00E4(\u00DE\u00DF9\u0082\u009F\u00F7m\x08\u009E\u00DB\u008B+\u00EE\n\x04ot\u00FF\x0Bd\u00B7\u00DB\u00EFNOO3\u00E7\u00D0\u00D0\x10|>\x1F(kT^\u00BC~\u0083\u00F2\x03&D/\x17\u00E0sp?\u0096\x1F\u00DA\u0080\u00E7\u0087\x11\u00F1\u00E5\u00E1\u00F4\u00C9c,'\x1AU\u0081\u00CA\u00CA\u00CA\u00EE\u00CD\u00CE\u00CE2'}\u00C4b1\u00A5\u00A9\u00A9\u0089Q^Y\u00E9@c\u00D3\x05\u00DC{\x14B\u00FB%/\u00DA\u0084\u0093\u00F0yN\u00E1\u00D6\u00ED \u00E6\x7F\u00FCRg\u00A4\x02\u00E5\u00E7\u00E7\u00F7LMM\u00E9\u008Ci\u00C3\u00A4;\u00E4v\u00BB\u00B1\u00B2\u00B2\u00A26\u00AA`=+#-n\u00AC\u0084\u00BAW\x7F[#\u0084\u00F0###:\u0090\u00B6x\u0094\u00AD\u00AE\u00AE.f\u00A7\u00D3i\u00CA\u0084\x0E\u00B8)N\u008AF\u00A3:k\u0087z{{YT6\u009B\u00D5\u0097p||\x1C}}}z\u0085\x0CB]\u00D4M\u00BE\x7F\u00E8'\x15\x15\x15\u00EF\u0096\u0097\u0097\x19\x16\u00BD\u00A04g~~^\u00F1z\u00BD\n\u00BD\u00C0\u00DA\u00C5\u00A5\u00B6\u00A6\u00EA\u00CE\u0089\u00B4\u00B5\u009C\u009C\u009C:\u00ED\u008A\u009C\x10\x04!\u00AD\u00B2E\u0093\u00D8\u00A9\u00FD\u00FD\u00FD\x18\x1C\u00DCXB\u00ADRM\u00D4\x03\u00E0\u00F7\u00FB3\u0084\x10\u00EB\u00E6_@\u00B9\u00D5j}\u00C5q\r\u00BFx\u009EO\t\u0082\u00B0x\u00B6\u00AE.e6\u009B\x17kkkS<\u00EFN5440\u00E58n\u00D1\u00EDv/UWW\x7F\u00CF\u00CB\u00CBk\u00A6\u00D9\x7F\x00r\u009AaL\u00D4\u00F8\u00A6\x7F\x00\x00\x00\x00IEND\u00AEB`\u0082",
   check: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x013IDATx\u009C\u0095\u0094=N\u00C3@\x14\u0084\u00BF\u008Ap\x01H\x15j0\x15\u0084\x0B\x04A\u00C5\u00CFM\x10!\u00F49A\u00A4\\\u0084;$\u0081\x0B\u00F0\u00D3\x00\u00E9\x10NJ\u00A8h\u0083\x06\u008D\u00D1\u00C6\u00AC7f\u00A4gy\u00DF\u00EE\u009B}?cC\x1AM\u00A0m\u00D3\u00FB\u00BF\u00B0\x0E\u00F4\u0080'`Q\u00B2G\u00A0\x0B4V\u0091\u00EC\x02S\x07\u008D\x1Dtj\u00EB\u00DA\u00A7\u00BDW K\u0091|\x02\u00EF@'q\u00D9!\u0090\u00FBl\x16+gj\u0092V\u008D\u00F2[&{)\u0097y\u00E5\u0094S\u0099\u0094q\u00E4\u0098\u00CB\u00D0\u00A9\u00C6\u008EX\u008DM`#X\u00DF\x02\x0F\u00C5\u00A2if53\u0085m`\x0E\u00DC\x04\u00BE\u009Ecu\x01\x07^\u009C\x04\x07.\u0080~\u0084d\u00EE\u00F7\x02g\u008E\u0095\u00CE~\x1E\x0B\u008F\u00B8@\u00DF\u00BE!\u00B0SA\"\u009C\u00FB\u00DC^\u00AA\u00B4\u00A1\u00FD_\x15$ai\u00BF}\u0093b'\u0091\u0083\x03\u00E0\u00AD\u0082D\u00B8\x03\u00EEc\u00E3\u0097\u00D8\u00EA\u00E286\u00FE\u0086e\u009F\u00D7\x14\u00E4\x160\x03\u009Ec\u00DF]f\u00D9\u00E7\x16[*\u0093\x19\u00F0\u00E1AD!2\u00C9^)Klj\u00A6F,\u00BBvO\u00B4\u00A7L*I\u00C225A)\u00B6\u00FC\x1BQc\u00D5\u0093\u00B5\x1A\u00E5/Ac\u00DD\u00B7\u0085\u009F\u00C6\x1F|\x03\u00DD\u00AET?\u0092\x0Cl>\x00\x00\x00\x00IEND\u00AEB`\u0082",
   copyBanner: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\u00BFIDATx\u009C\u00D5\u0092\u00CFk\x13Q\x10\u00C7\u00BF\u0082z(\u00FE\x01\u00C5\x7F\u00A0(\x15i/R\x0BA1\u0081z\u0088\u00A0E\x0F=y\u00E9],=\u00F4\u0087(Z\u00C1\u009C\u0082\x10\u00C4\u00B4\u009Bm\u008D\u00A1$i\u0083\x18\u00DF\u00DBM\u00836\x10OB\x10\x04!\x04\x0C\u00A5\u00A7\n^zH\u00F6\u00EDn0#\x1B\u00B2\u00A1\u009B\u0097\x1F\u00E8\u00CD\u0081/<\u00E6\u00CD|\u00DE\u00CC\u00BC\x01\x06\x18\x11\u009D*\u00C6\u0097\x1F\x1Ff\u00C6\x03\u00F8W+D\"\u00E7\u00F2\u00B1\u00F0\u009E\u00AE\u00AC\u00D3'5\u00F4\u00FB[\u00E2\u00EE\u00FD\u0081\t\u00BA\u00A2\u008C}~\u00B3\u00FA1\u00AF\u0086\x13\u00BA\x12\u008D\u00BA\u00CA\u00A9\u00AF\u00AA\x0EDok/\x16i\u00EE\u00AB/\u00DE\u009F\u008C\u00D17^\u00AF\x7F\u0089?\u00D8o\u0081\u00F2\u008Ar\u00FE{\u00F2N\u00A1\u0092\u00F2\u00FF,'\u0083\u00A5\x1F\u00A9k\u00F5\u0096\u00D2\u00BEFu\u00C7G\x1E\u00A5}\r\u00F7\u00BE\u0092\u009A\u00A9T\u00927\u00CB\x07\u00BB\u00D3\u00C7\u009D\u00AA\x0C\u0086\u00AB\u00B5,&\u009D\u00B3\u00E0 \u008F\u00DE\u0081\u00CCL\u0097\u008F\u0083\u00EA\x1C\u00B3&\u00C3\x05\u00A1\u00E1\u0086\u00A7E\u00C7\u00D9\x0Bd\u00AE\u0081\u00ACG\u00FDA\u00D2\u00AC\u00BAA\u00E6s\u0090\u00B5\x02\u00B2o\u0083\u00EC[ s\x05d>\x05\t6\x04Tg\u00B8Bi\u009C\u00ED\u00BC\u009A\x00Ys \u00FBz[\u00F7@b\u00CB[\u0091\u0091\u00C5\u0094\x04\x12\x1C\u00CF,\u008EK\u009E\u00B6\u0096@\u00B6\x1Fd\x07@\u00D6C\u00B95\u0083cS\x02\x19\x0C\u00B1\u009A\u0086\t\x0Fh\x11$\u00DE\u0082\u00C46\u00C8Z\u0090A\u0082\u00E1\u00AB\\\x11C\u00C8\u00FA\u0080\u00CB\u00D2\u00AF\u00F1\u00DEjW\u0094\u0093g\u00E4~\u00E7\u00DF\u0080\x18V\u00FF\x03\x10\u0095p\u00A6\u00D7B\u008A\x01 7\u00A7\u00A7\t\u0086\u00A4\u00C1\u00D0\u00E8\x070\x18\u009A\u0082\u00A3hj\u00B8\u00D8\x17\u00E2Z\u008DaTp<\x11\x1C\u00BFN@\u008E\x0C\u008E\u0097\u00CE\u00AE\r\x05H\u00EDf1\"8\u00E6M\rA*\u00E0\u00F4\u00A0\u00E0?)\u00CD\x16\u0094`\u00D0>\x1F\x00\x00\x00\x00IEND\u00AEB`\u0082",
+  folderCreate: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x01\x1EIDATx\u009Cc`\x18t`\u00FD\u00F3\x1D\u00EF\u00D0\u00F1\u0086g;\u0096\u00ED|\u00BE\u0093\u009B$\u00836<\u00DF\u00F1\x1F\x1B^\u00FFl\u00C7\u00C55/v+Ql\x10\x18?\u00DB\u00FEy\u00C3\u00B3\u00EDwQ\u00F0\u00F3\x1DS\u00892h\u00FD\u00F3\u00ED\u00D7\u00D7?\u00DF\u00B1\n'~\u00B1=\u0085\u00A0A\u00EB\u009Fm\u00FF\u00B7\u00E1\u00C96C\u0092\u00C2\x06\x06\u00D0\u00BC\u00B2\x14&nu\u00C4\u00DF\u00D6\u00E6p\u0090\x0B1\u00D8\u00FA\u00B0\u00BF\x03\u00C2\u00A0g\u00DB\x7Fm|\u00B9C\x05d\u0088\u00E5\u00D1@\x1D\u009B\u00C3\u0081\u00FFl\u008E\x04\u00FE'\x06[\x1F\x0EX\u008E\u00E4\u00A2\u00ED\u00D3`\u00AE\u00B19\x128\u0087XCl\u00C0\x06\x05Z\u00C0\x0C\u00FA\u00B6\u00F6\u00F16\x19\u00B0!\u0087BEm\x0E\x07|#\u00DA\u00A0\u00C3\x01\u00A7\u00E1a\u00B4\u00FE\u00D9\u00F6v\u0098k\u00AC\x0F\x07\u00D6\u0092\u00E2\x1A\u009B\u00A3\u0081\x11P\u0083\u00B6\u00BF_\u00F5h\u0087\x10\u0088m|&\u008D\u00D5\u00E6p\u00C0\x13\u00E2]\x13\u00F8\x14\u00A4\x07l\u00D0\u00C6\u00E7\u00DB+\u00E1as((\u0096\u00B4\u00B0\t\u0080\u00EBe@\u00CES6\u0087\x03N\u0091\x106\u00DFLO\x06\x08\u00C3\rB\u00A4\u009B`\x13\u009B#\u0081\u00EF\u0088\u00C5\u00D6\u0087\x03&a\x182\u00A8\x00\x00\u00A5\u00A0\u00C7\u00A5\u00BF6R\u00D0\x00\x00\x00\x00IEND\u00AEB`\u0082",
   folderSync: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x00\u00D0IDATx\u009C\u00DD\u00931\n\u00C2@\x10E\u00A3\u0095\u00A7\x10,\u0084\x1CG!\u00C7\x10\u00C4*VI\u009A\u00E5\u00FF%(\u00D6\x16\x01\u00CF\u00E3\x1Dl-\u008Du\u008A\u0095\u0081)\u00E2\x18\u00D0(Xd\u00E0\u00C12a_>\u00BB\u00B3Q4\u00EC\n!\u008CH\x1EH\u00DEI\u00866\x00.\u00CE\u00B9\u00F8#\x11\u0080\u00A5n<\u00D1\x14\u0080\u00AB@r\x0B m\u00B1&9\u00B5\u00A2LD\u0092\u00CC\u00FE\u00C49\x17K*\u009BT\u00D3\u00DE\u009Ed\x00\n\u00F9\u00D0\u00E78\u00CA\u00B2\u009C\u00A9l\u00F3\u0093HJEE\u00F4W\x11\u0080J\u00F8Z\u0094\u00E7\u00F9\u0084\u00E4\n\u00C0Y\u0090\u00B5\u00F4z\u008B\u00BC\u00F7s\u0092M\u00EB\u0096\x1A\u00E9\u00BD\x13u^?\u00C9DeBb\x12\u008FU\u0094\u00BD\x0C\u00A4\u009EGj8*\u00B6_\u00C9\x1E\u00EF\u00FD\u00C2>\u0091=\u00C9\u00BAk\u00F0\u00D8M\r`\u00D75\u00C4\x03\u00AB\x07\u00D3^\r[\u00DA\u00B90\u00FA\x00\x00\x00\x00IEND\u00AEB`\u0082",
   frameExport: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x00\u00B0IDATx\u009C\u00C5\u00D2!\u008B\x02A\x18\x06\u00E0\u00C5`\u00B4\u0098E\x11\u009Bb3\x184\n\x17\u0094\u00EBv\u00ABb\u00B5\u00FB3\u00EE\u008A\u00CD\u009F \u008B\u0098\u00BDf\u00B0\x08&\u0083p\u00D5\u00FC\u0088\u00B0A\u00C42\u00BB{\u00DC\x0Bo\u0098\t\x0F\u00F3\u00F1M\x14\u00FDe\u00D0F\x0B[,PL\u00834qA\x1D\x1D\u00AC\u00B1J\x03\r\u00D0}:\x17qE9\x14\u00FA\u00C6\u00F8\u00E5\u00EE\u0084j(4\u00C4\x01\x15\x140\u00C3>\x08y\u00C2\u00A6\u00F8\u00C5\r1j\u00A9\u00A0\x04\u00EB=\u00B6\x16e\r\u00FA8\u00E3'\u00E9W\x16(\u00CE\u00EBE\u00BB\u00E4?\u00BD\u00B6\x14\n\u009D\u00B0y\u00D3\u00F9\u00BF\u008C\u00F6\u0081#&IGyA\u009Fi\u00A1\u00DCFk`\u0099\x19\n\u00CD\x1D]\u00C5\u00F7\u00E0\u00AB^\x07\u00EF\x00\x00\x00\x00IEND\u00AEB`\u0082",
   getProject: "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x12\x08\x06\x00\x00\x00V\u00CE\u008EW\x00\x00\x00\tpHYs\x00\x00\x0B\x13\x00\x00\x0B\x13\x01\x00\u009A\u009C\x18\x00\x00\x011IDATx\u009C\u00CD\u0093\u00CDJ\u00C3@\x10\u00C7\u00D7\u00B6\u00EA\u00C9&3\u00AD\u00E0Q\u00BDx\u00F0\x0B\x15<\x14\u00BC\u00F9N\x1E\u00F3\x08R\u00D3\u009D \u00BEA\u00DE\u00C0S\u00BC\n\u0082\x08\u00D563\r\u00A1\x15/\u0082\x1E\u00F4\x01V\x16\x11\u00C4\u008D1R\x10\u00FF\u00F0?\x0C\x0B\u00BF\u009DO\u00A5\u00FE\u00AF\u0082\u00A4\u00E1\u009D\x0CW<JWK\x1D\r\u0096Ul\u00EA\u00C5\u0090.\u00CF#\u00C95\u0090\u00DC#IVf y@\u0092\x0Be\u00CC\u008C\u00C3i\u0087\u00B2\x0BZ\u0086\x1F\u00B1w\u009C\u00FB\x1E\u008D\u00A1\u00C8\u00CD\u00B3>\u00A2\u0096'\u00A0\u00D1\u0086\x03\u00C2(\u00DDG\u00E2\x1B\x15\u0098\x1A\u0090\u009C\x03\u00C9+\x12?\u0097\x19\u00B4\u00BC\u0080\u00E6\u00C4\u00B6\u00C4\x01\u00D9\x1E \u00C9\u00E3Bx\u00D7\u00FA.#\u00EFsf\u00C4\x13\u00E8\u00C9\u00BA\x03j\u00D1`\rI\u00CCo\u00EC\x11\u00EF\x14\u0083\u00B4\u00E4U\x07\rZn+\u0083@K\x07)=\u00FC\u00EA\u00C5^\u00BET\x19\u0084]n\u00DAi\x16\u00AF\x01\x1F9 \x1B\u0080f\u009E\u00BA4\x15\u00F7\u00E7@\u00CB\u00A5\u009D\u00D8t \u00AB\u00C0\u00D4|J\x0F\u00EC\u00E6\u00AA\u008A\x02b\u00810\u00DBt_bS\x7F\u00CF\u008C'?\u009D\nj\x1E\u00DB\u00B3\u00B2\u00D5\x14\x7F\x13$\r_g[m\x1A\u00ED\u0095\u00D9\u008F\u00D2muz5[5\u00FB\u00BF\u00D7\x1BuVD\u00FF>\u00AD\u0098\u00EB\x00\x00\x00\x00IEND\u00AEB`\u0082",
@@ -708,6 +709,29 @@ function executeWorkflow(sourceComp, baseName, presetFile, activeStates) {
         var lastComp = runSteps(sourceComp, baseName, steps, activeStates);
 
         if (lastComp) {
+            if (presetData.addBlackBg !== false) {
+                for (var pci = 1; pci <= app.project.items.length; pci++) {
+                    var pcItem = app.project.items[pci];
+                    if (pcItem instanceof CompItem) {
+                        var pcName = decodeUrlString(pcItem.name);
+                        if (/_预览$/.test(pcName)) {
+                            var hasBlackBg = false;
+                            for (var pli = 1; pli <= pcItem.layers.length; pli++) {
+                                if (pcItem.layer(pli) && pcItem.layer(pli).name === "黑底") {
+                                    hasBlackBg = true;
+                                    break;
+                                }
+                            }
+                            if (!hasBlackBg) {
+                                var blackSolid = pcItem.layers.addSolid([0, 0, 0], "黑底", pcItem.width, pcItem.height, 1);
+                                blackSolid.moveToEnd();
+                                logMessage("已创建黑底层: " + pcName, LOG_LEVEL.NORMAL, "ENGINE");
+                            }
+                        }
+                    }
+                }
+            }
+
             lastComp.openInViewer();
             app.endUndoGroup();
 
@@ -1769,10 +1793,14 @@ function createMainUI(parentPanel) {
             };
         },
         template: function() {
-            var btn = addFuncButton("模板", "importTemplate", "导入高光图并替换模板末尾图层");
+            var btn = addFuncButton("模板", "importTemplate", "单击: 导入高光图并替换模板末尾图层 | Ctrl+单击: 复制模板项目并打开");
             btn.onClick = function() {
                 try {
-                    importTemplateAndReplace();
+                    if (ScriptUI.environment.keyboardState.ctrlKey) {
+                        openTemplateProject();
+                    } else {
+                        importTemplateAndReplace();
+                    }
                 } catch(e) { alert("模板按钮出错: " + (e.message || e.toString())); }
             };
         },
@@ -1899,6 +1927,12 @@ function createMainUI(parentPanel) {
                 try {
                     autoExportFrames(app.project.activeItem);
                 } catch(e) { alert("帧导出按钮出错: " + (e.message || e.toString())); }
+            };
+        },
+        folders: function() {
+            var btn = addFuncButton("目录", "folderCreate", "在输出文件夹中创建项目子目录");
+            btn.onClick = function() {
+                try { createOutputFolders(); } catch(e) { alert("目录按钮出错: " + (e.message || e.toString())); }
             };
         }
     };
@@ -2260,9 +2294,26 @@ function createMainUI(parentPanel) {
             }
         }
 
-        // 5. 已有背景图层 → 提醒后停止
+        // 5. 已有背景图层 → 直接使用，移动到底部并缩放
         if (hasBgLayer) {
-            alert("目标合成 \"" + decodeUrlString(targetComp.name) + "\" 已有背景图层，请手动删除后重试。");
+            app.beginUndoGroup("Use existing bg layer");
+            try {
+                for (var i = 1; i <= targetComp.layers.length; i++) {
+                    var l = targetComp.layer(i);
+                    if (l && (l.name === "bg" || l.name === "bg.png")) {
+                        var compW = targetComp.width;
+                        var imgW = l.source.width;
+                        var imgH = l.source.height;
+                        var sf = (compW / imgW) * 100;
+                        l.transform.scale.setValue([sf, sf]);
+                        l.moveToEnd();
+                        break;
+                    }
+                }
+            } catch (e) {
+                alert("使用已有背景图层出错: " + e.toString());
+            }
+            app.endUndoGroup();
             return;
         }
 
@@ -2495,6 +2546,45 @@ function createMainUI(parentPanel) {
             alert("导入模板出错: " + e.toString());
         }
         app.endUndoGroup();
+    }
+
+    function openTemplateProject() {
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+
+        var projectDir = app.project.file.parent.fsName;
+        var hlFile = new File(projectDir + "/输出/高光图.png");
+        if (!hlFile.exists) {
+            alert("未找到高光图！\n\n请先执行 PAG 导出生成高光图，再使用此功能。");
+            return;
+        }
+
+        var sourceFile = new File(getPresetResourcePath("xx2.aep"));
+        if (!sourceFile.exists) {
+            alert("找不到 xx2.aep 模板文件！\n请确保模板文件在预设目录:\n" + configFolder.fsName);
+            return;
+        }
+
+        var destFile = new File(projectDir + "/xx2.aep");
+        if (!destFile.exists) {
+            sourceFile.copy(destFile.fsName);
+            if (!destFile.exists) {
+                alert("复制 xx2.aep 到项目目录失败！");
+                return;
+            }
+        }
+
+        var sourceMatFolder = new Folder(getPresetResourcePath("(素材)"));
+        if (sourceMatFolder.exists) {
+            var destMatFolder = new Folder(projectDir + "/(素材)");
+            if (!destMatFolder.exists) {
+                copyFolderRecursively(sourceMatFolder, destMatFolder);
+            }
+        }
+
+        app.open(destFile);
     }
 
     function copyFolderRecursively(source, dest) {
@@ -3565,6 +3655,79 @@ function createMainUI(parentPanel) {
             }
         }
 
+    }
+
+    // ================== 创建输出子目录 ==================
+    function createOutputFolders() {
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+
+        var presetFile = getSelectedPresetFile();
+        var presetData = presetFile ? loadPreset(presetFile) : null;
+        var folderOptions = presetData && presetData.folderOptions ? presetData.folderOptions : null;
+        if (!folderOptions || folderOptions.length === 0) {
+            alert("当前预设未配置 folderOptions。");
+            return;
+        }
+
+        var projectDir = app.project.file.parent;
+        var outDir = new Folder(projectDir.fsName + "\\输出");
+        if (!outDir.exists) outDir.create();
+
+        var projectName = decodeUrlString(app.project.file.name.replace(/\.[^\.]+$/, ''));
+
+        var dlg = new Window("dialog", "创建输出子目录");
+        dlg.orientation = "column";
+        dlg.alignChildren = ["fill", "top"];
+
+        var headerGrp = dlg.add("group");
+        headerGrp.alignment = ["fill", "top"];
+        var selectAll = headerGrp.add("checkbox", undefined, "全选");
+        selectAll.value = true;
+
+        var chkPanel = dlg.add("panel", undefined, "选择要创建的目录");
+        chkPanel.alignChildren = ["fill", "top"];
+        var chks = [];
+        for (var ci = 0; ci < folderOptions.length; ci++) {
+            var folderName = projectName + "_" + folderOptions[ci];
+            var chk = chkPanel.add("checkbox", undefined, folderName);
+            chk.value = true;
+            chks.push(chk);
+        }
+
+        selectAll.onClick = function() {
+            for (var si = 0; si < chks.length; si++) {
+                chks[si].value = selectAll.value;
+            }
+        };
+
+        var btnGrp = dlg.add("group");
+        btnGrp.alignment = ["center", "bottom"];
+        btnGrp.add("button", undefined, "创建", { name: "ok" });
+        btnGrp.add("button", undefined, "取消", { name: "cancel" });
+
+        if (dlg.show() !== 1) return;
+
+        var created = [];
+        var skipped = [];
+        for (var si = 0; si < chks.length; si++) {
+            if (!chks[si].value) continue;
+            var folderName = projectName + "_" + folderOptions[si];
+            var subDir = new Folder(outDir.fsName + "\\" + folderName);
+            if (subDir.exists) {
+                skipped.push(folderName);
+            } else {
+                subDir.create();
+                created.push(folderName);
+            }
+        }
+
+        var msg = "";
+        if (created.length > 0) msg += "已创建:\n- " + created.join("\n- ") + "\n";
+        if (skipped.length > 0) msg += "已存在（跳过）:\n- " + skipped.join("\n- ");
+        if (msg) alert(msg);
     }
 
     // ================== 缓存预设文件列表 ==================

@@ -2,6 +2,7 @@
   "name": "礼物墙",
   "description": "礼物墙工作流 - 先创建礼物墙再创建预览",
   "sortConfig": "sort/giftwall.json",
+  "addBlackBg": true,
   "functions": ["compress", "sort", "save", "renderMp4", "rename", "loopAnim", "frameExp"],
   "sync": {
     "targetPath": "\\\\172.19.241.43\\互娱中台设计-文件共享\\A礼物"

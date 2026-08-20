@@ -834,10 +834,14 @@ function createMainUI(parentPanel) {
             };
         },
         template: function() {
-            var btn = addFuncButton("模板", "importTemplate", "导入高光图并替换模板末尾图层");
+            var btn = addFuncButton("模板", "importTemplate", "单击: 导入高光图并替换模板末尾图层 | Ctrl+单击: 复制模板项目并打开");
             btn.onClick = function() {
                 try {
-                    importTemplateAndReplace();
+                    if (ScriptUI.environment.keyboardState.ctrlKey) {
+                        openTemplateProject();
+                    } else {
+                        importTemplateAndReplace();
+                    }
                 } catch(e) { alert("模板按钮出错: " + (e.message || e.toString())); }
             };
         },
@@ -964,6 +968,12 @@ function createMainUI(parentPanel) {
                 try {
                     autoExportFrames(app.project.activeItem);
                 } catch(e) { alert("帧导出按钮出错: " + (e.message || e.toString())); }
+            };
+        },
+        folders: function() {
+            var btn = addFuncButton("目录", "folderCreate", "在输出文件夹中创建项目子目录");
+            btn.onClick = function() {
+                try { createOutputFolders(); } catch(e) { alert("目录按钮出错: " + (e.message || e.toString())); }
             };
         }
     };
@@ -1325,9 +1335,26 @@ function createMainUI(parentPanel) {
             }
         }
 
-        // 5. 已有背景图层 → 提醒后停止
+        // 5. 已有背景图层 → 直接使用，移动到底部并缩放
         if (hasBgLayer) {
-            alert("目标合成 \"" + decodeUrlString(targetComp.name) + "\" 已有背景图层，请手动删除后重试。");
+            app.beginUndoGroup("Use existing bg layer");
+            try {
+                for (var i = 1; i <= targetComp.layers.length; i++) {
+                    var l = targetComp.layer(i);
+                    if (l && (l.name === "bg" || l.name === "bg.png")) {
+                        var compW = targetComp.width;
+                        var imgW = l.source.width;
+                        var imgH = l.source.height;
+                        var sf = (compW / imgW) * 100;
+                        l.transform.scale.setValue([sf, sf]);
+                        l.moveToEnd();
+                        break;
+                    }
+                }
+            } catch (e) {
+                alert("使用已有背景图层出错: " + e.toString());
+            }
+            app.endUndoGroup();
             return;
         }
 
@@ -1560,6 +1587,45 @@ function createMainUI(parentPanel) {
             alert("导入模板出错: " + e.toString());
         }
         app.endUndoGroup();
+    }
+
+    function openTemplateProject() {
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+
+        var projectDir = app.project.file.parent.fsName;
+        var hlFile = new File(projectDir + "/输出/高光图.png");
+        if (!hlFile.exists) {
+            alert("未找到高光图！\n\n请先执行 PAG 导出生成高光图，再使用此功能。");
+            return;
+        }
+
+        var sourceFile = new File(getPresetResourcePath("xx2.aep"));
+        if (!sourceFile.exists) {
+            alert("找不到 xx2.aep 模板文件！\n请确保模板文件在预设目录:\n" + configFolder.fsName);
+            return;
+        }
+
+        var destFile = new File(projectDir + "/xx2.aep");
+        if (!destFile.exists) {
+            sourceFile.copy(destFile.fsName);
+            if (!destFile.exists) {
+                alert("复制 xx2.aep 到项目目录失败！");
+                return;
+            }
+        }
+
+        var sourceMatFolder = new Folder(getPresetResourcePath("(素材)"));
+        if (sourceMatFolder.exists) {
+            var destMatFolder = new Folder(projectDir + "/(素材)");
+            if (!destMatFolder.exists) {
+                copyFolderRecursively(sourceMatFolder, destMatFolder);
+            }
+        }
+
+        app.open(destFile);
     }
 
     function copyFolderRecursively(source, dest) {
@@ -2630,6 +2696,79 @@ function createMainUI(parentPanel) {
             }
         }
 
+    }
+
+    // ================== 创建输出子目录 ==================
+    function createOutputFolders() {
+        if (!app.project.file) {
+            alert("请先保存项目文件！");
+            return;
+        }
+
+        var presetFile = getSelectedPresetFile();
+        var presetData = presetFile ? loadPreset(presetFile) : null;
+        var folderOptions = presetData && presetData.folderOptions ? presetData.folderOptions : null;
+        if (!folderOptions || folderOptions.length === 0) {
+            alert("当前预设未配置 folderOptions。");
+            return;
+        }
+
+        var projectDir = app.project.file.parent;
+        var outDir = new Folder(projectDir.fsName + "\\输出");
+        if (!outDir.exists) outDir.create();
+
+        var projectName = decodeUrlString(app.project.file.name.replace(/\.[^\.]+$/, ''));
+
+        var dlg = new Window("dialog", "创建输出子目录");
+        dlg.orientation = "column";
+        dlg.alignChildren = ["fill", "top"];
+
+        var headerGrp = dlg.add("group");
+        headerGrp.alignment = ["fill", "top"];
+        var selectAll = headerGrp.add("checkbox", undefined, "全选");
+        selectAll.value = true;
+
+        var chkPanel = dlg.add("panel", undefined, "选择要创建的目录");
+        chkPanel.alignChildren = ["fill", "top"];
+        var chks = [];
+        for (var ci = 0; ci < folderOptions.length; ci++) {
+            var folderName = projectName + "_" + folderOptions[ci];
+            var chk = chkPanel.add("checkbox", undefined, folderName);
+            chk.value = true;
+            chks.push(chk);
+        }
+
+        selectAll.onClick = function() {
+            for (var si = 0; si < chks.length; si++) {
+                chks[si].value = selectAll.value;
+            }
+        };
+
+        var btnGrp = dlg.add("group");
+        btnGrp.alignment = ["center", "bottom"];
+        btnGrp.add("button", undefined, "创建", { name: "ok" });
+        btnGrp.add("button", undefined, "取消", { name: "cancel" });
+
+        if (dlg.show() !== 1) return;
+
+        var created = [];
+        var skipped = [];
+        for (var si = 0; si < chks.length; si++) {
+            if (!chks[si].value) continue;
+            var folderName = projectName + "_" + folderOptions[si];
+            var subDir = new Folder(outDir.fsName + "\\" + folderName);
+            if (subDir.exists) {
+                skipped.push(folderName);
+            } else {
+                subDir.create();
+                created.push(folderName);
+            }
+        }
+
+        var msg = "";
+        if (created.length > 0) msg += "已创建:\n- " + created.join("\n- ") + "\n";
+        if (skipped.length > 0) msg += "已存在（跳过）:\n- " + skipped.join("\n- ");
+        if (msg) alert(msg);
     }
 
     // ================== 缓存预设文件列表 ==================
