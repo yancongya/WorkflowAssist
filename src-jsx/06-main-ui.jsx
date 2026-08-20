@@ -191,6 +191,11 @@ function createMainUI(parentPanel) {
             updateFuncButtons();
             if (syncTargetInput) syncTargetInput.text = getSyncTargetPath();
             tabContent.layout.layout(true);
+            if (presetDropdown.selection) {
+                var settings = loadSettings();
+                settings.lastPreset = presetDropdown.selection.text;
+                saveSettings(settings);
+            }
         } catch(e) {
             logMessage("presetDropdown.onChange 出错: " + (e.message || e.toString()), LOG_LEVEL.ERROR, "UI");
         }
@@ -974,6 +979,26 @@ function createMainUI(parentPanel) {
             var btn = addFuncButton("目录", "folderCreate", "在输出文件夹中创建项目子目录");
             btn.onClick = function() {
                 try { createOutputFolders(); } catch(e) { alert("目录按钮出错: " + (e.message || e.toString())); }
+            };
+        },
+        openFolder: function() {
+            var btn = addFuncButton("文件夹", "openFolder", "打开网络共享文件夹");
+            btn.onClick = function() {
+                try {
+                    var presetFile = getSelectedPresetFile();
+                    var presetData = presetFile ? loadPreset(presetFile) : null;
+                    var targetPath = presetData && presetData.sync && presetData.sync.targetPath;
+                    if (!targetPath) {
+                        alert("当前预设未配置 sync.targetPath。");
+                        return;
+                    }
+                    var folder = new Folder(targetPath);
+                    if (!folder.exists) {
+                        alert("目标文件夹不存在:\n" + targetPath);
+                        return;
+                    }
+                    folder.execute();
+                } catch(e) { alert("打开文件夹出错: " + (e.message || e.toString())); }
             };
         }
     };
@@ -2774,14 +2799,57 @@ function createMainUI(parentPanel) {
     // ================== 缓存预设文件列表 ==================
     var cachedPresetFiles = [];
 
+    function loadSettings() {
+        try {
+            var f = new File(configFolder.fsName + "/settings.json");
+            if (!f.exists) return {};
+            f.encoding = "UTF8";
+            if (f.open("r")) { var raw = f.read(); f.close(); return raw ? JSON.parse(raw) : {}; }
+        } catch(e) {}
+        return {};
+    }
+
+    function saveSettings(settings) {
+        try {
+            var f = new File(configFolder.fsName + "/settings.json");
+            f.encoding = "UTF8";
+            if (f.open("w")) { f.write(JSON.stringify(settings, null, 2)); f.close(); }
+        } catch(e) {}
+    }
+
     function refreshPresetList() {
         cachedPresetFiles = scanPresetFiles();
+        var settings = loadSettings();
+        var order = settings.presetOrder || [];
+        var lastPreset = settings.lastPreset || "";
+
+        cachedPresetFiles.sort(function(a, b) {
+            var ia = order.indexOf(a.name);
+            var ib = order.indexOf(b.name);
+            if (ia < 0 && ib < 0) return 0;
+            if (ia < 0) return 1;
+            if (ib < 0) return -1;
+            return ia - ib;
+        });
+
         presetDropdown.removeAll();
         if (cachedPresetFiles.length > 0) {
             for (var i = 0; i < cachedPresetFiles.length; i++) {
                 presetDropdown.add("item", cachedPresetFiles[i].name);
             }
-            presetDropdown.selection = presetDropdown.items[0];
+            var restored = false;
+            if (lastPreset) {
+                for (var i = 0; i < cachedPresetFiles.length; i++) {
+                    if (cachedPresetFiles[i].name === lastPreset) {
+                        presetDropdown.selection = i;
+                        restored = true;
+                        break;
+                    }
+                }
+            }
+            if (!restored) {
+                presetDropdown.selection = presetDropdown.items[0];
+            }
             updateStepPreview();
             refreshOutputUI();
         } else {

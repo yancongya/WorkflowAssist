@@ -3,7 +3,7 @@
   "description": "海外座驾工作流 - 先创建动画层再创建预览层",
   "sortConfig": "sort/vehicle.json",
   "addBlackBg": true,
-  "functions": ["mask", "pag", "banner", "sort", "save", "renderMp4", "rename"],
+  "functions": ["mask", "pag", "banner", "sort", "save", "renderMp4", "rename", "openFolder"],
   "sync": {
     "targetPath": "\\\\172.19.241.43\\互娱中台设计-文件共享\\海外座驾"
   },
