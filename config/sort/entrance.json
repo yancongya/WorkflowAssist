@@ -1,0 +1,16 @@
+{
+  "description": "进场特效输出整理：重命名 SVGA 和封面图",
+  "keepSourceFiles": true,
+  "required": [
+    { "regex": "\\.svga$", "label": "SVGA 文件" },
+    { "regex": "\\.png$", "label": "封面图 PNG" }
+  ],
+  "rename": [
+    { "regex": "\\.svga$", "to": "{prefix}.svga" },
+    { "regex": "\\.png$", "to": "{prefix}封面图.png" }
+  ],
+  "clipboard": [
+    "{prefix}.svga",
+    "{prefix}封面图.png"
+  ]
+}

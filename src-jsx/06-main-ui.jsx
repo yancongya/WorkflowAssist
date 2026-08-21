@@ -767,6 +767,15 @@ function createMainUI(parentPanel) {
                 var icon = group.add("iconbutton", undefined, ICON_DATA[iconKey], {style: "toolbutton"});
                 icon.preferredSize = [18, 18];
                 icon.helpTip = tip || "";
+                icon._normalIcon = ICON_DATA[iconKey];
+                icon._hoverIcon = ICON_DATA[iconKey + "Hover"] || ICON_DATA[iconKey];
+
+                icon.addEventListener("mouseover", function() {
+                    try { this.image = this._hoverIcon; } catch(e) {}
+                });
+                icon.addEventListener("mouseout", function() {
+                    try { this.image = this._normalIcon; } catch(e) {}
+                });
 
                 var lbl = group.add("statictext", undefined, label);
                 lbl.alignment = ["center", "center"];
@@ -1297,6 +1306,11 @@ function createMainUI(parentPanel) {
             return;
         }
 
+        var presetFile = getSelectedPresetFile();
+        var presetData = presetFile ? loadPreset(presetFile) : null;
+        var bgImageName = (presetData && presetData.bgImage) ? presetData.bgImage : "bg.png";
+        var bgLayerName = bgImageName.replace(/\.[^\.]+$/, '');
+
         // 1. 找预览合成
         var previewComps = [];
         for (var i = 1; i <= app.project.items.length; i++) {
@@ -1360,13 +1374,13 @@ function createMainUI(parentPanel) {
         }
 
         // 3. 询问是否清理其他合成
-        var shouldCleanup = confirm("是否同时清理其他合成中名为 \"bg\" 的图层？\n\n注意：此操作不可撤销（跨合成 undo 不完整）", false, "清理背景图层");
+        var shouldCleanup = confirm("是否同时清理其他合成中名为 \"" + bgLayerName + "\" 的背景层？\n\n注意：此操作不可撤销（跨合成 undo 不完整）", false, "清理背景图层");
 
-        // 4. 找目标合成中所有 bg 图层（含 bg.png）
+        // 4. 找目标合成中所有 bg 图层
         var hasBgLayer = false;
         for (var i = 1; i <= targetComp.layers.length; i++) {
             var l = targetComp.layer(i);
-            if (l && (l.name === "bg" || l.name === "bg.png")) {
+            if (l && (l.name === bgLayerName || l.name === "bg" || l.name === "bg.png")) {
                 hasBgLayer = true;
                 break;
             }
@@ -1402,28 +1416,28 @@ function createMainUI(parentPanel) {
         }
 
         var projectDir = app.project.file.parent.fsName;
-        var bgFile = new File(projectDir + "/bg.png");
+        var bgFile = new File(projectDir + "/" + bgImageName);
 
         if (!bgFile.exists) {
-            var sourceFile = new File(getPresetResourcePath("bg.png"));
+            var sourceFile = new File(getPresetResourcePath(bgImageName));
             if (!sourceFile.exists) {
-                alert("找不到 bg.png 文件！\n请将 bg.png 放置在预设目录:\n" + configFolder.fsName);
+                alert("找不到 " + bgImageName + " 文件！\n请将 " + bgImageName + " 放置在预设目录:\n" + configFolder.fsName);
                 return;
             }
             if (!sourceFile.copy(bgFile.fsName)) {
-                alert("复制 bg.png 到项目目录失败！");
+                alert("复制 " + bgImageName + " 到项目目录失败！");
                 return;
             }
         }
 
         // 7. 导入 + 清理（一个 undo group）
-        app.beginUndoGroup("Import bg.png");
+        app.beginUndoGroup("Import " + bgImageName);
         try {
             var importOptions = new ImportOptions(bgFile);
             var importedFile = app.project.importFile(importOptions);
 
             var bgLayer = targetComp.layers.add(importedFile);
-            bgLayer.name = "bg";
+            bgLayer.name = bgLayerName;
 
             var compW = targetComp.width;
             var imgW = bgLayer.source.width;
@@ -1433,21 +1447,21 @@ function createMainUI(parentPanel) {
             bgLayer.transform.scale.setValue([sf, sf]);
             bgLayer.moveToEnd();
 
-            if (shouldCleanup) cleanupBgFromOtherComps(targetComp);
+            if (shouldCleanup) cleanupBgFromOtherComps(targetComp, bgLayerName);
         } catch (e) {
             alert("导入背景出错: " + e.toString());
         }
         app.endUndoGroup();
     }
 
-    function cleanupBgFromOtherComps(keepComp) {
+    function cleanupBgFromOtherComps(keepComp, bgLayerName) {
         try {
             for (var ci = 1; ci <= app.project.items.length; ci++) {
                 var item = app.project.items[ci];
                 if (item instanceof CompItem && item !== keepComp) {
                     for (var li = item.layers.length; li >= 1; li--) {
                         var l = item.layer(li);
-                        if (l && (l.name === "bg" || l.name === "bg.png")) {
+                        if (l && (l.name === bgLayerName || l.name === "bg" || l.name === "bg.png")) {
                             l.remove();
                         }
                     }
@@ -2296,25 +2310,30 @@ function createMainUI(parentPanel) {
                 }
 
                 // --- Generate bat ---
-                var zipFiles = [];
-                for (var zf = 0; zf < sortConfig.zip.files.length; zf++) {
-                    var zipSrcName = String(sortConfig.zip.files[zf]).replace("{prefix}", output_name);
-                    zipFiles.push("'" + zipSrcName + "'");
-                }
-                var zipName = String(sortConfig.zip.name).replace("{prefix}", output_name);
-
                 var clipItems = [];
                 for (var ci = 0; ci < sortConfig.clipboard.length; ci++) {
                     clipItems.push("'" + String(sortConfig.clipboard[ci]).replace("{prefix}", output_name) + "'");
                 }
 
-                var hasZipSources = true;
+                var hasZip = sortConfig.zip && sortConfig.zip.files && sortConfig.zip.name;
+                var hasZipSources = false;
+                var zipFiles = [];
+                var zipName = "";
                 var delFiles = [];
-                for (var df = 0; df < sortConfig.zip.files.length; df++) {
-                    var zipSrcName = String(sortConfig.zip.files[df]).replace("{prefix}", output_name);
-                    var zipSrc = new File(outputFolder.fsName + "/" + zipSrcName);
-                    if (!zipSrc.exists) { hasZipSources = false; break; }
-                    delFiles.push('"' + zipSrcName + '"');
+
+                if (hasZip) {
+                    for (var zf = 0; zf < sortConfig.zip.files.length; zf++) {
+                        var zipSrcName = String(sortConfig.zip.files[zf]).replace("{prefix}", output_name);
+                        zipFiles.push("'" + zipSrcName + "'");
+                    }
+                    zipName = String(sortConfig.zip.name).replace("{prefix}", output_name);
+                    hasZipSources = true;
+                    for (var df = 0; df < sortConfig.zip.files.length; df++) {
+                        var zipSrcName = String(sortConfig.zip.files[df]).replace("{prefix}", output_name);
+                        var zipSrc = new File(outputFolder.fsName + "/" + zipSrcName);
+                        if (!zipSrc.exists) { hasZipSources = false; break; }
+                        delFiles.push('"' + zipSrcName + '"');
+                    }
                 }
 
                 if (hasZipSources) {
@@ -2917,21 +2936,28 @@ function createMainUI(parentPanel) {
         var tip = "Step " + (index + 1) + ": " + s.name + "\n";
         var outLabel = s.rename ? String(s.rename).replace("{baseName}", baseName) : baseName + (s.suffix || "");
         tip += "合成: " + outLabel + "\n";
-        tip += "尺寸: " + s.width + "\u00D7" + s.height + "\n";
-        tip += "帧率: " + s.frameRate + "fps\n";
-        tip += "时长: ";
-        if (typeof s.duration === "string" && s.duration === "custom") {
-            tip += "自定义（运行前弹窗输入）\n";
-        } else if (typeof s.duration === "string" && s.duration === "source") {
-            tip += "与源合成相同\n";
+        if (s.mode === "rename") {
+            tip += "操作: 重命名当前合成";
         } else {
-            tip += s.duration + "s\n";
-        }
-        tip += "图层: ";
-        if (s.scaleMode === "fit_width") {
-            tip += "自适应宽度缩放";
-        } else if (s.scaleMode === "custom") {
-            tip += s.scalePercent + "% 缩放";
+            tip += "尺寸: " + s.width + "\u00D7" + s.height + "\n";
+            tip += "帧率: " + s.frameRate + "fps\n";
+            tip += "时长: ";
+            if (typeof s.duration === "string" && s.duration === "custom") {
+                tip += "自定义（运行前弹窗输入）\n";
+            } else if (typeof s.duration === "string" && s.duration === "source") {
+                tip += "与源合成相同\n";
+            } else {
+                tip += s.duration + "s\n";
+            }
+            tip += "图层: ";
+            if (s.scaleMode === "fit_width") {
+                tip += "自适应宽度缩放";
+            } else if (s.scaleMode === "custom") {
+                tip += s.scalePercent + "% 缩放";
+            }
+            if (s.position) {
+                tip += "\n定位: [" + s.position[0] + ", " + s.position[1] + "]";
+            }
         }
     if (s.stagger && s.stagger.enabled) {
         tip += "\n错层: " + s.stagger.count + "层, 偏移=";

@@ -63,7 +63,11 @@ function executeWorkflow(sourceComp, baseName, presetFile, activeStates) {
                 if (activeStates && !activeStates[m]) continue;
                 count++;
                 resultMsg += "\n" + count + ". " + resolveOutputName(baseName, steps[m]);
-                resultMsg += " (" + steps[m].width + "×" + steps[m].height + ")";
+                if (steps[m].mode === "rename") {
+                    resultMsg += " (重命名)";
+                } else {
+                    resultMsg += " (" + steps[m].width + "×" + steps[m].height + ")";
+                }
             }
             alert("工作流执行完成！\n共创建 " + count + " 个合成:\n" + resultMsg);
             return true;
@@ -82,6 +86,7 @@ function runSteps(sourceComp, baseName, steps, activeStates) {
     var currentComp = sourceComp;
     var lastComp = null;
     var _customDuration = null;
+    var compMap = {};
 
     for (var j = 0; j < steps.length; j++) {
         if (activeStates && !activeStates[j]) {
@@ -91,6 +96,15 @@ function runSteps(sourceComp, baseName, steps, activeStates) {
 
         var s = steps[j];
         var outputName = resolveOutputName(baseName, s);
+
+        if (s.mode === "rename") {
+            var oldName = currentComp.name;
+            currentComp.name = outputName;
+            logMessage("步骤 " + (j + 1) + ": 重命名 " + oldName + " → " + outputName, LOG_LEVEL.NORMAL, "ENGINE");
+            compMap[s.name] = currentComp;
+            lastComp = currentComp;
+            continue;
+        }
 
         if (getCompByName(outputName)) {
             alert("合成已存在: " + outputName + "\n请先删除或重命名现有合成后再执行。");
@@ -132,7 +146,8 @@ function runSteps(sourceComp, baseName, steps, activeStates) {
         }
 
         var newComp = createComp(outputName, s.width, s.height, s.frameRate, durationVal);
-        nestWithScale(currentComp, newComp, s.scaleMode, s.scalePercent);
+        var nestSource = s.baseComp && compMap[s.baseComp] ? compMap[s.baseComp] : currentComp;
+        nestWithScale(nestSource, newComp, s.scaleMode, s.scalePercent, s.position);
 
         if (s.stagger && s.stagger.enabled) {
             var staggerOffset = currentComp.duration;
@@ -157,6 +172,7 @@ function runSteps(sourceComp, baseName, steps, activeStates) {
 
         currentComp = newComp;
         lastComp = newComp;
+        compMap[s.name] = newComp;
     }
 
     return lastComp;
@@ -198,6 +214,15 @@ function executeSingleStep(sourceComp, baseName, presetFile, stepIndex) {
 
         var s = presetData.steps[stepIndex];
         var outputName = resolveOutputName(baseName, s);
+
+        if (s.mode === "rename") {
+            var oldName = stepSource.name;
+            stepSource.name = outputName;
+            logMessage("单步 " + stepIndex + ": 重命名 " + oldName + " → " + outputName, LOG_LEVEL.NORMAL, "ENGINE");
+            app.endUndoGroup();
+            alert("单步执行完成: 重命名 " + oldName + " → " + outputName);
+            return true;
+        }
 
         if (getCompByName(outputName)) {
             alert("合成已存在: " + outputName + "\n请先删除或重命名现有合成后再执行。");
@@ -241,7 +266,7 @@ function executeSingleStep(sourceComp, baseName, presetFile, stepIndex) {
         }
 
         var newComp = createComp(outputName, s.width, s.height, s.frameRate, durationVal);
-        nestWithScale(stepSource, newComp, s.scaleMode, s.scalePercent);
+        nestWithScale(stepSource, newComp, s.scaleMode, s.scalePercent, s.position);
 
         if (s.stagger && s.stagger.enabled) {
             var staggerOffset = stepSource.duration;

@@ -46,7 +46,7 @@ function calculateFitWidthScale(sourceComp, targetComp) {
     return (targetComp.width / sourceComp.width) * 100;
 }
 
-function nestWithScale(sourceComp, targetComp, scaleMode, scalePercent) {
+function nestWithScale(sourceComp, targetComp, scaleMode, scalePercent, position) {
     var layer = targetComp.layers.add(sourceComp);
 
     if (scaleMode === "fit_width") {
@@ -56,6 +56,11 @@ function nestWithScale(sourceComp, targetComp, scaleMode, scalePercent) {
     } else if (scaleMode === "custom") {
         layer.scale.setValue([scalePercent, scalePercent, 100]);
         logMessage("嵌套合成 - 自定义缩放: " + scalePercent + "%", LOG_LEVEL.NORMAL, "AE");
+    }
+
+    if (position && position.length >= 2) {
+        layer.position.setValue([position[0], position[1]]);
+        logMessage("嵌套合成 - 定位: [" + position[0] + ", " + position[1] + "]", LOG_LEVEL.NORMAL, "AE");
     }
 
     layer.label = 1;

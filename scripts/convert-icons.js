@@ -70,8 +70,16 @@ async function convert() {
             .png()
             .toBuffer();
 
+        var brightBuf = await sharp(buf)
+            .resize(ICON_SIZE, ICON_SIZE, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+            .modulate({ brightness: 2.5 })
+            .png()
+            .toBuffer();
+
         var sourceStr = toSource(pngBuf);
+        var brightStr = toSource(brightBuf);
         lines.push('  ' + key + ': ' + sourceStr + ',');
+        lines.push('  ' + key + 'Hover: ' + brightStr + ',');
         console.log('  ' + file + ' → ' + key + ' (' + pngBuf.length + ' bytes)');
     }
 

@@ -1,0 +1,40 @@
+{
+  "name": "进场特效",
+  "description": "进场特效工作流 - 重命名合成 → 创建预览和封面",
+  "sortConfig": "sort/entrance.json",
+  "addBlackBg": true,
+  "bgImage": "HYbg-01.png",
+  "folderOptions": ["进场特效"],
+  "functions": ["bg", "svga", "save", "sort", "renderMp4", "rename", "frameExp", "openFolder"],
+  "sync": {
+    "targetPath": "\\\\172.19.241.43\\互娱中台设计-文件共享\\Yo进场特效"
+  },
+  "steps": [
+    {
+      "name": "重命名",
+      "mode": "rename",
+      "rename": "{baseName}"
+    },
+    {
+      "name": "预览",
+      "suffix": "_预览",
+      "width": 750,
+      "height": 1334,
+      "frameRate": 24,
+      "duration": "source",
+      "scaleMode": "custom",
+      "scalePercent": 100,
+      "position": [378.0, 350.0]
+    },
+    {
+      "name": "封面",
+      "suffix": "_封面",
+      "baseComp": "重命名",
+      "width": 314,
+      "height": 196,
+      "frameRate": 24,
+      "duration": "source",
+      "scaleMode": "fit_width"
+    }
+  ]
+}

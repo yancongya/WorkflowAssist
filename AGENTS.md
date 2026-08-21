@@ -137,6 +137,9 @@ node -e "const fs=require('fs'); new Function(fs.readFileSync('dist/WorkflowAssi
 |-------|------|-------------|
 | `sortConfig` | string | 可选。指向 `config/sort/xxx.json` 的相对路径。有此字段的预设才支持输出整理按钮。 |
 | `sync` | object | 可选。远程同步配置 `{ targetPath }`。把源文件和输出推送到网络共享文件夹。 |
+| `bgImage` | string | 可选。背景按钮导入的图片文件名（默认 `bg.png`）。图片放 `config/` 目录。 |
+| `addBlackBg` | boolean | 可选。工作流执行后是否在预览合成中创建黑底纯色层（默认 `true`）。 |
+| `folderOptions` | string[] | 可选。目录按钮的子目录选项列表。有此字段才显示目录按钮。 |
 
 ### sync 字段说明
 
@@ -248,6 +251,121 @@ newName = String(rule.to).replace("{prefix}", output_name);
 2. 创建 `config/sort/新项目.json`（输出整理规则）
 3. 在预设 JSON 中加 `"sortConfig": "sort/新项目.json"`
 4. 构建即可，**无需改 JSX 代码**
+
+### 新预设创建速查（Checklist）
+
+创建新预设时，按以下步骤操作：
+
+**① 主预设 JSON `config/新项目.json`**
+
+```json
+{
+  "name": "新项目",
+  "description": "新项目工作流 - 简短描述",
+  "sortConfig": "sort/新项目.json",
+  "addBlackBg": true,
+  "folderOptions": ["选项A", "选项B"],
+  "functions": ["save", "renderMp4", "rename"],
+  "sync": {
+    "targetPath": "\\\\172.19.241.43\\互娱中台设计-文件共享\\目录名"
+  },
+  "steps": [
+    {
+      "name": "动画",
+      "width": 750,
+      "height": 1334,
+      "frameRate": 24,
+      "duration": "custom",
+      "scaleMode": "fit_width"
+    },
+    {
+      "name": "预览",
+      "suffix": "_预览",
+      "width": 750,
+      "height": 1334,
+      "frameRate": 24,
+      "duration": "custom",
+      "scaleMode": "fit_width"
+    }
+  ]
+}
+```
+
+**② 输出整理 JSON `config/sort/新项目.json`**（可选，有 sortConfig 时必填）
+
+```json
+{
+  "description": "新项目输出整理：描述",
+  "required": [
+    { "name": "exact.pag" },
+    { "regex": "\\.png$", "label": "PNG 图片" }
+  ],
+  "rename": [
+    { "regex": "\\.pag$", "to": "{prefix}.pag" },
+    { "regex": "\\.png$", "to": "{prefix}图片.png" }
+  ],
+  "zip": {
+    "files": ["{prefix}.pag"],
+    "name": "{prefix}.zip"
+  },
+  "clipboard": [
+    "{prefix}.zip"
+  ]
+}
+```
+
+**③ 更新 `config/settings.json`**
+
+在 `presetOrder` 数组中添加新预设名。
+
+**④ 构建验证**
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/build-jsx.ps1
+node -e "const fs=require('fs'); new Function(fs.readFileSync('dist/WorkflowAssist.jsx','utf8')); console.log('syntax ok')"
+```
+
+**可用的 functions key 一览：**
+
+| key | 按钮文字 | 说明 |
+|-----|---------|------|
+| `mask` | 蒙版 | 创建蒙版 / Ctrl: 设置轨道遮罩 |
+| `bg` | 背景 | 导入或复用 bg 图层 |
+| `pag` | PAG | 独显+标记+预合成+高光图 |
+| `template` | 模板 | 导入高光图替换模板 / Ctrl: 复制项目 |
+| `svga` | SVGA | 打开 SVGAConverter 面板 |
+| `banner` | Banner | 复制 banner PAG 到输出 |
+| `compress` | 压缩 | 打开 Auto_Tinify |
+| `sort` | 输出 | 整理输出文件（需 sortConfig） |
+| `save` | 保存 | 自动保存项目 |
+| `renderMp4` | 渲染合成 | 序列帧合成 MP4 |
+| `rename` | 重命名 | 重命名项目文件 |
+| `loopAnim` | 循环 | 无缝循环动画 |
+| `frameExp` | 帧导出 | 标记帧导出 |
+| `folders` | 目录 | 创建输出子目录（需 folderOptions） |
+| `openFolder` | 文件夹 | 打开 sync.targetPath 网络目录 |
+
+**步骤字段 `mode` 与特殊配置：**
+
+| 字段 | 说明 |
+|------|------|
+| `mode: "rename"` | 只重命名当前合成，不创建新合成 |
+| `position: [x, y]` | 嵌套图层定位到指定坐标（默认居中） |
+| `baseComp: "步骤名"` | 指定嵌套的源合成（默认用上一步输出） |
+
+**示例：平行合成结构**
+
+```json
+{
+  "steps": [
+    { "name": "素材", "mode": "rename", "rename": "{baseName}" },
+    { "name": "预览", "suffix": "_预览", "width": 750, "height": 1334, ... },
+    { "name": "封面", "suffix": "_封面", "baseComp": "素材", "width": 314, "height": 196, ... }
+  ]
+}
+```
+
+预览和封面都基于「素材」合成，互不依赖。
 
 ## Core Conventions
 
