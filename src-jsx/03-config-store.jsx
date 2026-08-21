@@ -11,6 +11,7 @@ function scanPresetFiles() {
     var presets = [];
     for (var i = 0; i < files.length; i++) {
         var fileName = files[i].name.replace(/\.json$/i, "");
+        if (fileName.toLowerCase() === "settings") continue;
         fileName = decodeUrlString(fileName);
         presets.push({
             name: fileName,

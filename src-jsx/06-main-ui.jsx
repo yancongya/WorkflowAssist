@@ -683,6 +683,8 @@ function createMainUI(parentPanel) {
 
     var funcButtons = [];
     var _rowWidths = [];
+    var _rowCounts = [];
+    var FUNC_MAX_PER_ROW = 5;
 
     var FUNC_ROW_MARGIN = 4;
     var FUNC_ROW_SPACING = 6;
@@ -710,13 +712,16 @@ function createMainUI(parentPanel) {
         var available = getFuncPanelWidth() - FUNC_ROW_MARGIN * 2;
         var rows = 1;
         var curW = 0;
+        var curCount = 0;
         for (var i = 0; i < funcButtons.length; i++) {
             var w = getBtnWidth(funcButtons[i]);
-            if (curW > 0 && curW + FUNC_ROW_SPACING + w > available) {
+            if (curCount >= FUNC_MAX_PER_ROW || (curW > 0 && curW + FUNC_ROW_SPACING + w > available)) {
                 rows++;
                 curW = 0;
+                curCount = 0;
             }
             curW += (curW > 0 ? FUNC_ROW_SPACING : 0) + w;
+            curCount++;
         }
         return rows;
     }
@@ -725,7 +730,7 @@ function createMainUI(parentPanel) {
         var available = getFuncPanelWidth() - FUNC_ROW_MARGIN * 2;
         var rowIdx = -1;
         for (var i = 0; i < _rowWidths.length; i++) {
-            if (_rowWidths[i] === 0 || _rowWidths[i] + FUNC_ROW_SPACING + idealW <= available) {
+            if (_rowCounts[i] < FUNC_MAX_PER_ROW && (_rowWidths[i] === 0 || _rowWidths[i] + FUNC_ROW_SPACING + idealW <= available)) {
                 rowIdx = i;
                 break;
             }
@@ -739,8 +744,10 @@ function createMainUI(parentPanel) {
             row.spacing = FUNC_ROW_SPACING;
             row.margins = [0, 0, 0, 0];
             _rowWidths.push(0);
+            _rowCounts.push(0);
         }
         _rowWidths[rowIdx] += (_rowWidths[rowIdx] > 0 ? FUNC_ROW_SPACING : 0) + idealW;
+        _rowCounts[rowIdx]++;
         return funcRowsContainer.children[rowIdx];
     }
 
@@ -1016,12 +1023,17 @@ function createMainUI(parentPanel) {
                     "save", "renderMp4", "rename", "loopAnim", "frameExp"];
         }
         try {
+            // 先布局一次，让 funcPanel 获得真实宽度，getCurrentRow 才能正确分派行
+            funcPanel.layout.layout(true);
+            win.layout.layout(true);
+
             // Clear all rows inside funcRowsContainer
             while (funcRowsContainer.children.length > 0) {
                 funcRowsContainer.remove(funcRowsContainer.children[0]);
             }
             funcButtons = [];
             _rowWidths = [];
+            _rowCounts = [];
             for (var i = 0; i < keys.length; i++) {
                 var creator = FUNC_CREATORS[keys[i]];
                 if (creator) creator();
@@ -1033,7 +1045,7 @@ function createMainUI(parentPanel) {
             // 根据实际行数显式设置按钮容器与面板高度，防止行被窗口挤压裁切
             var rowCount = funcRowsContainer.children.length;
             if (rowCount > 0) {
-                var rowItemH = 34;
+                var rowItemH = 48;
                 var rowsTotalH = rowCount * rowItemH + Math.max(0, rowCount - 1) * funcRowsContainer.spacing;
                 funcRowsContainer.preferredSize.height = rowsTotalH;
                 var panelPadH = (funcPanel.margins && funcPanel.margins.length) ? funcPanel.margins[0] + funcPanel.margins[2] : 8;
