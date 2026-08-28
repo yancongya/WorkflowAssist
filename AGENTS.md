@@ -97,6 +97,29 @@ group.add("iconbutton", undefined, "\u0089PNG\r\n\x1A\n...", {style: "toolbutton
 
 此发现记录于 `scripts/convert-icons.js` 顶部注释，作为 AE 图标转换的权威参考。
 
+### image 控件 click 事件陷阱（重要）
+
+ScriptUI 中 `image` 控件的 click 事件**不是标准冒泡**，而是沿 `image → stack → group` **独立分发**。如果用 `stack` 叠放两个 image 实现 hover，点击时 group 的 click 监听器会被触发 **3~4 次**（每个子层级各一次）。
+
+**正确做法**：用 `iconbutton` 控件，它自带 hover 支持，click 事件只触发一次：
+```javascript
+var icon = group.add("iconbutton", undefined, ICON_DATA[key], {style: "toolbutton"});
+icon._normalIcon = ICON_DATA[key];
+icon._hoverIcon = ICON_DATA[key + "Hover"] || ICON_DATA[key];
+icon.addEventListener("mouseover", function() { try { this.image = this._hoverIcon; } catch(e) {} });
+icon.addEventListener("mouseout",  function() { try { this.image = this._normalIcon; } catch(e) {} });
+```
+
+**错误做法**（会导致 click 执行多次）：
+```javascript
+// ❌ stack 双图层 image 方案
+var stack = group.add("group");
+stack.orientation = "stack";
+var normalImg = stack.add("image", ...);
+var hoverImg = stack.add("image", ...);
+group.addEventListener("click", function() { ... }); // 会被触发 3~4 次！
+```
+
 ## Syntax Verification
 
 ```powershell
@@ -380,6 +403,59 @@ node -e "const fs=require('fs'); new Function(fs.readFileSync('dist/WorkflowAssi
 
 ### UI 交互约定
 - 预设下拉切换（`presetDropdown.onChange`）必须刷新步骤预览和输出 UI
+
+### Icon Button 实现规范（重要）
+
+功能区图标按钮采用 **stacked image + mousedown** 方案：
+
+**`addFuncButton` 返回 `group`，内部结构：**
+```
+group (column, 32×30)
+└── stack (stack layout, 18×18)
+    ├── normalImg (image, ICON_DATA[key])       ← 正常图标
+    ├── hoverImg  (image, ICON_DATA[keyHover])  ← 亮色图标，visible=false
+    └── statictext label (按钮文字)
+```
+
+**hover 实现（group 上监听，冒泡到 group）：**
+```javascript
+group.addEventListener("mouseover", function() { applyHover(true); });
+group.addEventListener("mouseout", function() { applyHover(false); });
+```
+
+**click 实现（mousedown + stopPropagation + 500ms 时间戳防抖）：**
+```javascript
+var _lastClickTime = 0;
+function _handleClick() {
+    var now = new Date().getTime();
+    if (now - _lastClickTime < 500) return;
+    _lastClickTime = now;
+    try { if (group.onClick) group.onClick(); } catch(e) {}
+}
+normalImg.addEventListener("mousedown", function(e) { try { e.stopPropagation(); } catch(ex) {} _handleClick(); });
+hoverImg.addEventListener("mousedown", function(e) { try { e.stopPropagation(); } catch(ex) {} _handleClick(); });
+
+// FUNC_CREATORS 中使用 btn.onClick：
+btn.onClick = function() { ... };  // ✅ 正确
+```
+
+**关键设计：用 mousedown 代替 click**
+- `mousedown` 在 image 上触发后，`stopPropagation()` 阻止事件冒泡到 stack/group
+- 不会触发 image → stack → group 的多次 click 分发
+- 500ms 时间戳防抖作为安全兜底
+
+**图标生成（`scripts/convert-icons.js`）：**
+- 正常图：`sharp(buf).resize(18,18).png()`
+- 亮色图：`sharp(buf).resize(18,18).modulate({ brightness: 1.4 }).png()`
+- 存储为 `key` 和 `keyHover`（如 `addMask` / `addMaskHover`）
+- **brightness 不要超过 1.5**，否则像素值溢出变纯白
+
+**踩坑教训（血泪史）：**
+- ❌ **不要用 `iconbutton`(toolbutton)** — 有圆形按钮背景，破坏自定义图标外观
+- ❌ **不要用 `stack` image + `click` 事件** — ScriptUI 中 image 的 click 事件沿 `image → stack → group` 独立分发，导致 click 执行 3~4 次
+- ✅ **用 `mousedown` + `stopPropagation`** — 只触发一次，不冒泡
+- ❌ 不要在多个子元素上分别 `addEventListener("click")` — 会执行多次
+- ❌ brightness > 1.5 — 图标 hover 变纯白
 - 预设源文件存在 `config/`，构建时自动同步到 `dist/WorkflowAssist/`
 - 不改动 `dist/WorkflowAssist.jsx` 本身
 
@@ -470,7 +546,7 @@ btn.onClick = function() {
 - 设置点击：`btn.onClick = function() { ... };`
 - 按钮数量变化后调用 `relayoutFuncButtons()` 重排宽度
 - 图标源文件放 `icons/`（SVG 或 PNG），构建时自动通过 `convert-icons.js` 转为 `.toSource()` 格式嵌入 `01a-icons.jsx`
-- 控件优先级：`iconbutton`（有按钮背景+hover）→ `image`（纯图标）→ `button`（文字 fallback）
+- 控件优先级：`iconbutton`（有按钮背景+hover）→ `button`（文字 fallback）
 - 外部脚本调用使用 `EXT_SCRIPTS` 配置模式，路径定义在 `01-constants.jsx`
 
 ### 功能按钮自适应布局（重要）
@@ -564,7 +640,7 @@ for (var i = 1; i <= app.project.items.length; i++) {
 
 ### 第二行功能按钮（`addIconButton2`）
 `addIconButton2` 与 `addFuncButton` 的区别：
-- `addFuncButton`：图标不可用时回退到 `image` 控件 → `button`
+- `addFuncButton`：图标不可用时回退到 `button`
 - `addIconButton2`：图标不可用时**直接回退到 `button`**（跳过 `image`，因为 `image` 不支持 `onClick`）
 
 ### 生成 .bat 文件的编码陷阱

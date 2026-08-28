@@ -89,20 +89,46 @@ function createMainUI(parentPanel) {
         }
     };
 
-    function makeIconButton(parent, symbol, tip) {
-        var btn = parent.add("iconbutton", undefined, undefined, {style: "toolbutton"});
-        btn.text = symbol;
-        btn.helpTip = tip;
-        btn.preferredSize = [22, 22];
-        return btn;
+    function makeHoverIcon(parent, iconKey, tip) {
+        var group = parent.add("group");
+        group.orientation = "stack";
+        group.alignChildren = ["center", "center"];
+        group.margins = 0;
+        group.spacing = 0;
+        group.preferredSize = [22, 22];
+        group.helpTip = tip || "";
+
+        var normalImg = group.add("image", undefined, ICON_DATA[iconKey]);
+        normalImg.preferredSize = [22, 22];
+        normalImg.helpTip = tip || "";
+
+        var hoverImg = group.add("image", undefined, ICON_DATA[iconKey + "Hover"] || ICON_DATA[iconKey]);
+        hoverImg.preferredSize = [22, 22];
+        hoverImg.visible = false;
+        hoverImg.helpTip = tip || "";
+
+        function applyHover(on) {
+            try { hoverImg.visible = on; normalImg.visible = !on; } catch(e) {}
+        }
+
+        group.addEventListener("mouseover", function() { applyHover(true); });
+        group.addEventListener("mouseout", function() { applyHover(false); });
+
+        var _lastClickTime = 0;
+        function _handleClick() {
+            var now = new Date().getTime();
+            if (now - _lastClickTime < 500) return;
+            _lastClickTime = now;
+            try { if (group.onClick) group.onClick(); } catch(e) {}
+        }
+        normalImg.addEventListener("mousedown", function(e) { try { e.stopPropagation(); } catch(ex) {} _handleClick(); });
+        hoverImg.addEventListener("mousedown", function(e) { try { e.stopPropagation(); } catch(ex) {} _handleClick(); });
+
+        return group;
     }
 
-    var btnRefresh = nameGroup.add("iconbutton", undefined, ICON_DATA.refresh, {style: "toolbutton"});
-    btnRefresh.helpTip = "重新获取当前活动合成";
-    btnRefresh.preferredSize = [22, 22];
-    var btnGetProject = nameGroup.add("iconbutton", undefined, ICON_DATA.getProject, {style: "toolbutton"});
-    btnGetProject.helpTip = "取项目名 → 填入输入框";
-    btnGetProject.preferredSize = [22, 22];
+    var btnRefresh = makeHoverIcon(nameGroup, "refresh", "重新获取当前活动合成");
+    var btnGetProject = makeHoverIcon(nameGroup, "getProject", "取项目名 → 填入输入框");
 
     function stripKnownSuffixes(name) {
         var presetFile = getSelectedPresetFile();
@@ -764,24 +790,47 @@ function createMainUI(parentPanel) {
                 group.helpTip = tip || "";
                 group.preferredSize = [32, 30];
 
-                var icon = group.add("iconbutton", undefined, ICON_DATA[iconKey], {style: "toolbutton"});
-                icon.preferredSize = [18, 18];
-                icon.helpTip = tip || "";
-                icon._normalIcon = ICON_DATA[iconKey];
-                icon._hoverIcon = ICON_DATA[iconKey + "Hover"] || ICON_DATA[iconKey];
+                var stack = group.add("group");
+                stack.orientation = "stack";
+                stack.alignChildren = ["center", "center"];
+                stack.margins = 0;
+                stack.spacing = 0;
+                stack.preferredSize = [18, 18];
+                stack.minimumSize = [18, 18];
 
-                icon.addEventListener("mouseover", function() {
-                    try { this.image = this._hoverIcon; } catch(e) {}
-                });
-                icon.addEventListener("mouseout", function() {
-                    try { this.image = this._normalIcon; } catch(e) {}
-                });
+                var normalImg = stack.add("image", undefined, ICON_DATA[iconKey]);
+                normalImg.preferredSize = [18, 18];
+
+                var hoverImg = stack.add("image", undefined, ICON_DATA[iconKey + "Hover"] || ICON_DATA[iconKey]);
+                hoverImg.preferredSize = [18, 18];
+                hoverImg.visible = false;
+
+                function applyHover(on) {
+                    try { hoverImg.visible = on; normalImg.visible = !on; } catch(e) {}
+                }
+
+                group.helpTip = tip || "";
+                stack.helpTip = tip || "";
+                normalImg.helpTip = tip || "";
+                hoverImg.helpTip = tip || "";
+                group.addEventListener("mouseover", function() { applyHover(true); });
+                group.addEventListener("mouseout", function() { applyHover(false); });
 
                 var lbl = group.add("statictext", undefined, label);
                 lbl.alignment = ["center", "center"];
 
+                var _lastClickTime = 0;
+                function _handleClick() {
+                    var now = new Date().getTime();
+                    if (now - _lastClickTime < 500) return;
+                    _lastClickTime = now;
+                    try { if (group.onClick) group.onClick(); } catch(e) {}
+                }
+                normalImg.addEventListener("mousedown", function(e) { try { e.stopPropagation(); } catch(ex) {} _handleClick(); });
+                hoverImg.addEventListener("mousedown", function(e) { try { e.stopPropagation(); } catch(ex) {} _handleClick(); });
+
                 funcButtons.push(group);
-                return icon;
+                return group;
             } catch (e) {}
         }
         var btn = row.add("button", undefined, label);
@@ -843,7 +892,7 @@ function createMainUI(parentPanel) {
             };
         },
         bg: function() {
-            var btn = addFuncButton("背景", "importBg", "从预设目录导入 bg.png 作为背景图层");
+            var btn = addFuncButton("背景", "importBg", "从预设目录导入背景图层");
             btn.onClick = function() {
                 try { importBgImage(); } catch(e) { alert("背景按钮出错: " + (e.message || e.toString())); }
             };
@@ -882,63 +931,50 @@ function createMainUI(parentPanel) {
             };
         },
         banner: function() {
-            var btn = addFuncButton("Banner", "copyBanner", "根据合成时长选择并复制PAG文件到输出文件夹");
+            var btn = addFuncButton("Banner", "copyBanner", "复制 banner PAG 到输出");
             btn.onClick = function() {
                 try { copyBannerPag(); } catch(e) { alert("Banner按钮出错: " + (e.message || e.toString())); }
             };
         },
         compress: function() {
-            var btn = addFuncButton("压缩", "autoTiny", "打开 Auto_Tinify 图片压缩工具");
+            var btn = addFuncButton("压缩", "autoTiny", "打开 Auto_Tinify 压缩工具");
             btn.onClick = function() {
                 try {
-                    var scriptPath = EXT_SCRIPTS.compress;
-                    if (!scriptPath) {
-                        alert("未配置压缩脚本路径！\n请在 01-constants.jsx 中设置 EXT_SCRIPTS.compress");
-                        return;
+                    var scriptFile = new File(EXT_SCRIPTS.compress);
+                    if (scriptFile.exists) {
+                        $.evalFile(scriptFile);
+                    } else {
+                        alert("未找到压缩脚本:\n" + EXT_SCRIPTS.compress);
                     }
-                    var scriptFile = new File(scriptPath);
-                    if (!scriptFile.exists) {
-                        alert("压缩脚本不存在: " + scriptPath);
-                        return;
-                    }
-                    $.evalFile(scriptFile);
-                } catch(e) {
-                    alert("加载压缩脚本出错: " + e.toString());
-                }
+                } catch(e) { alert("压缩按钮出错: " + (e.message || e.toString())); }
             };
         },
         sort: function() {
-            var btn = addFuncButton("输出", "sortOutput", "整理输出文件夹文件并生成批处理");
+            var btn = addFuncButton("输出", "sortOutput", "整理输出文件（重命名+打包+复制到剪贴板）");
             btn.onClick = function() {
-                try { sortOutputFiles(); } catch(e) { alert("整理输出按钮出错: " + (e.message || e.toString())); }
+                try { sortOutputFiles(); } catch(e) { alert("输出按钮出错: " + (e.message || e.toString())); }
             };
         },
         save: function() {
-            var btn = addFuncButton("保存", "saveProject", "自动保存未保存的项目到素材文件所在目录");
+            var btn = addFuncButton("保存", "saveProject", "自动保存项目文件");
             btn.onClick = function() {
                 try { autoSaveProject(); } catch(e) { alert("保存按钮出错: " + (e.message || e.toString())); }
             };
         },
         renderMp4: function() {
-            var btn = addFuncButton("渲染合成", "renderMp4", "将'预览'文件夹中的序列帧重命名并合成为MP4视频");
+            var btn = addFuncButton("渲染合成", "renderMp4", "选择预览文件夹合成MP4");
             btn.onClick = function() {
                 try { renderPreviewToMp4(); } catch(e) { alert("渲染合成按钮出错: " + (e.message || e.toString())); }
             };
         },
         rename: function() {
-            var btn = addFuncButton("重命名", "rename", "重命名当前项目 | Ctrl+单击: 重新加载文件");
+            var btn = addFuncButton("重命名", "rename", "重命名项目文件");
             btn.onClick = function() {
-                try {
-                    if (ScriptUI.environment.keyboardState.ctrlKey) {
-                        reloadCurrentProject();
-                    } else {
-                        renameProject();
-                    }
-                } catch(e) { alert("重命名按钮出错: " + (e.message || e.toString())); }
+                try { renameProject(); } catch(e) { alert("重命名按钮出错: " + (e.message || e.toString())); }
             };
         },
         loopAnim: function() {
-            var btn = addFuncButton("循环", "loopAnim", "复制图层+偏移1s+透明度渐隐，制作无缝循环动画");
+            var btn = addFuncButton("循环", "loopAnim", "无缝循环动画");
             btn.onClick = function() {
                 try {
                     var comp = app.project.activeItem;
@@ -946,13 +982,6 @@ function createMainUI(parentPanel) {
                         alert("请先选中一个合成！");
                         return;
                     }
-
-                    if (comp.width !== 750 || comp.height !== 1624) {
-                        if (!confirm("当前合成尺寸不是礼物墙标准尺寸（750×1624），是否继续？", false, "尺寸提醒")) {
-                            return;
-                        }
-                    }
-
                     var layers = comp.selectedLayers;
                     if (layers.length !== 1) {
                         alert("请选中一个图层！");
@@ -961,7 +990,6 @@ function createMainUI(parentPanel) {
                     var layer = layers[0];
                     var layerDuration = layer.outPoint - layer.inPoint;
                     var suggestedDuration = Math.max(0.5, layerDuration - 1);
-
                     var result = prompt("请输入循环时长（秒）:", suggestedDuration.toFixed(1));
                     if (!result) return;
                     var loopDuration = parseFloat(result);
@@ -969,7 +997,6 @@ function createMainUI(parentPanel) {
                         alert("无效的时长！");
                         return;
                     }
-
                     app.beginUndoGroup("循环动画设置");
                     try {
                         setupLoopAnimation(comp, layer, loopDuration);
@@ -977,7 +1004,6 @@ function createMainUI(parentPanel) {
                         alert("循环动画设置出错: " + (e.message || e.toString()));
                     }
                     app.endUndoGroup();
-
                 } catch(e) {
                     alert("循环按钮出错: " + (e.message || e.toString()));
                 }
@@ -1749,12 +1775,11 @@ function createMainUI(parentPanel) {
     function getBannerFolderName(duration) {
         var exactMap = {
             3: "3s用的", 4: "4S用的", 5: "5S用的",
-            6: "6S用的", 7: "7S用的", 8: "8S用的",
+            6: "6S用的", 7: "7S用的", 8: "8S用的", 9: "8S用的",
             11: "11S用的", 15: "15s用的"
         };
         if (exactMap[duration]) return exactMap[duration];
-        if (duration >= 8 && duration <= 9) return "8-9S用的";
-        if (duration >= 10 && duration <= 11) return "10-11S用的";
+        if (duration >= 10 && duration <= 11) return "11S用的";
         if (duration >= 12 && duration <= 14) return "12-14S用的";
         return null;
     }
@@ -2850,18 +2875,22 @@ function createMainUI(parentPanel) {
 
     function refreshPresetList() {
         cachedPresetFiles = scanPresetFiles();
-        var settings = loadSettings();
-        var order = settings.presetOrder || [];
+        var settings = loadSettings() || {};
         var lastPreset = settings.lastPreset || "";
 
-        cachedPresetFiles.sort(function(a, b) {
-            var ia = order.indexOf(a.name);
-            var ib = order.indexOf(b.name);
-            if (ia < 0 && ib < 0) return 0;
-            if (ia < 0) return 1;
-            if (ib < 0) return -1;
-            return ia - ib;
-        });
+        try {
+            var order = settings.presetOrder;
+            if (order && typeof order.indexOf === "function") {
+                cachedPresetFiles.sort(function(a, b) {
+                    var ia = order.indexOf(a.name);
+                    var ib = order.indexOf(b.name);
+                    if (ia < 0 && ib < 0) return 0;
+                    if (ia < 0) return 1;
+                    if (ib < 0) return -1;
+                    return ia - ib;
+                });
+            }
+        } catch(e) {}
 
         presetDropdown.removeAll();
         if (cachedPresetFiles.length > 0) {
